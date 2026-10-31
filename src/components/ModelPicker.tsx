@@ -1,10 +1,11 @@
 import { useCallback, useMemo, useState } from 'react'
-import { Check, Loader2, Search } from 'lucide-react'
+import { Check, Loader2 } from 'lucide-react'
 import { formatContext, matchesQuery, MODALITIES, perMillion } from '../modalities'
 import { useLoad } from '../hooks/useLoad'
 import { userApi } from '../services/api'
 import type { Modality, ModelInfo } from '../types'
 import { Button } from './Button'
+import { SearchField } from './Field'
 import { Modal } from './Modal'
 import { Badge } from './PageHeader'
 
@@ -125,17 +126,7 @@ export function ModelPicker({ title, current, fallback, onSave, onClose }: Props
         )}
       </p>
 
-      <div className="relative">
-        <Search aria-hidden className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-fg-muted" />
-        <input
-          type="search"
-          aria-label="Search models"
-          placeholder="Search by name or id, e.g. claude or :free"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          className="block h-10 w-full rounded-xl border border-line bg-canvas-subtle pr-3 pl-9 text-sm shadow-xs placeholder:text-fg-muted/70 focus:border-accent focus:ring-4 focus:ring-accent/20 focus:outline-none"
-        />
-      </div>
+      <SearchField label="Search models" placeholder="Search by name or id, e.g. claude or :free" value={query} onChange={setQuery} />
 
       {loading && !data ? (
         <p className="py-8 text-center text-sm text-fg-muted">
