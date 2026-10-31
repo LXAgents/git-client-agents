@@ -1,7 +1,7 @@
 ---
 name: oauth-and-modern-ui
 description: Task record for "Continue with GitHub/GitLab" sign-in, admin users and the modern restyle (1.2.0).
-status: in progress
+status: done
 ---
 
 # OAuth sign-in, admin users and a modern look
@@ -25,6 +25,6 @@ status: in progress
 
 | # | Title | Scope | Repository | Branch | Files / areas | PR |
 |---|---|---|---|---|---|---|
-| 1 | Task record | This record | git-client-agents | `plan/oauth-and-modern-ui` | `.agents/` | |
-| 2 | Sign-in and restyle | OAuth return, admin users, new styles, tests, README | git-client-agents | `feat/oauth-and-modern-ui` | `src/`, `index.html`, README | |
-| 3 | Release | 1.2.0 changelog and version | git-client-agents | `release/1.2.0` | `wiki/logs/`, `package.json` | |
+| 1 | Task record | This record | git-client-agents | `plan/oauth-and-modern-ui` | `.agents/` | #15 |
+| 2 | Sign-in and restyle | OAuth return, admin users, new styles, tests, README | git-client-agents | `feat/oauth-and-modern-ui` | `src/`, README | #16 |
+| 3 | Release | 1.2.0 changelog and version | git-client-agents | `release/1.2.0` | `wiki/logs/`, `package.json` | #17 |
