@@ -3,8 +3,11 @@ import { Loader2 } from 'lucide-react'
 import { AuthProvider, useAuth } from './auth/AuthContext'
 import { Layout } from './components/Layout'
 import { ToastProvider } from './components/Toast'
+import { ApiKeys } from './pages/ApiKeys'
 import { Home } from './pages/Home'
+import { Organizations } from './pages/Organizations'
 import { SignIn } from './pages/SignIn'
+import { Users } from './pages/Users'
 
 function Routed() {
   const { session, checking } = useAuth()
@@ -20,6 +23,9 @@ function Routed() {
     <Routes>
       <Route element={<Layout />}>
         <Route index element={<Home />} />
+        {session.mode === 'admin' && <Route path="users" element={<Users />} />}
+        <Route path="orgs" element={<Organizations />} />
+        <Route path="keys" element={<ApiKeys />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>

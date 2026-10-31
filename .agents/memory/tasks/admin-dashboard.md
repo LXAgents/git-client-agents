@@ -56,3 +56,18 @@ status: in-progress
   `PageHeader`/`Badge`, `ConfirmDelete`, `ToastProvider`.
 - Pages: `SignIn` (User with GitHub/GitLab token, or Operator) and `Home` (counts and how
   access works). Lint and build pass.
+
+### Task 4 — feat/admin-pages
+
+- `Users` (operator only): table, whitelist modal (platform, numeric user id, username),
+  delete with a cascade warning.
+- `Organizations`: operator sees and deletes all; a user sees orgs they own and imports
+  through a modal listing what the platform says they own (rows show why one cannot be
+  imported). There is no free-text org form anywhere.
+- `API keys`: operator sees every key; a user sees their own keys plus keys of orgs they
+  own. The add modal toggles User/Organization; the org picker lists owned orgs only.
+- `useLoad` hook, `format.ts`; sign-out returns to the dashboard.
+- Smoke-tested in Chromium against git-server-agents 1.1.0 with a mocked GitHub API:
+  operator sign-in (bad token rejected), whitelist a user, user sign-in, import acme, add
+  and delete own and org keys, member (bob) cannot import acme, stranger told they are not
+  whitelisted, 390px layout.
