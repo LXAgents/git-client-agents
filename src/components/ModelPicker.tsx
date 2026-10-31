@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useRef, useState, type UIEvent } from 'react'
 import { Check, Loader2 } from 'lucide-react'
 import { formatContext, matchesQuery, MODALITIES, perMillion } from '../modalities'
 import { useLoad } from '../hooks/useLoad'
@@ -9,7 +9,10 @@ import { SearchField } from './Field'
 import { Modal } from './Modal'
 import { Badge } from './PageHeader'
 
-const LIMIT = 100
+// Rows rendered at a time. Scrolling near the bottom of the list adds the next batch.
+const PAGE = 100
+// How close to the bottom, in pixels, counts as "near".
+const NEAR_BOTTOM = 160
 
 interface Props {
   title: string
@@ -63,10 +66,26 @@ export function ModelPicker({ title, current, fallback, onSave, onClose }: Props
   const [query, setQuery] = useState('')
   const [selected, setSelected] = useState<string | undefined>(current)
   const [busy, setBusy] = useState(false)
+  const [limit, setLimit] = useState(PAGE)
+  const listRef = useRef<HTMLUListElement>(null)
   const { data, loading } = useLoad(useCallback(() => userApi.models(modality), [modality]))
 
   const matches = useMemo(() => (data ?? []).filter((m) => matchesQuery(m, query)), [data, query])
-  const shown = matches.slice(0, LIMIT)
+  const shown = matches.slice(0, limit)
+
+  // A new search starts again from the first batch, at the top of the list.
+  const search = (value: string) => {
+    setQuery(value)
+    setLimit(PAGE)
+    listRef.current?.scrollTo?.({ top: 0 })
+  }
+
+  const loadMoreNearBottom = (e: UIEvent<HTMLUListElement>) => {
+    const { scrollTop, clientHeight, scrollHeight } = e.currentTarget
+    if (limit < matches.length && scrollTop + clientHeight >= scrollHeight - NEAR_BOTTOM) {
+      setLimit((n) => n + PAGE)
+    }
+  }
 
   const save = async (model: string | null) => {
     setBusy(true)
@@ -126,7 +145,7 @@ export function ModelPicker({ title, current, fallback, onSave, onClose }: Props
         )}
       </p>
 
-      <SearchField label="Search models" placeholder="Search by name or id, e.g. claude or :free" value={query} onChange={setQuery} />
+      <SearchField label="Search models" placeholder="Search by name or id, e.g. claude or :free" value={query} onChange={search} />
 
       {loading && !data ? (
         <p className="py-8 text-center text-sm text-fg-muted">
@@ -135,7 +154,7 @@ export function ModelPicker({ title, current, fallback, onSave, onClose }: Props
         </p>
       ) : (
         <>
-          <ul aria-label="Models" className="max-h-80 divide-y divide-line-muted overflow-y-auto rounded-xl border border-line">
+          <ul ref={listRef} onScroll={loadMoreNearBottom} aria-label="Models" className="max-h-80 divide-y divide-line-muted overflow-y-auto rounded-xl border border-line">
             {shown.map((m) => (
               <ModelRow key={m.id} model={m} selected={selected === m.id} onSelect={() => setSelected(m.id)} />
             ))}
@@ -143,7 +162,7 @@ export function ModelPicker({ title, current, fallback, onSave, onClose }: Props
           </ul>
           {data && (
             <p className="text-xs text-fg-muted" aria-live="polite">
-              {matches.length > LIMIT ? `Showing ${LIMIT} of ${matches.length} matches. Keep typing to narrow it down.` : `${matches.length} of ${data.length} models`}
+              {matches.length > shown.length ? `Showing ${shown.length} of ${matches.length} models. Scroll for more.` : `${matches.length} of ${data.length} models`}
             </p>
           )}
         </>

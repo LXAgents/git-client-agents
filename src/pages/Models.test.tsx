@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react'
+import { fireEvent, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { formatContext, matchesQuery, perMillion } from '../modalities'
@@ -80,6 +80,34 @@ describe('Models', () => {
     await userEvent.click(within(dialog).getByRole('button', { name: /Claude Sonnet/ }))
     await userEvent.click(within(dialog).getByRole('button', { name: 'Save' }))
     expect(set).toHaveBeenCalledWith('repo1', 'text', 'anthropic/claude-sonnet')
+  })
+
+  it('loads the next 100 models when the list is scrolled to the bottom, and a new search starts over', async () => {
+    vi.spyOn(userApi, 'models').mockResolvedValue(Array.from({ length: 250 }, (_, i) => model(`vendor/m${i}`, `Model ${i}`)))
+    renderAs({ mode: 'user', platform: 'github', token: 'ghp' }, <Models />)
+    await userEvent.click(await screen.findByRole('button', { name: 'Change model for alice' }))
+    const dialog = screen.getByRole('dialog')
+    const list = await within(dialog).findByRole('list', { name: 'Models' })
+    expect(within(list).getAllByRole('button')).toHaveLength(100)
+    expect(within(dialog).getByText('Showing 100 of 250 models. Scroll for more.')).toBeInTheDocument()
+
+    Object.defineProperty(list, 'clientHeight', { configurable: true, value: 320 })
+    Object.defineProperty(list, 'scrollHeight', { configurable: true, value: 5000 })
+    const scrollToBottom = () => {
+      list.scrollTop = 4680
+      fireEvent.scroll(list)
+    }
+    list.scrollTop = 100
+    fireEvent.scroll(list)
+    expect(within(list).getAllByRole('button')).toHaveLength(100)
+    scrollToBottom()
+    expect(within(list).getAllByRole('button')).toHaveLength(200)
+    scrollToBottom()
+    expect(within(list).getAllByRole('button')).toHaveLength(250)
+    expect(within(dialog).getByText('250 of 250 models')).toBeInTheDocument()
+
+    await userEvent.type(within(dialog).getByRole('searchbox', { name: 'Search models' }), 'm1')
+    expect(within(dialog).getByText('Showing 100 of 111 models. Scroll for more.')).toBeInTheDocument()
   })
 
   it('offers only the Text modality for now; the others are disabled', async () => {
