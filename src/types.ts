@@ -1,7 +1,7 @@
 export type Platform = 'github' | 'gitlab'
 
 /** Lower case, as stored on the server. Only "owner" carries rights today. */
-export type Role = 'owner' | 'member'
+export type Role = 'owner' | 'free'
 
 /** Read from GitHub or GitLab by the server, never stored. `login` is the numeric id when the platform gave no answer. */
 export interface Profile {

@@ -39,7 +39,7 @@ const web: Repo = {
 
 describe('Models', () => {
   beforeEach(() => {
-    vi.spyOn(userApi, 'me').mockResolvedValue({ platform: 'github', id: '1001', login: 'alice', name: null, avatarUrl: null, role: 'member' as const })
+    vi.spyOn(userApi, 'me').mockResolvedValue({ platform: 'github', id: '1001', login: 'alice', name: null, avatarUrl: null, role: 'free' as const })
     vi.spyOn(userApi, 'ownModels').mockResolvedValue({})
     vi.spyOn(userApi, 'orgs').mockResolvedValue([acme])
     vi.spyOn(userApi, 'repos').mockResolvedValue([web])

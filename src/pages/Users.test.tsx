@@ -17,33 +17,33 @@ const owen: Account = {
   orgCount: 2,
   createdAt: '2026-10-31T00:00:00Z',
 }
-const ghost: Account = { ...owen, id: '404', login: '404', name: null, avatarUrl: null, role: 'member' }
+const ghost: Account = { ...owen, id: '404', login: '404', name: null, avatarUrl: null, role: 'free' }
 
 describe('Users', () => {
   it('lists users with their platform profile and role, and no Platform column', async () => {
     vi.spyOn(adminApi, 'accounts').mockResolvedValue([owen, ghost])
     renderAs({ platform: 'github', token: 'gho' }, <Users />)
-    const table = await screen.findByRole('table', { name: 'Whitelisted users' })
+    const table = await screen.findByRole('table', { name: 'Users' })
     const [, first, second] = within(table).getAllByRole('row')
     expect(first).toHaveTextContent('Owen')
     expect(first).toHaveTextContent('@owen')
     expect(within(first).getByText('Owner')).toBeInTheDocument()
     expect(second).toHaveTextContent('404')
-    expect(within(second).getByText('Member')).toBeInTheDocument()
+    expect(within(second).getByText('Free')).toBeInTheDocument()
     expect(within(table).queryByRole('columnheader', { name: 'Platform' })).toBeNull()
   })
 
-  it('whitelists a user of the session platform by ID alone', async () => {
+  it('adds a user of the session platform by ID alone', async () => {
     vi.spyOn(adminApi, 'accounts').mockResolvedValue([])
     const create = vi.spyOn(adminApi, 'createAccount').mockResolvedValue({ ...ghost, platform: 'gitlab', id: '7', login: 'carol' })
     renderAs({ platform: 'gitlab', token: 'glpat' }, <Users />)
-    await userEvent.click(await screen.findByRole('button', { name: 'Whitelist user' }))
+    await userEvent.click(await screen.findByRole('button', { name: 'Add user' }))
     const dialog = screen.getByRole('dialog')
     expect(within(dialog).queryByLabelText('Platform')).toBeNull()
     expect(within(dialog).queryByLabelText(/Username/)).toBeNull()
     await userEvent.type(within(dialog).getByLabelText(/GitLab user ID/), '7')
-    await userEvent.click(within(dialog).getByRole('button', { name: 'Whitelist user' }))
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Add user' }))
     expect(create).toHaveBeenCalledWith({ userId: '7' })
-    expect(await screen.findByText('Whitelisted carol')).toBeInTheDocument()
+    expect(await screen.findByText('Added carol')).toBeInTheDocument()
   })
 })

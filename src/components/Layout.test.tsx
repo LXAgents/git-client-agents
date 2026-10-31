@@ -20,7 +20,7 @@ describe('Layout', () => {
       login: 'carol',
       name: 'Carol Danvers',
       avatarUrl: 'https://gitlab.example/7.png',
-      role: 'member',
+      role: 'free',
     })
     const { container } = renderAs({ platform: 'gitlab', token: 'glpat' }, <Layout />)
     expect(await screen.findByText('Carol Danvers')).toBeInTheDocument()
@@ -28,11 +28,13 @@ describe('Layout', () => {
     expect(container.querySelector('img[src="https://gitlab.example/7.png"]')).not.toBeNull()
   })
 
-  it('hides the admin pages from other users', async () => {
-    vi.spyOn(userApi, 'me').mockResolvedValue({ platform: 'github', id: '1', login: 'alice', name: null, avatarUrl: null, role: 'member' })
+  it('hides the admin pages from other users and shows them a Free badge', async () => {
+    vi.spyOn(userApi, 'me').mockResolvedValue({ platform: 'github', id: '1', login: 'alice', name: null, avatarUrl: null, role: 'free' })
     renderAs({ platform: 'github', token: 'ghp' }, <Layout />)
     expect(await screen.findByText('alice')).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'Users' })).toBeNull()
     expect(screen.queryByText('Owner')).toBeNull()
+    const free = screen.getByText('Free')
+    expect(free.className).toContain('--color-free')
   })
 })

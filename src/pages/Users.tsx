@@ -5,7 +5,7 @@ import { ConfirmDelete } from '../components/ConfirmDelete'
 import { DataTable, type Column } from '../components/DataTable'
 import { TextField } from '../components/Field'
 import { Modal } from '../components/Modal'
-import { Badge, PageHeader } from '../components/PageHeader'
+import { PageHeader, RoleBadge } from '../components/PageHeader'
 import { useAuth } from '../auth/AuthContext'
 import { BrandIcon } from '../components/BrandIcon'
 import { useToast } from '../components/Toast'
@@ -47,7 +47,7 @@ function AddUserModal({ onClose, onAdded }: { onClose: () => void; onAdded: () =
     setBusy(true)
     try {
       const added = await adminApi.createAccount({ userId: userId.trim() })
-      toast.success(`Whitelisted ${added.login}`)
+      toast.success(`Added ${added.login}`)
       onAdded()
       onClose()
     } catch (err) {
@@ -58,7 +58,7 @@ function AddUserModal({ onClose, onAdded }: { onClose: () => void; onAdded: () =
   }
 
   return (
-    <Modal title="Whitelist a user" onClose={onClose}>
+    <Modal title="Add a user" onClose={onClose}>
       <form onSubmit={submit} className="space-y-4">
         <TextField
           label={`${platformName} user ID`}
@@ -66,12 +66,12 @@ function AddUserModal({ onClose, onAdded }: { onClose: () => void; onAdded: () =
           inputMode="numeric"
           value={userId}
           onChange={(e) => setUserId(e.target.value)}
-          hint={`The numeric account id, not the login: logins can be renamed and claimed by someone else. Their name and avatar are read from ${platformName}.`}
+          hint={`Optional: anyone can log in with ${platformName} and is added as Free. Add someone here to give them keys first. Use the numeric account id, not the login: logins can be renamed and claimed by someone else.`}
         />
         <div className="flex justify-end gap-2 pt-2">
           <Button onClick={onClose}>Cancel</Button>
           <Button type="submit" variant="primary" busy={busy}>
-            Whitelist user
+            Add user
           </Button>
         </div>
       </form>
@@ -96,7 +96,7 @@ export function Users() {
 
   const columns: Column<Account>[] = [
     { header: 'User', cell: (a) => <UserCell account={a} /> },
-    { header: 'Role', cell: (a) => (a.role === 'owner' ? <Badge tone="accent">Owner</Badge> : <Badge>Member</Badge>) },
+    { header: 'Role', cell: (a) => <RoleBadge role={a.role} /> },
     { header: 'User ID', cell: (a) => <code className="font-mono text-xs text-fg-muted">{a.id}</code> },
     { header: 'Keys', cell: (a) => a.keyCount, className: 'tabular-nums' },
     { header: 'Orgs', cell: (a) => a.orgCount, className: 'tabular-nums' },
@@ -108,7 +108,7 @@ export function Users() {
         <ConfirmDelete
           label={`Remove ${a.login}`}
           title="Remove user"
-          message={`Remove ${a.login} from the whitelist? Orgs they imported and all of their keys are deleted too.`}
+          message={`Remove ${a.login}? Orgs they imported and all of their keys are deleted too. They can log in again later, as a new Free user.`}
           onConfirm={() => remove(a)}
         />
       ),
@@ -119,14 +119,14 @@ export function Users() {
     <>
       <PageHeader
         title="Users"
-        description="Only whitelisted users can trigger the agent or sign in to this dashboard."
+        description="Everyone who has logged in with GitHub or GitLab. New users are Free; the owner is set on the server."
         actions={
           <Button variant="primary" onClick={() => setAdding(true)}>
-            <Plus aria-hidden className="size-4" /> Whitelist user
+            <Plus aria-hidden className="size-4" /> Add user
           </Button>
         }
       />
-      <DataTable label="Whitelisted users" columns={columns} rows={data} rowKey={(a) => `${a.platform}:${a.id}`} loading={loading} empty="No users are whitelisted yet." />
+      <DataTable label="Users" columns={columns} rows={data} rowKey={(a) => `${a.platform}:${a.id}`} loading={loading} empty="Nobody has logged in yet." />
       {adding && <AddUserModal onClose={() => setAdding(false)} onAdded={reload} />}
     </>
   )

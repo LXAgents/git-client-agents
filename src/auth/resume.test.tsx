@@ -28,7 +28,7 @@ const renderApp = () =>
     </ToastProvider>,
   )
 
-const me = { platform: 'github' as const, id: '1', login: 'alice', name: null, avatarUrl: null, role: 'member' as const }
+const me = { platform: 'github' as const, id: '1', login: 'alice', name: null, avatarUrl: null, role: 'free' as const }
 
 describe('staying signed in across a reload', () => {
   it('remembers only the platform after an OAuth sign-in, never the token', async () => {

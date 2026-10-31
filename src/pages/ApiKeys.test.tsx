@@ -35,7 +35,7 @@ const key = (id: string, type: 'user' | 'org' | 'repo', name: string, last4: str
 
 describe('API keys as a user', () => {
   beforeEach(() => {
-    vi.spyOn(userApi, 'me').mockResolvedValue({ platform: 'github', id: '1001', login: 'alice', name: null, avatarUrl: null, role: 'member' as const })
+    vi.spyOn(userApi, 'me').mockResolvedValue({ platform: 'github', id: '1001', login: 'alice', name: null, avatarUrl: null, role: 'free' as const })
     vi.spyOn(userApi, 'orgs').mockResolvedValue([acme])
     vi.spyOn(userApi, 'repos').mockResolvedValue([web])
     vi.spyOn(userApi, 'repoKeys').mockResolvedValue([])

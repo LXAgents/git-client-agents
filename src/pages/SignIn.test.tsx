@@ -82,13 +82,13 @@ describe('SignIn', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('started in another browser')
   })
 
-  it('explains a user who is not whitelisted after OAuth', async () => {
-    vi.spyOn(userApi, 'me').mockRejectedValue(httpError(403))
+  it('shows why the server refused a login after OAuth, and keeps nothing', async () => {
+    vi.spyOn(userApi, 'me').mockRejectedValue(httpError(401))
     vi.spyOn(authApi, 'exchange').mockResolvedValue({ platform: 'github', token: 'ghu_abc' })
     sessionStorage.setItem('git-client-agents.oauth-nonce', 'n4')
     window.history.replaceState(null, '', '/?signin=n4#code=sealed-x')
     renderSignIn()
-    expect(await screen.findByRole('alert')).toHaveTextContent('not whitelisted')
+    expect(await screen.findByRole('alert')).toHaveTextContent('did not accept the sign-in')
     expect(loadSession()).toBeNull()
   })
 

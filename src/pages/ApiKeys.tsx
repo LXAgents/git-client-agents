@@ -95,7 +95,7 @@ function AddKeyModal({ data, onClose, onAdded }: { data: KeysData; onClose: () =
         />
         {target === 'user' &&
           (isOwner ? (
-            <SelectField label="User" required value={accountId} onChange={(e) => setAccountId(e.target.value)} hint={noUsers ? 'Whitelist a user first.' : undefined}>
+            <SelectField label="User" required value={accountId} onChange={(e) => setAccountId(e.target.value)} hint={noUsers ? 'Nobody has logged in yet.' : undefined}>
               {data.accounts.map((a) => (
                 <option key={a.id} value={a.id}>
                   {a.login} ({a.id})
