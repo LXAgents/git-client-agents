@@ -1,7 +1,7 @@
 ---
 name: sonar-fixes
 description: Task record for the SonarCloud findings on the dashboard (1.2.1).
-status: in-progress
+status: done
 ---
 
 # SonarCloud fixes
