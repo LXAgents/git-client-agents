@@ -4,12 +4,13 @@ import type { Platform } from '../types'
 // a user signs in with GitHub or GitLab (OAuth) or pastes a personal access token.
 export type Session = { mode: 'admin'; token: string } | { mode: 'user'; platform: Platform; token: string }
 
-const STORAGE_KEY = 'git-client-agents.session'
+// Older versions kept the session in sessionStorage under this key. It is only ever removed now.
+const LEGACY_STORAGE_KEY = 'git-client-agents.session'
 
 // A token is sent as a header, so it must be a single printable word.
 const TOKEN = /^[\x21-\x7e]{1,4096}$/
 
-// Whatever is in storage may have been written by someone else; only a well-formed session is used.
+// Only a well-formed session is ever kept.
 export function isSession(value: unknown): value is Session {
   if (typeof value !== 'object' || value === null) return false
   const v = value as Record<string, unknown>
@@ -18,41 +19,32 @@ export function isSession(value: unknown): value is Session {
   return v.mode === 'user' && (v.platform === 'github' || v.platform === 'gitlab') && Object.keys(v).length === 3
 }
 
-function parseJson(raw: string): unknown {
+// The token lives only in this page's memory. Nothing is written to browser storage, so no
+// other script or tab can plant a session, and a reload asks you to sign in again.
+let current: Session | null = null
+
+function forgetLegacy() {
   try {
-    return JSON.parse(raw)
+    sessionStorage.removeItem(LEGACY_STORAGE_KEY)
   } catch {
-    return null
+    // Storage blocked: nothing to clean up.
   }
 }
 
-// sessionStorage keeps the token for this tab only and drops it when the tab closes.
+forgetLegacy()
+
 export function loadSession(): Session | null {
-  try {
-    const raw = sessionStorage.getItem(STORAGE_KEY)
-    if (raw) {
-      const parsed = parseJson(raw)
-      if (isSession(parsed)) return parsed
-      sessionStorage.removeItem(STORAGE_KEY)
-    }
-  } catch {
-    // Storage blocked or corrupt: fall through to the dev default.
-  }
+  if (current) return current
   const devToken = import.meta.env.VITE_ADMIN_TOKEN
   return devToken ? { mode: 'admin', token: devToken } : null
 }
 
-// Only a checked session is written, rebuilt field by field so nothing else rides along.
-function storable(session: Session): Session {
-  return session.mode === 'admin' ? { mode: 'admin', token: session.token } : { mode: 'user', platform: session.platform, token: session.token }
-}
-
+// Only a checked session is kept, rebuilt field by field so nothing else rides along.
 export function saveSession(session: Session | null) {
-  try {
-    if (session && isSession(session)) sessionStorage.setItem(STORAGE_KEY, JSON.stringify(storable(session)))
-    else sessionStorage.removeItem(STORAGE_KEY)
-  } catch {
-    // The session still lives in memory for this page load.
+  if (session && isSession(session)) {
+    current = session.mode === 'admin' ? { mode: 'admin', token: session.token } : { mode: 'user', platform: session.platform, token: session.token }
+  } else {
+    current = null
   }
 }
 

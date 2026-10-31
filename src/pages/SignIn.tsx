@@ -155,7 +155,7 @@ export function SignIn() {
             </form>
           )}
         </div>
-        <p className="mt-6 text-center text-xs text-fg-muted">Your sign-in stays in this browser tab and is cleared when you close it.</p>
+        <p className="mt-6 text-center text-xs text-fg-muted">Your sign-in stays in this page only. Reloading or closing it signs you out.</p>
       </div>
     </div>
   )
