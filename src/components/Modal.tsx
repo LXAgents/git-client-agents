@@ -18,17 +18,17 @@ export function Modal({ title, onClose, children, footer }: Props) {
   }, [onClose])
 
   return (
-    <div
-      className="fixed inset-0 z-40 flex items-start justify-center overflow-y-auto bg-black/40 px-4 py-16 backdrop-blur-sm transition-opacity duration-200 starting:opacity-0"
-      onMouseDown={onClose}
-    >
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-        onMouseDown={(e) => e.stopPropagation()}
-        className="enter w-full max-w-md rounded-2xl border border-line bg-canvas-subtle shadow-raised"
-      >
+    <div className="fixed inset-0 z-40 flex items-start justify-center overflow-y-auto px-4 py-16">
+      {/* The backdrop is a real button behind the dialog: a click outside closes it. Keyboard users
+          close it with Escape or the Close button, so it is left out of the tab order. */}
+      <button
+        type="button"
+        aria-label="Close dialog"
+        tabIndex={-1}
+        onClick={onClose}
+        className="fixed inset-0 cursor-default bg-black/40 backdrop-blur-sm transition-opacity duration-200 starting:opacity-0"
+      />
+      <div role="dialog" aria-modal="true" aria-labelledby={titleId} className="enter relative w-full max-w-md rounded-2xl border border-line bg-canvas-subtle shadow-raised">
         <div className="flex items-center justify-between px-6 pt-5 pb-1">
           <h2 id={titleId} className="text-lg font-semibold tracking-tight">
             {title}

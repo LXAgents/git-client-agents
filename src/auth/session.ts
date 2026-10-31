@@ -6,11 +6,35 @@ export type Session = { mode: 'admin'; token: string } | { mode: 'user'; platfor
 
 const STORAGE_KEY = 'git-client-agents.session'
 
+// A token is sent as a header, so it must be a single printable word.
+const TOKEN = /^[\x21-\x7e]{1,4096}$/
+
+// Whatever is in storage may have been written by someone else; only a well-formed session is used.
+export function isSession(value: unknown): value is Session {
+  if (typeof value !== 'object' || value === null) return false
+  const v = value as Record<string, unknown>
+  if (typeof v.token !== 'string' || !TOKEN.test(v.token)) return false
+  if (v.mode === 'admin') return Object.keys(v).length === 2
+  return v.mode === 'user' && (v.platform === 'github' || v.platform === 'gitlab') && Object.keys(v).length === 3
+}
+
+function parseJson(raw: string): unknown {
+  try {
+    return JSON.parse(raw)
+  } catch {
+    return null
+  }
+}
+
 // sessionStorage keeps the token for this tab only and drops it when the tab closes.
 export function loadSession(): Session | null {
   try {
     const raw = sessionStorage.getItem(STORAGE_KEY)
-    if (raw) return JSON.parse(raw) as Session
+    if (raw) {
+      const parsed = parseJson(raw)
+      if (isSession(parsed)) return parsed
+      sessionStorage.removeItem(STORAGE_KEY)
+    }
   } catch {
     // Storage blocked or corrupt: fall through to the dev default.
   }

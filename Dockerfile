@@ -4,7 +4,8 @@
 FROM node:26-slim AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci
+# No dependency needs an install script, so none are run.
+RUN npm ci --ignore-scripts
 COPY . .
 # Optional build-time default; API_URL at run time takes precedence.
 ARG VITE_API_URL=
