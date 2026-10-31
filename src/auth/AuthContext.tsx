@@ -17,7 +17,7 @@ interface AuthState {
 
 const AuthContext = createContext<AuthState | null>(null)
 
-// Proves a session works before keeping it: the platform token must belong to a whitelisted user.
+// Proves a session works before keeping it: the platform token must belong to a real user.
 async function verify(session: Session): Promise<Me> {
   setApiSession(session)
   return userApi.me()

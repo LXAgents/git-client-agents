@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import type { Platform } from '../types'
+import type { Platform, Role } from '../types'
 import { BrandIcon } from './BrandIcon'
 
 export function PageHeader({ title, description, actions }: { title: string; description?: ReactNode; actions?: ReactNode }) {
@@ -14,7 +14,7 @@ export function PageHeader({ title, description, actions }: { title: string; des
   )
 }
 
-type Tone = 'default' | 'success' | 'attention' | 'accent' | 'danger'
+type Tone = 'default' | 'success' | 'attention' | 'accent' | 'danger' | 'free'
 
 // A soft tinted pill. The tint is mixed from the tone colour, so it works in light and dark.
 const tones: Record<Tone, string> = {
@@ -23,6 +23,7 @@ const tones: Record<Tone, string> = {
   attention: '[--tone:var(--color-attention)]',
   accent: '[--tone:var(--color-accent)]',
   danger: '[--tone:var(--color-danger)]',
+  free: '[--tone:var(--color-free)]',
 }
 
 export function Badge({ children, tone = 'default' }: { children: ReactNode; tone?: Tone }) {
@@ -34,6 +35,17 @@ export function Badge({ children, tone = 'default' }: { children: ReactNode; ton
       {children}
     </span>
   )
+}
+
+const ROLE_BADGES: Record<Role, { label: string; tone: Tone }> = {
+  owner: { label: 'Owner', tone: 'accent' },
+  free: { label: 'Free', tone: 'free' },
+}
+
+// An account's role: Owner for the platform's owner, a light green Free for everyone else.
+export function RoleBadge({ role }: { role: Role }) {
+  const { label, tone } = ROLE_BADGES[role] ?? ROLE_BADGES.free
+  return <Badge tone={tone}>{label}</Badge>
 }
 
 // The platform's logo in place of its name; the name stays as alt text and tooltip.

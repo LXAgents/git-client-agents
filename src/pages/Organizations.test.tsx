@@ -18,7 +18,7 @@ const acme: Org = {
 
 describe('Organizations as a user', () => {
   beforeEach(() => {
-    vi.spyOn(userApi, 'me').mockResolvedValue({ platform: 'github', id: '1001', login: 'alice', name: null, avatarUrl: null, role: 'member' as const })
+    vi.spyOn(userApi, 'me').mockResolvedValue({ platform: 'github', id: '1001', login: 'alice', name: null, avatarUrl: null, role: 'free' as const })
   })
 
   it('imports only from the orgs the platform says the user owns', async () => {

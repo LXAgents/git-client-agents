@@ -3,7 +3,7 @@ import { Bot, LogOut } from 'lucide-react'
 import { useAuth } from '../auth/AuthContext'
 import { NAV, type NavItem } from '../nav'
 import { BrandIcon } from './BrandIcon'
-import { Badge } from './PageHeader'
+import { RoleBadge } from './PageHeader'
 
 function Brand() {
   return (
@@ -84,7 +84,11 @@ export function Layout({ nav = NAV }: { nav?: NavItem[] }) {
                 {name}
               </p>
               {me?.name && <p className="truncate text-xs text-fg-muted">@{me.login}</p>}
-              {isOwner ? <Badge tone="accent">Owner</Badge> : !me?.name && <p className="text-xs text-fg-muted">Signed in</p>}
+              {me && (
+                <div className="mt-1">
+                  <RoleBadge role={isOwner ? 'owner' : me.role} />
+                </div>
+              )}
             </div>
             {signOutButton}
           </div>
