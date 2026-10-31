@@ -6,7 +6,7 @@ import { ConfirmDelete } from '../components/ConfirmDelete'
 import { DataTable, type Column } from '../components/DataTable'
 import { SearchField } from '../components/Field'
 import { Modal } from '../components/Modal'
-import { Badge, PageHeader, PlatformBadge } from '../components/PageHeader'
+import { Badge, PageHeader } from '../components/PageHeader'
 import { useToast } from '../components/Toast'
 import { formatDate, platformName } from '../format'
 import { useLoad } from '../hooks/useLoad'
@@ -76,15 +76,15 @@ function ImportModal({ onClose, onImported }: { onClose: () => void; onImported:
 
 export function Organizations() {
   const toast = useToast()
-  const { session, isAdmin } = useAuth()
+  const { session, isOwner } = useAuth()
   // An admin user is still a platform user, so they can import orgs they own.
   const canImport = session?.mode === 'user'
-  const { data, loading, reload } = useLoad(useCallback(() => (isAdmin ? adminApi.orgs() : userApi.orgs()), [isAdmin]))
+  const { data, loading, reload } = useLoad(useCallback(() => (isOwner ? adminApi.orgs() : userApi.orgs()), [isOwner]))
   const [importing, setImporting] = useState(false)
 
   const remove = async (org: Org) => {
     try {
-      await (isAdmin ? adminApi.deleteOrg(org.id) : userApi.deleteOrg(org.id))
+      await (isOwner ? adminApi.deleteOrg(org.id) : userApi.deleteOrg(org.id))
       toast.success(`Removed ${org.orgName}`)
       await reload()
     } catch (err) {
@@ -94,12 +94,11 @@ export function Organizations() {
 
   const columns: Column<Org>[] = [
     { header: 'Organization', cell: (o) => <span className="font-semibold">{o.orgName}</span> },
-    { header: 'Platform', className: 'text-center', cell: (o) => <PlatformBadge platform={o.platform} /> },
     {
       header: 'Installation',
       cell: (o) => (o.installationId ? <code className="font-mono text-xs text-fg-muted">{o.installationId}</code> : <span className="text-fg-muted">—</span>),
     },
-    { header: 'Imported by', cell: (o) => o.owner.username || o.owner.id },
+    { header: 'Imported by', cell: (o) => o.owner.login },
     { header: 'Keys', cell: (o) => o.keyCount ?? 0, className: 'tabular-nums' },
     { header: 'Imported', cell: (o) => <span className="text-fg-muted">{formatDate(o.createdAt)}</span> },
     {
@@ -121,7 +120,7 @@ export function Organizations() {
       <PageHeader
         title="Organizations"
         description={
-          isAdmin
+          isOwner
             ? 'Every organization the agent serves. Owners import their own organizations; they cannot be added by hand.'
             : 'Imported organizations you own. Ownership is checked with the platform on every change.'
         }
@@ -139,7 +138,7 @@ export function Organizations() {
         rows={data}
         rowKey={(o) => o.id}
         loading={loading}
-        empty={isAdmin ? 'No organizations have been imported yet.' : 'You have not imported any organizations you own.'}
+        empty={isOwner ? 'No organizations have been imported yet.' : 'You have not imported any organizations you own.'}
       />
       {importing && <ImportModal onClose={() => setImporting(false)} onImported={reload} />}
     </>

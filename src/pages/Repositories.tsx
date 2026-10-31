@@ -6,7 +6,7 @@ import { ConfirmDelete } from '../components/ConfirmDelete'
 import { DataTable, type Column } from '../components/DataTable'
 import { SearchField } from '../components/Field'
 import { Modal } from '../components/Modal'
-import { Badge, PageHeader, PlatformBadge } from '../components/PageHeader'
+import { Badge, PageHeader } from '../components/PageHeader'
 import { useToast } from '../components/Toast'
 import { formatDate, platformName } from '../format'
 import { useLoad } from '../hooks/useLoad'
@@ -74,14 +74,14 @@ function ImportModal({ onClose, onImported }: { onClose: () => void; onImported:
 
 export function Repositories() {
   const toast = useToast()
-  const { session, isAdmin } = useAuth()
+  const { session, isOwner } = useAuth()
   const canImport = session?.mode === 'user'
-  const { data, loading, reload } = useLoad(useCallback(() => (isAdmin ? adminApi.repos() : userApi.repos()), [isAdmin]))
+  const { data, loading, reload } = useLoad(useCallback(() => (isOwner ? adminApi.repos() : userApi.repos()), [isOwner]))
   const [importing, setImporting] = useState(false)
 
   const remove = async (repo: Repo) => {
     try {
-      await (isAdmin ? adminApi.deleteRepo(repo.id) : userApi.deleteRepo(repo.id))
+      await (isOwner ? adminApi.deleteRepo(repo.id) : userApi.deleteRepo(repo.id))
       toast.success(`Removed ${repo.fullName}`)
       await reload()
     } catch (err) {
@@ -91,7 +91,6 @@ export function Repositories() {
 
   const columns: Column<Repo>[] = [
     { header: 'Repository', cell: (r) => <span className="font-semibold">{r.fullName}</span> },
-    { header: 'Platform', className: 'text-center', cell: (r) => <PlatformBadge platform={r.platform} /> },
     { header: 'Organization', cell: (r) => r.org.name ?? '—' },
     {
       header: 'Text model',
@@ -118,7 +117,7 @@ export function Repositories() {
       <PageHeader
         title="Repositories"
         description={
-          isAdmin
+          isOwner
             ? 'Every imported repository. Admins import their own; they cannot be added by hand.'
             : 'Repositories you administer, with their own model and keys. Set the model on the Models page and keys on the API keys page.'
         }
@@ -136,7 +135,7 @@ export function Repositories() {
         rows={data}
         rowKey={(r) => r.id}
         loading={loading}
-        empty={isAdmin ? 'No repositories have been imported yet.' : 'You have not imported any repositories you administer.'}
+        empty={isOwner ? 'No repositories have been imported yet.' : 'You have not imported any repositories you administer.'}
       />
       {importing && <ImportModal onClose={() => setImporting(false)} onImported={reload} />}
     </>
