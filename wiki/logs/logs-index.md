@@ -2,6 +2,7 @@
 
 | Version | Summary | Files |
 |---|---|---|
+| [1.6.1](1/6/1/CHANGELOG.md) | Platform logo centered in its column | `CHANGELOG.md` |
 | [1.6.0](1/6/0/CHANGELOG.md) | Platform logos, import search, OAuth sign-in survives reload | `CHANGELOG.md` |
 | [1.5.0](1/5/0/CHANGELOG.md) | Models page with live OpenRouter picker, Repositories page, repository keys | `CHANGELOG.md` |
 | [1.4.0](1/4/0/CHANGELOG.md) | Session kept in memory only; a reload signs you out | `CHANGELOG.md` |
