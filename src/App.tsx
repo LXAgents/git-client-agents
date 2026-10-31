@@ -5,6 +5,7 @@ import { Layout } from './components/Layout'
 import { ToastProvider } from './components/Toast'
 import { ApiKeys } from './pages/ApiKeys'
 import { Home } from './pages/Home'
+import { Models } from './pages/Models'
 import { Organizations } from './pages/Organizations'
 import { SignIn } from './pages/SignIn'
 import { Users } from './pages/Users'
@@ -25,6 +26,7 @@ function Routed() {
         <Route index element={<Home />} />
         {isAdmin && <Route path="users" element={<Users />} />}
         <Route path="orgs" element={<Organizations />} />
+        {session.mode === 'user' && <Route path="models" element={<Models />} />}
         <Route path="keys" element={<ApiKeys />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
