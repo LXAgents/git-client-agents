@@ -23,6 +23,6 @@ status: done
 
 | # | Title | Scope | Repository | Branch | Files / areas | PR |
 |---|---|---|---|---|---|---|
-| 1 | Task record | This record | git-client-agents | `plan/sonar-fixes` | `.agents/` | |
-| 2 | Sonar fixes | Session check, Modal, CSS, install scripts, regex | git-client-agents | `fix/sonar-fixes` | `src/`, `Dockerfile`, `.github/` | |
-| 3 | Release | 1.2.1 changelog and version | git-client-agents | `release/1.2.1` | `wiki/logs/`, `package.json` | |
+| 1 | Task record | This record | git-client-agents | `plan/sonar-fixes` | `.agents/` | #18 |
+| 2 | Sonar fixes | Session check, Modal, CSS, install scripts, regex | git-client-agents | `fix/sonar-fixes` | `src/`, `Dockerfile`, `.github/` | #19 |
+| 3 | Release | 1.2.1 changelog and version | git-client-agents | `release/1.2.1` | `wiki/logs/`, `package.json` | #20 |

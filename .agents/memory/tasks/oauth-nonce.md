@@ -1,7 +1,7 @@
 ---
 name: oauth-nonce
 description: Task record for binding the OAuth return to the tab that started it, and the SonarCloud storage finding (1.2.2).
-status: in-progress
+status: done
 ---
 
 # OAuth return nonce
@@ -23,6 +23,6 @@ status: in-progress
 
 | # | Title | Scope | Repository | Branch | Files / areas | PR |
 |---|---|---|---|---|---|---|
-| 1 | Task record | This record | git-client-agents | `plan/oauth-nonce` | `.agents/` | |
-| 2 | OAuth nonce | Nonce, validated save, tests | git-client-agents | `fix/oauth-nonce` | `src/auth/`, `src/pages/SignIn.tsx`, `src/services/api.ts` | |
-| 3 | Release | 1.2.2 changelog and version | git-client-agents | `release/1.2.2` | `wiki/logs/`, `package.json` | |
+| 1 | Task record | This record | git-client-agents | `plan/oauth-nonce` | `.agents/` | #21 |
+| 2 | OAuth nonce | Nonce, validated save, tests | git-client-agents | `fix/oauth-nonce` | `src/auth/`, `src/pages/SignIn.tsx`, `src/services/api.ts` | #22 |
+| 3 | Release | 1.2.2 changelog and version | git-client-agents | `release/1.2.2` | `wiki/logs/`, `package.json` | #23 |
