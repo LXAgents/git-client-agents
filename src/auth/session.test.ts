@@ -29,30 +29,31 @@ describe('session', () => {
   })
 
   it('reads the token or the error the server puts in the fragment after OAuth', () => {
-    expect(readOAuthReturn('#platform=gitlab&token=gloas-1')).toEqual({ session: { mode: 'user', platform: 'gitlab', token: 'gloas-1' } })
+    expect(readOAuthReturn('#code=sealed-1')).toEqual({ code: 'sealed-1' })
     expect(readOAuthReturn('#error=Access%20denied')).toEqual({ error: 'Access denied' })
-    expect(readOAuthReturn('#platform=bitbucket&token=x')).toBeNull()
+    // The token is never taken from the URL, even if a link puts it there.
+    expect(readOAuthReturn('#platform=github&token=x')).toBeNull()
     expect(readOAuthReturn('#section')).toBeNull()
     expect(readOAuthReturn('')).toBeNull()
   })
 
   it('removes the token and nonce from the address bar once read, and the nonce works once', () => {
     const nonce = beginOAuth()
-    window.history.replaceState(null, '', `/keys?x=1&signin=${nonce}#platform=github&token=gho_1`)
-    expect(takeOAuthReturn()).toEqual({ session: { mode: 'user', platform: 'github', token: 'gho_1' } })
-    expect(window.location.href).not.toContain('gho_1')
+    window.history.replaceState(null, '', `/keys?x=1&signin=${nonce}#code=sealed-1`)
+    expect(takeOAuthReturn()).toEqual({ code: 'sealed-1' })
+    expect(window.location.href).not.toContain('sealed-1')
     expect(window.location.pathname + window.location.search).toBe('/keys?x=1')
-    window.history.replaceState(null, '', `/?signin=${nonce}#platform=github&token=gho_1`)
+    window.history.replaceState(null, '', `/?signin=${nonce}#code=sealed-1`)
     expect(takeOAuthReturn()).toEqual({ error: FOREIGN_SIGNIN })
   })
 
   it('refuses a return without the nonce this tab stored', () => {
     beginOAuth()
-    window.history.replaceState(null, '', '/?signin=other#platform=github&token=gho_2')
+    window.history.replaceState(null, '', '/?signin=other#code=sealed-2')
     expect(takeOAuthReturn()).toEqual({ error: FOREIGN_SIGNIN })
-    window.history.replaceState(null, '', '/#platform=github&token=gho_3')
+    window.history.replaceState(null, '', '/#code=sealed-3')
     expect(takeOAuthReturn()).toEqual({ error: FOREIGN_SIGNIN })
-    expect(window.location.href).not.toContain('gho_')
+    expect(window.location.href).not.toContain('sealed-')
   })
 
   it('never writes a malformed session', () => {

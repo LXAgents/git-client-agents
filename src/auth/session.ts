@@ -56,18 +56,17 @@ export function saveSession(session: Session | null) {
   }
 }
 
-export type OAuthReturn = { session: Session } | { error: string }
+export type OAuthReturn = { code: string } | { error: string }
 
-// After "Continue with GitHub/GitLab" the server sends the browser back with
-// #platform=…&token=… or #error=… in the URL fragment. Returns null for any other hash.
+// After "Continue with GitHub/GitLab" the server sends the browser back with #code=… (a sealed,
+// one-time code that is swapped for the token by POST /api/auth/exchange; the token itself is
+// never in the URL) or #error=…. Returns null for any other hash.
 export function readOAuthReturn(hash: string): OAuthReturn | null {
   const params = new URLSearchParams(hash.replace(/^#/, ''))
   const error = params.get('error')
   if (error) return { error }
-  const platform = params.get('platform')
-  const token = params.get('token')
-  if ((platform === 'github' || platform === 'gitlab') && token) return { session: { mode: 'user', platform, token } }
-  return null
+  const code = params.get('code')
+  return code ? { code } : null
 }
 
 const NONCE_KEY = 'git-client-agents.oauth-nonce'
@@ -97,8 +96,8 @@ function takeNonce(): string | null {
   }
 }
 
-// Takes the OAuth result (and the nonce) out of the address bar, so the token is not left in
-// history or bookmarks.
+// Takes the OAuth result (and the nonce) out of the address bar, so the one-time code is not
+// left in history or bookmarks.
 export function takeOAuthReturn(): OAuthReturn | null {
   const result = readOAuthReturn(window.location.hash)
   if (!result) return null

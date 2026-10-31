@@ -45,6 +45,8 @@ const data = <T>(p: Promise<{ data: T }>) => p.then((r) => r.data)
 // must open in the browser, and the server sends the browser back to `redirect`.
 export const authApi = {
   providers: () => data(api.get<Providers>('/api/auth/providers')),
+  // Swaps the one-time code from the OAuth return for the user's token.
+  exchange: (code: string) => data(api.post<{ platform: Platform; token: string }>('/api/auth/exchange', { code })),
   // `nonce` comes back as ?signin=… and ties the return to this tab (see beginOAuth).
   startUrl: (platform: Platform, nonce?: string) => {
     const back = new URL('/', window.location.origin)

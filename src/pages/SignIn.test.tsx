@@ -53,10 +53,12 @@ describe('SignIn', () => {
 
   it('signs in with the token the server returns after OAuth', async () => {
     const me = vi.spyOn(userApi, 'me').mockResolvedValue({ platform: 'github', id: '1', login: 'owen', username: 'owen', isAdmin: true })
+    const exchange = vi.spyOn(authApi, 'exchange').mockResolvedValue({ platform: 'github', token: 'gho_abc' })
     sessionStorage.setItem('git-client-agents.oauth-nonce', 'n1')
-    window.history.replaceState(null, '', '/?signin=n1#platform=github&token=gho_abc')
+    window.history.replaceState(null, '', '/?signin=n1#code=sealed-abc')
     renderSignIn()
     await vi.waitFor(() => expect(me).toHaveBeenCalled())
+    expect(exchange).toHaveBeenCalledWith('sealed-abc')
     await vi.waitFor(() =>
       expect(JSON.parse(sessionStorage.getItem('git-client-agents.session')!)).toEqual({ mode: 'user', platform: 'github', token: 'gho_abc' }),
     )
@@ -64,11 +66,13 @@ describe('SignIn', () => {
     expect(window.location.search).toBe('')
   })
 
-  it('refuses a token link that this tab did not start, and keeps nothing', async () => {
+  it('refuses a sign-in link that this tab did not start, and keeps nothing', async () => {
     const me = vi.spyOn(userApi, 'me')
-    window.history.replaceState(null, '', '/#platform=github&token=gho_attacker')
+    const exchange = vi.spyOn(authApi, 'exchange')
+    window.history.replaceState(null, '', '/#code=sealed-attacker')
     renderSignIn()
     expect(await screen.findByRole('alert')).toHaveTextContent("wasn't started from this tab")
+    expect(exchange).not.toHaveBeenCalled()
     expect(me).not.toHaveBeenCalled()
     expect(sessionStorage.getItem('git-client-agents.session')).toBeNull()
   })
