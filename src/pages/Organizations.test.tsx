@@ -11,14 +11,14 @@ const acme: Org = {
   platform: 'github',
   orgName: 'acme',
   installationId: '555',
-  owner: { platform: 'github', id: '1001', username: 'alice' },
+  owner: { platform: 'github', id: '1001', login: 'alice', name: null, avatarUrl: null },
   keyCount: 1,
   createdAt: '2026-10-31T00:00:00Z',
 }
 
 describe('Organizations as a user', () => {
   beforeEach(() => {
-    vi.spyOn(userApi, 'me').mockResolvedValue({ platform: 'github', id: '1001', login: 'alice', username: 'alice' })
+    vi.spyOn(userApi, 'me').mockResolvedValue({ platform: 'github', id: '1001', login: 'alice', name: null, avatarUrl: null, role: 'member' as const })
   })
 
   it('imports only from the orgs the platform says the user owns', async () => {
@@ -44,12 +44,12 @@ describe('Organizations as a user', () => {
     expect(orgs).toHaveBeenCalledTimes(2)
   })
 
-  it('centers the platform logo in its column', async () => {
+  it('shows who imported an org, and no Platform column since a session sees one platform', async () => {
     vi.spyOn(userApi, 'orgs').mockResolvedValue([acme])
     renderAs({ mode: 'user', platform: 'github', token: 'ghp' }, <Organizations />)
-    const logo = await screen.findByRole('img', { name: 'GitHub' })
-    expect(logo.closest('td')).toHaveClass('text-center')
-    expect(screen.getByRole('columnheader', { name: 'Platform' })).toHaveClass('text-center')
+    const row = (await screen.findByText('acme')).closest('tr')!
+    expect(row).toHaveTextContent('alice')
+    expect(screen.queryByRole('columnheader', { name: 'Platform' })).toBeNull()
   })
 
   it('filters the import list as you type', async () => {
@@ -75,7 +75,7 @@ describe('Organizations as the operator', () => {
     vi.spyOn(adminApi, 'orgs').mockResolvedValueOnce([acme]).mockResolvedValue([])
     const del = vi.spyOn(adminApi, 'deleteOrg').mockResolvedValue({} as never)
 
-    renderAs({ mode: 'admin', token: 'admin' }, <Organizations />)
+    renderAs({ mode: 'admin', platform: 'github', token: 'admin' }, <Organizations />)
     expect(await screen.findByRole('cell', { name: 'acme' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /Import/ })).toBeNull()
 
@@ -88,7 +88,7 @@ describe('Organizations as the operator', () => {
 
 describe('Organizations as an admin user', () => {
   it('lists every org through the admin API and can still import their own', async () => {
-    vi.spyOn(userApi, 'me').mockResolvedValue({ platform: 'github', id: '9', login: 'owen', username: 'owen', isAdmin: true })
+    vi.spyOn(userApi, 'me').mockResolvedValue({ platform: 'github', id: '9', login: 'owen', name: null, avatarUrl: null, role: 'owner' })
     vi.spyOn(userApi, 'orgs').mockResolvedValue([])
     const adminOrgs = vi.spyOn(adminApi, 'orgs').mockResolvedValue([acme])
 

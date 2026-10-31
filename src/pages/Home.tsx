@@ -15,7 +15,7 @@ interface Stat {
 }
 
 const ACCESS_RULES = [
-  'The operator and admin users whitelist users. Nobody else can.',
+  'The operator and owners whitelist users. Nobody else can.',
   'Organizations are only ever imported by one of their owners, and only when the app is installed.',
   'Org keys can be changed by org owners only. The server asks GitHub or GitLab every time.',
   'Repositories are imported by their admins, inside an imported organization.',
@@ -24,28 +24,28 @@ const ACCESS_RULES = [
 ]
 
 export function Home() {
-  const { session, me, isAdmin } = useAuth()
+  const { session, me, isOwner } = useAuth()
   const toast = useToast()
   const [counts, setCounts] = useState<Record<string, number> | null>(null)
 
   useEffect(() => {
-    const load = isAdmin
+    const load = isOwner
       ? Promise.all([adminApi.accounts(), adminApi.orgs(), adminApi.keys()]).then(([a, o, k]) => ({ users: a.length, orgs: o.length, keys: k.length }))
       : Promise.all([userApi.orgs(), userApi.keys()]).then(([o, k]) => ({ orgs: o.length, keys: k.length }))
     load.then(setCounts).catch((err) => toast.error(errorMessage(err)))
-  }, [isAdmin, toast])
+  }, [isOwner, toast])
 
   const stats: Stat[] = [
-    ...(isAdmin ? [{ label: 'Whitelisted users', value: counts?.users ?? null, to: '/users', icon: Users, blurb: 'Who may trigger the agent.' }] : []),
+    ...(isOwner ? [{ label: 'Whitelisted users', value: counts?.users ?? null, to: '/users', icon: Users, blurb: 'Who may trigger the agent.' }] : []),
     {
-      label: isAdmin ? 'Organizations' : 'Organizations you own',
+      label: isOwner ? 'Organizations' : 'Organizations you own',
       value: counts?.orgs ?? null,
       to: '/orgs',
       icon: Building2,
       blurb: 'Imported from GitHub or GitLab.',
     },
     {
-      label: isAdmin ? 'API keys' : 'Your API keys',
+      label: isOwner ? 'API keys' : 'Your API keys',
       value: counts?.keys ?? null,
       to: '/keys',
       icon: KeyRound,
@@ -56,7 +56,7 @@ export function Home() {
   return (
     <>
       <PageHeader
-        title={session?.mode === 'admin' ? 'Welcome, operator' : `Welcome${me ? `, ${me.login}` : ''}`}
+        title={session?.mode === 'admin' ? 'Welcome, operator' : `Welcome${me ? `, ${me.name ?? me.login}` : ''}`}
         description="Manage who can use the agent server, which organizations it serves, and the API keys it spends."
       />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

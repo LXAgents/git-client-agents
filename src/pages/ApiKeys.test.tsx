@@ -11,7 +11,7 @@ const acme: Org = {
   platform: 'github',
   orgName: 'acme',
   installationId: '555',
-  owner: { platform: 'github', id: '1001', username: 'alice' },
+  owner: { platform: 'github', id: '1001', login: 'alice', name: null, avatarUrl: null },
   createdAt: '2026-10-31T00:00:00Z',
 }
 const web: Repo = {
@@ -35,7 +35,7 @@ const key = (id: string, type: 'user' | 'org' | 'repo', name: string, last4: str
 
 describe('API keys as a user', () => {
   beforeEach(() => {
-    vi.spyOn(userApi, 'me').mockResolvedValue({ platform: 'github', id: '1001', login: 'alice', username: 'alice' })
+    vi.spyOn(userApi, 'me').mockResolvedValue({ platform: 'github', id: '1001', login: 'alice', name: null, avatarUrl: null, role: 'member' as const })
     vi.spyOn(userApi, 'orgs').mockResolvedValue([acme])
     vi.spyOn(userApi, 'repos').mockResolvedValue([web])
     vi.spyOn(userApi, 'repoKeys').mockResolvedValue([])
@@ -51,7 +51,7 @@ describe('API keys as a user', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Add key' }))
     const dialog = screen.getByRole('dialog')
     await userEvent.click(within(dialog).getByRole('button', { name: 'Repository' }))
-    expect(within(dialog).getByLabelText('Repository')).toHaveDisplayValue('acme/web (github)')
+    expect(within(dialog).getByLabelText('Repository')).toHaveDisplayValue('acme/web')
     await userEvent.type(within(dialog).getByLabelText('OpenRouter API key'), 'sk-or-4444')
     vi.spyOn(userApi, 'repoKeys').mockResolvedValue([key('k4', 'repo', 'acme/web', '4444', 0)])
     await userEvent.click(within(dialog).getByRole('button', { name: 'Add key' }))
@@ -87,7 +87,7 @@ describe('API keys as a user', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Add key' }))
     const dialog = screen.getByRole('dialog')
     await userEvent.click(within(dialog).getByRole('button', { name: 'Organization' }))
-    expect(within(dialog).getByLabelText('Organization')).toHaveDisplayValue('acme (github)')
+    expect(within(dialog).getByLabelText('Organization')).toHaveDisplayValue('acme')
     await userEvent.type(within(dialog).getByLabelText('OpenRouter API key'), 'sk-or-9999')
     await userEvent.clear(within(dialog).getByLabelText('Priority'))
     await userEvent.type(within(dialog).getByLabelText('Priority'), '3')

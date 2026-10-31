@@ -53,7 +53,7 @@ describe('SignIn', () => {
   })
 
   it('signs in with the token the server returns after OAuth', async () => {
-    const me = vi.spyOn(userApi, 'me').mockResolvedValue({ platform: 'github', id: '1', login: 'owen', username: 'owen', isAdmin: true })
+    const me = vi.spyOn(userApi, 'me').mockResolvedValue({ platform: 'github', id: '1', login: 'owen', name: null, avatarUrl: null, role: 'owner' })
     const exchange = vi.spyOn(authApi, 'exchange').mockResolvedValue({ platform: 'github', token: 'gho_abc' })
     sessionStorage.setItem('git-client-agents.oauth-nonce', 'n1')
     window.history.replaceState(null, '', '/?signin=n1#code=sealed-abc')
@@ -86,7 +86,7 @@ describe('SignIn', () => {
   })
 
   it('signs a user in with their platform token and keeps it for the page', async () => {
-    const me = vi.spyOn(userApi, 'me').mockResolvedValue({ platform: 'gitlab', id: '7', login: 'carol', username: 'carol' })
+    const me = vi.spyOn(userApi, 'me').mockResolvedValue({ platform: 'gitlab', id: '7', login: 'carol', name: null, avatarUrl: null, role: 'member' as const })
     renderSignIn()
     await userEvent.selectOptions(await screen.findByLabelText('Platform'), 'gitlab')
     await userEvent.type(screen.getByLabelText('Personal access token'), 'glpat-x')
@@ -102,6 +102,17 @@ describe('SignIn', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Sign in' }))
     expect(await screen.findByRole('alert')).toHaveTextContent('not whitelisted')
     expect(loadSession()).toBeNull()
+  })
+
+  it('signs the operator in for the platform they pick', async () => {
+    const accounts = vi.spyOn(adminApi, 'accounts').mockResolvedValue([])
+    renderSignIn()
+    await userEvent.click(screen.getByRole('button', { name: 'Operator' }))
+    await userEvent.selectOptions(screen.getByLabelText('Platform'), 'gitlab')
+    await userEvent.type(screen.getByLabelText('Admin token'), 'op-token')
+    await userEvent.click(screen.getByRole('button', { name: 'Sign in' }))
+    await vi.waitFor(() => expect(loadSession()).toEqual({ mode: 'admin', platform: 'gitlab', token: 'op-token' }))
+    expect(accounts).toHaveBeenCalled()
   })
 
   it('rejects a wrong operator token', async () => {

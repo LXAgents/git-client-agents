@@ -6,7 +6,7 @@ import { ConfirmDelete } from '../components/ConfirmDelete'
 import { DataTable, type Column } from '../components/DataTable'
 import { Segmented, SelectField, TextField } from '../components/Field'
 import { Modal } from '../components/Modal'
-import { Badge, PageHeader, PlatformBadge } from '../components/PageHeader'
+import { Badge, PageHeader } from '../components/PageHeader'
 import { useToast } from '../components/Toast'
 import { formatDate } from '../format'
 import { useLoad } from '../hooks/useLoad'
@@ -41,9 +41,9 @@ async function loadUser(): Promise<KeysData> {
 
 function AddKeyModal({ data, onClose, onAdded }: { data: KeysData; onClose: () => void; onAdded: () => void }) {
   const toast = useToast()
-  const { me, isAdmin } = useAuth()
+  const { me, isOwner } = useAuth()
   const [target, setTarget] = useState<Target>('user')
-  const [accountKey, setAccountKey] = useState(data.accounts[0] ? `${data.accounts[0].platform}:${data.accounts[0].id}` : '')
+  const [accountId, setAccountId] = useState(data.accounts[0]?.id ?? '')
   const [orgId, setOrgId] = useState(data.orgs[0]?.id ?? '')
   const [repoId, setRepoId] = useState(data.repos[0]?.id ?? '')
   const [apiKey, setApiKey] = useState('')
@@ -52,17 +52,16 @@ function AddKeyModal({ data, onClose, onAdded }: { data: KeysData; onClose: () =
 
   const noOrgs = target === 'org' && data.orgs.length === 0
   const noRepos = target === 'repo' && data.repos.length === 0
-  const noUsers = isAdmin && target === 'user' && data.accounts.length === 0
+  const noUsers = isOwner && target === 'user' && data.accounts.length === 0
 
   const submit = async (e: FormEvent) => {
     e.preventDefault()
     const key = { apiKey: apiKey.trim(), priority: Number(priority) || 0 }
     setBusy(true)
     try {
-      if (isAdmin && target === 'user') {
-        const [platform, ...rest] = accountKey.split(':')
-        await adminApi.createUserKey(platform as Account['platform'], rest.join(':'), key)
-      } else if (isAdmin) {
+      if (isOwner && target === 'user') {
+        await adminApi.createUserKey(accountId, key)
+      } else if (isOwner) {
         await adminApi.createOrgKey(orgId, key)
       } else if (target === 'user') {
         await userApi.createKey(key)
@@ -91,15 +90,15 @@ function AddKeyModal({ data, onClose, onAdded }: { data: KeysData; onClose: () =
           options={[
             { value: 'user', label: 'User' },
             { value: 'org', label: 'Organization' },
-            ...(isAdmin ? [] : [{ value: 'repo' as const, label: 'Repository' }]),
+            ...(isOwner ? [] : [{ value: 'repo' as const, label: 'Repository' }]),
           ]}
         />
         {target === 'user' &&
-          (isAdmin ? (
-            <SelectField label="User" required value={accountKey} onChange={(e) => setAccountKey(e.target.value)} hint={noUsers ? 'Whitelist a user first.' : undefined}>
+          (isOwner ? (
+            <SelectField label="User" required value={accountId} onChange={(e) => setAccountId(e.target.value)} hint={noUsers ? 'Whitelist a user first.' : undefined}>
               {data.accounts.map((a) => (
-                <option key={`${a.platform}:${a.id}`} value={`${a.platform}:${a.id}`}>
-                  {a.username || a.id} ({a.platform}, {a.id})
+                <option key={a.id} value={a.id}>
+                  {a.login} ({a.id})
                 </option>
               ))}
             </SelectField>
@@ -114,11 +113,11 @@ function AddKeyModal({ data, onClose, onAdded }: { data: KeysData; onClose: () =
             required
             value={orgId}
             onChange={(e) => setOrgId(e.target.value)}
-            hint={noOrgs ? (isAdmin ? 'No organizations have been imported yet.' : 'Import an organization you own first.') : 'Used for members of the organization, after repository keys.'}
+            hint={noOrgs ? (isOwner ? 'No organizations have been imported yet.' : 'Import an organization you own first.') : 'Used for members of the organization, after repository keys.'}
           >
             {data.orgs.map((o) => (
               <option key={o.id} value={o.id}>
-                {o.orgName} ({o.platform})
+                {o.orgName}
               </option>
             ))}
           </SelectField>
@@ -133,7 +132,7 @@ function AddKeyModal({ data, onClose, onAdded }: { data: KeysData; onClose: () =
           >
             {data.repos.map((r) => (
               <option key={r.id} value={r.id}>
-                {r.fullName} ({r.platform})
+                {r.fullName}
               </option>
             ))}
           </SelectField>
@@ -167,13 +166,13 @@ function OwnerIcon({ type }: { type: ApiKey['owner']['type'] }) {
 
 export function ApiKeys() {
   const toast = useToast()
-  const { isAdmin } = useAuth()
-  const { data, loading, reload } = useLoad(useCallback(() => (isAdmin ? loadAdmin() : loadUser()), [isAdmin]))
+  const { isOwner } = useAuth()
+  const { data, loading, reload } = useLoad(useCallback(() => (isOwner ? loadAdmin() : loadUser()), [isOwner]))
   const [adding, setAdding] = useState(false)
 
   const remove = async (key: ApiKey) => {
     try {
-      if (isAdmin) await adminApi.deleteKey(key.id)
+      if (isOwner) await adminApi.deleteKey(key.id)
       else if (key.owner.type === 'org') await userApi.deleteOrgKey(key.owner.id, key.id)
       else if (key.owner.type === 'repo') await userApi.deleteRepoKey(key.owner.id, key.id)
       else await userApi.deleteKey(key.id)
@@ -195,7 +194,6 @@ export function ApiKeys() {
         </span>
       ),
     },
-    { header: 'Platform', className: 'text-center', cell: (k) => <PlatformBadge platform={k.owner.platform} /> },
     { header: 'Key', cell: (k) => <code className="font-mono text-xs text-fg-muted">{k.last4 ? `••••${k.last4}` : 'unreadable'}</code> },
     { header: 'Provider', cell: (k) => k.provider },
     { header: 'Priority', cell: (k) => k.priority, className: 'tabular-nums' },
@@ -220,7 +218,7 @@ export function ApiKeys() {
       <PageHeader
         title="API keys"
         description={
-          isAdmin
+          isOwner
             ? 'Every OpenRouter key on the server. Keys are shown by their last four characters only.'
             : 'Your own keys, and the keys of organizations you own and repositories you administer. The agent tries repository keys, then organization keys, then the commenter’s own.'
         }

@@ -1,7 +1,7 @@
 # git-client-agents
 
-A dashboard for [git-server-agents](https://github.com/LXAgents/git-server-agents) (1.3.0 or
-later for the sign-in buttons and admin users). It follows the system light or dark theme. It
+A dashboard for [git-server-agents](https://github.com/LXAgents/git-server-agents) (1.7.0 or
+later for roles, platform profiles and per-platform sessions). It follows the system light or dark theme. It
 replaces the server's command line for whitelisting users, importing organizations and
 managing the OpenRouter keys the agent spends.
 
@@ -9,14 +9,19 @@ managing the OpenRouter keys the agent spends.
 
 | Sign in as | With | Pages |
 |---|---|---|
-| **Operator** | The server's `ADMIN_TOKEN` | Dashboard, Users, Organizations and Repositories (list and remove), API keys (all) |
-| **Admin user** | Continue with GitHub or GitLab, when the server lists your user ID in `GITHUB_ADMIN_ID` or `GITLAB_ADMIN_ID` | Everything the operator sees, plus importing your own orgs and repositories, and Models |
+| **Operator** | The server's `ADMIN_TOKEN`, and a platform picked at sign-in | Dashboard, Users, Organizations and Repositories (list and remove), API keys (all), for that platform |
+| **Owner** | Continue with GitHub or GitLab, when your account's role is `owner` (users in the server's `GITHUB_ADMIN_ID` or `GITLAB_ADMIN_ID` become owners) | Everything the operator sees, plus importing your own orgs and repositories, and Models |
 | **User** | Continue with GitHub or GitLab, or a personal access token (GitHub `read:org`, GitLab `read_api`) | Dashboard, Organizations you own and Repositories you administer (import and remove), Models, API keys (yours, your orgs' and your repositories') |
 
 - **Continue with GitHub / GitLab** appears for each platform whose client ID and secret are set
   on the server. The server sends you back with the token in the URL fragment. The dashboard
   takes it out of the address bar at once. With no client IDs set, the token form is shown instead.
-- Only the operator and admin users can whitelist users. A user who isn't whitelisted is told so at sign-in.
+- **One platform per session.** A GitHub sign-in sees only GitHub users, orgs, repositories and
+  keys, and a GitLab sign-in only GitLab ones, so the tables have no Platform column.
+- **Profiles come from the platform.** Your avatar, name and login, and those on the Users page,
+  are read from GitHub or GitLab by the server. Only the numeric user ID and role are stored.
+- Only the operator and owners can whitelist users, by numeric user ID. A user who isn't
+  whitelisted is told so at sign-in.
 - Organizations are **imported, never typed in**. The import dialog lists the orgs that GitHub
   or GitLab says you own. On GitHub the App must be installed on the org first.
 - Organization keys can be added or deleted by owners only. The dashboard offers only orgs
@@ -57,7 +62,7 @@ default), or your deployed URL.
 | Variable | Purpose |
 |---|---|
 | `VITE_API_URL` | git-server-agents base URL (default `http://localhost:3000`) |
-| `VITE_ADMIN_TOKEN` | **Development only.** Signs you in as the operator automatically. Anything `VITE_*` is compiled into the JavaScript bundle and readable by anyone who loads the site, so leave it empty for any build that others can reach. |
+| `VITE_ADMIN_TOKEN` | **Development only.** Signs you in as the operator automatically, for `VITE_ADMIN_PLATFORM` (`github`, the default, or `gitlab`). Anything `VITE_*` is compiled into the JavaScript bundle and readable by anyone who loads the site, so leave it empty for any build that others can reach. |
 
 ## Run with Docker
 

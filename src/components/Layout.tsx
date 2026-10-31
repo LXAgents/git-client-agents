@@ -20,7 +20,7 @@ function Brand() {
 }
 
 export function Layout({ nav = NAV }: { nav?: NavItem[] }) {
-  const { session, me, isAdmin, signOut: endSession } = useAuth()
+  const { session, me, isOwner, signOut: endSession } = useAuth()
   const navigate = useNavigate()
   // The next person to sign in starts on the dashboard, not on the last page visited.
   const signOut = () => {
@@ -28,8 +28,8 @@ export function Layout({ nav = NAV }: { nav?: NavItem[] }) {
     endSession()
   }
   const operator = session?.mode === 'admin'
-  const items = nav.filter((item) => (isAdmin || !item.adminOnly) && !(operator && item.userOnly))
-  const name = operator ? 'Operator' : (me?.login ?? '')
+  const items = nav.filter((item) => (isOwner || !item.adminOnly) && !(operator && item.userOnly))
+  const name = operator ? 'Operator' : (me?.name ?? me?.login ?? '')
 
   const signOutButton = (
     <button
@@ -68,14 +68,24 @@ export function Layout({ nav = NAV }: { nav?: NavItem[] }) {
             ))}
           </nav>
           <div className="m-3 hidden items-center gap-3 rounded-2xl border border-line-muted bg-canvas-subtle/70 p-3 md:flex">
-            <span className="grid size-9 shrink-0 place-items-center rounded-full bg-overlay text-sm font-semibold uppercase">
-              {session?.mode === 'user' ? <BrandIcon platform={session.platform} className="size-4.5" /> : name.slice(0, 1)}
+            <span className="relative grid size-9 shrink-0 place-items-center rounded-full bg-overlay text-sm font-semibold uppercase">
+              {me?.avatarUrl ? (
+                <img src={me.avatarUrl} alt="" className="size-9 rounded-full object-cover" referrerPolicy="no-referrer" />
+              ) : (
+                <BrandIcon platform={session?.platform ?? 'github'} className="size-4.5" />
+              )}
+              {me?.avatarUrl && session && (
+                <span className="absolute -right-0.5 -bottom-0.5 grid size-4 place-items-center rounded-full bg-canvas ring-2 ring-canvas">
+                  <BrandIcon platform={session.platform} className="size-3" />
+                </span>
+              )}
             </span>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium" title={name}>
                 {name}
               </p>
-              {isAdmin ? <Badge tone="accent">Admin</Badge> : <p className="text-xs text-fg-muted">Signed in</p>}
+              {me?.name && <p className="truncate text-xs text-fg-muted">@{me.login}</p>}
+              {isOwner ? <Badge tone="accent">Owner</Badge> : !me?.name && <p className="text-xs text-fg-muted">Signed in</p>}
             </div>
             {signOutButton}
           </div>

@@ -2,7 +2,8 @@ import type { Platform } from '../types'
 
 // Who the dashboard is calling the server as. The operator uses the server's ADMIN_TOKEN;
 // a user signs in with GitHub or GitLab (OAuth) or pastes a personal access token.
-export type Session = { mode: 'admin'; token: string } | { mode: 'user'; platform: Platform; token: string }
+// Every session works on one platform: it sees only that platform's users, orgs, repos and keys.
+export type Session = { mode: 'admin' | 'user'; platform: Platform; token: string }
 
 // Older versions kept the session in sessionStorage under this key. It is only ever removed now.
 const LEGACY_STORAGE_KEY = 'git-client-agents.session'
@@ -15,8 +16,7 @@ export function isSession(value: unknown): value is Session {
   if (typeof value !== 'object' || value === null) return false
   const v = value as Record<string, unknown>
   if (typeof v.token !== 'string' || !TOKEN.test(v.token)) return false
-  if (v.mode === 'admin') return Object.keys(v).length === 2
-  return v.mode === 'user' && (v.platform === 'github' || v.platform === 'gitlab') && Object.keys(v).length === 3
+  return (v.mode === 'admin' || v.mode === 'user') && (v.platform === 'github' || v.platform === 'gitlab') && Object.keys(v).length === 3
 }
 
 // The token lives only in this page's memory. Nothing is written to browser storage, so no
@@ -37,13 +37,14 @@ forgetLegacy()
 export function loadSession(): Session | null {
   if (current) return current
   const devToken = import.meta.env.VITE_ADMIN_TOKEN
-  return devToken ? { mode: 'admin', token: devToken } : null
+  const devPlatform: Platform = import.meta.env.VITE_ADMIN_PLATFORM === 'gitlab' ? 'gitlab' : 'github'
+  return devToken ? { mode: 'admin', platform: devPlatform, token: devToken } : null
 }
 
 // Only a checked session is kept, rebuilt field by field so nothing else rides along.
 export function saveSession(session: Session | null) {
   if (session && isSession(session)) {
-    current = session.mode === 'admin' ? { mode: 'admin', token: session.token } : { mode: 'user', platform: session.platform, token: session.token }
+    current = { mode: session.mode, platform: session.platform, token: session.token }
   } else {
     current = null
   }
@@ -142,7 +143,5 @@ export function takeOAuthReturn(): OAuthReturn | null {
 
 export function authHeaders(session: Session | null): Record<string, string> {
   if (!session) return {}
-  const headers: Record<string, string> = { Authorization: `Bearer ${session.token}` }
-  if (session.mode === 'user') headers['X-Platform'] = session.platform
-  return headers
+  return { Authorization: `Bearer ${session.token}`, 'X-Platform': session.platform }
 }

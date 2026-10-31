@@ -19,7 +19,7 @@ const web: Repo = {
 
 describe('Repositories as a user', () => {
   it('imports only repositories the platform says the user administers', async () => {
-    vi.spyOn(userApi, 'me').mockResolvedValue({ platform: 'github', id: '1001', login: 'alice', username: 'alice' })
+    vi.spyOn(userApi, 'me').mockResolvedValue({ platform: 'github', id: '1001', login: 'alice', name: null, avatarUrl: null, role: 'member' as const })
     const repos = vi.spyOn(userApi, 'repos').mockResolvedValueOnce([]).mockResolvedValue([web])
     vi.spyOn(userApi, 'importableRepos').mockResolvedValue([
       { externalId: '301', fullName: 'acme/web', org: 'acme', importable: true, reason: null },
@@ -36,11 +36,12 @@ describe('Repositories as a user', () => {
     expect(importRepo).toHaveBeenCalledWith('301')
     expect(await screen.findByText('Imported acme/web')).toBeInTheDocument()
     expect(repos).toHaveBeenCalledTimes(2)
-    expect(await screen.findByRole('img', { name: 'GitHub' })).toBeInTheDocument()
+    // A session sees one platform only, so there is no Platform column.
+    expect(screen.queryByRole('columnheader', { name: 'Platform' })).toBeNull()
   })
 
   it('filters the import list as you type', async () => {
-    vi.spyOn(userApi, 'me').mockResolvedValue({ platform: 'gitlab', id: '7', login: 'carol', username: 'carol' })
+    vi.spyOn(userApi, 'me').mockResolvedValue({ platform: 'gitlab', id: '7', login: 'carol', name: null, avatarUrl: null, role: 'member' as const })
     vi.spyOn(userApi, 'repos').mockResolvedValue([])
     vi.spyOn(userApi, 'importableRepos').mockResolvedValue([
       { externalId: '41', fullName: 'grp/app', org: 'grp', importable: true, reason: null },

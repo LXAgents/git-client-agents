@@ -55,18 +55,18 @@ export const authApi = {
   },
 }
 
-// Operator endpoints: ADMIN_TOKEN, or the platform token of a user in GITHUB_ADMIN_ID / GITLAB_ADMIN_ID.
+// Owner endpoints: ADMIN_TOKEN, or the platform token of a user whose role is "owner". Every call
+// works on the session's platform only (X-Platform).
 export const adminApi = {
   accounts: () => data(api.get<Account[]>('/api/admin/accounts')),
-  createAccount: (body: { platform: Platform; userId: string; username: string }) =>
+  createAccount: (body: { userId: string }) =>
     data(api.post<Account>('/api/admin/accounts', body)),
   deleteAccount: (platform: Platform, userId: string) =>
     api.delete(`/api/admin/accounts/${platform}/${encodeURIComponent(userId)}`),
   orgs: () => data(api.get<Org[]>('/api/admin/orgs')),
   deleteOrg: (id: string) => api.delete(`/api/admin/orgs/${id}`),
   keys: () => data(api.get<ApiKey[]>('/api/admin/keys')),
-  createUserKey: (platform: Platform, userId: string, key: NewKey) =>
-    data(api.post<ApiKey>('/api/admin/keys', { target: 'user', platform, userId, ...key })),
+  createUserKey: (userId: string, key: NewKey) => data(api.post<ApiKey>('/api/admin/keys', { target: 'user', userId, ...key })),
   createOrgKey: (appInstallationId: string, key: NewKey) =>
     data(api.post<ApiKey>('/api/admin/keys', { target: 'org', appInstallationId, ...key })),
   deleteKey: (id: string) => api.delete(`/api/admin/keys/${id}`),
