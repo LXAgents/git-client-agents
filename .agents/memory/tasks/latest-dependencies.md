@@ -1,7 +1,7 @@
 ---
 name: latest-dependencies
 description: Task record for moving git-client-agents to the latest dependencies (1.0.1).
-status: in-progress
+status: done
 ---
 
 # Latest dependencies
