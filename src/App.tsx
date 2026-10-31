@@ -10,11 +10,11 @@ import { SignIn } from './pages/SignIn'
 import { Users } from './pages/Users'
 
 function Routed() {
-  const { session, checking } = useAuth()
+  const { session, isAdmin, checking } = useAuth()
   if (checking) {
     return (
-      <div className="flex min-h-screen items-center justify-center text-fg-muted">
-        <Loader2 aria-hidden className="mr-2 size-5 animate-spin" /> Checking your session…
+      <div className="flex min-h-dvh items-center justify-center text-sm text-fg-muted">
+        <Loader2 aria-hidden className="mr-2 size-5 animate-spin text-accent" /> Checking your session…
       </div>
     )
   }
@@ -23,7 +23,7 @@ function Routed() {
     <Routes>
       <Route element={<Layout />}>
         <Route index element={<Home />} />
-        {session.mode === 'admin' && <Route path="users" element={<Users />} />}
+        {isAdmin && <Route path="users" element={<Users />} />}
         <Route path="orgs" element={<Organizations />} />
         <Route path="keys" element={<ApiKeys />} />
         <Route path="*" element={<Navigate to="/" replace />} />

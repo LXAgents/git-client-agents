@@ -37,17 +37,15 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           <div
             key={t.id}
             role={t.tone === 'error' ? 'alert' : 'status'}
-            className={`pointer-events-auto flex w-full max-w-sm items-start gap-2 rounded-md border bg-overlay px-3 py-2.5 text-sm shadow-lg shadow-black/40 ${
-              t.tone === 'error' ? 'border-danger/60' : 'border-success/60'
-            }`}
+            className="glass enter pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-2xl border border-line px-4 py-3 text-sm shadow-raised"
           >
             {t.tone === 'error' ? (
-              <CircleAlert aria-hidden className="mt-0.5 size-4 shrink-0 text-danger" />
+              <CircleAlert aria-hidden className="mt-0.5 size-4.5 shrink-0 text-danger" />
             ) : (
-              <CircleCheck aria-hidden className="mt-0.5 size-4 shrink-0 text-success-hover" />
+              <CircleCheck aria-hidden className="mt-0.5 size-4.5 shrink-0 text-success" />
             )}
             <p className="flex-1 break-words">{t.message}</p>
-            <button type="button" aria-label="Dismiss" onClick={() => dismiss(t.id)} className="text-fg-muted hover:text-fg">
+            <button type="button" aria-label="Dismiss" onClick={() => dismiss(t.id)} className="rounded-md text-fg-muted transition-colors hover:text-fg">
               <X className="size-4" />
             </button>
           </div>

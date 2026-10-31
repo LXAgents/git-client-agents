@@ -1,7 +1,7 @@
 import axios, { isAxiosError } from 'axios'
 import { authHeaders, type Session } from '../auth/session'
 import { apiBaseUrl } from '../config'
-import type { Account, ApiKey, ImportableOrg, Me, Org, Platform } from '../types'
+import type { Account, ApiKey, ImportableOrg, Me, Org, Platform, Providers } from '../types'
 
 export const api = axios.create({
   baseURL: apiBaseUrl(),
@@ -40,7 +40,15 @@ export interface NewKey {
 
 const data = <T>(p: Promise<{ data: T }>) => p.then((r) => r.data)
 
-// Operator endpoints (ADMIN_TOKEN).
+// OAuth sign-in. `start` is a full-page navigation, not an XHR: the platform's consent page
+// must open in the browser, and the server sends the browser back to `redirect`.
+export const authApi = {
+  providers: () => data(api.get<Providers>('/api/auth/providers')),
+  startUrl: (platform: Platform, redirect = `${window.location.origin}/`) =>
+    `${apiBaseUrl().replace(/\/+$/, '')}/api/auth/${platform}/start?redirect=${encodeURIComponent(redirect)}`,
+}
+
+// Operator endpoints: ADMIN_TOKEN, or the platform token of a user in GITHUB_ADMIN_ID / GITLAB_ADMIN_ID.
 export const adminApi = {
   accounts: () => data(api.get<Account[]>('/api/admin/accounts')),
   createAccount: (body: { platform: Platform; userId: string; username: string }) =>

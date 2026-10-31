@@ -37,8 +37,7 @@ async function loadUser(): Promise<KeysData> {
 
 function AddKeyModal({ data, onClose, onAdded }: { data: KeysData; onClose: () => void; onAdded: () => void }) {
   const toast = useToast()
-  const { session, me } = useAuth()
-  const isAdmin = session?.mode === 'admin'
+  const { me, isAdmin } = useAuth()
   const [target, setTarget] = useState<Target>('user')
   const [accountKey, setAccountKey] = useState(data.accounts[0] ? `${data.accounts[0].platform}:${data.accounts[0].id}` : '')
   const [orgId, setOrgId] = useState(data.orgs[0]?.id ?? '')
@@ -96,7 +95,7 @@ function AddKeyModal({ data, onClose, onAdded }: { data: KeysData; onClose: () =
               ))}
             </SelectField>
           ) : (
-            <p className="rounded-md border border-line bg-canvas px-3 py-2 text-sm">
+            <p className="rounded-xl bg-overlay px-3.5 py-2.5 text-sm">
               Your key{me ? <> as <span className="font-semibold">{me.login}</span></> : null}. Used first when you trigger the agent.
             </p>
           ))}
@@ -137,8 +136,7 @@ function AddKeyModal({ data, onClose, onAdded }: { data: KeysData; onClose: () =
 
 export function ApiKeys() {
   const toast = useToast()
-  const { session } = useAuth()
-  const isAdmin = session?.mode === 'admin'
+  const { isAdmin } = useAuth()
   const { data, loading, reload } = useLoad(useCallback(() => (isAdmin ? loadAdmin() : loadUser()), [isAdmin]))
   const [adding, setAdding] = useState(false)
 

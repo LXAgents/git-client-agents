@@ -45,7 +45,7 @@ function ImportModal({ onClose, onImported }: { onClose: () => void; onImported:
           Asking {me ? platformName(me.platform) : 'the platform'}…
         </p>
       ) : (
-        <ul aria-label="Organizations you own" className="divide-y divide-line-muted rounded-md border border-line">
+        <ul aria-label="Organizations you own" className="divide-y divide-line-muted overflow-hidden rounded-xl border border-line">
           {data?.map((org) => (
             <li key={org.name} className="flex items-center justify-between gap-3 px-3 py-2.5">
               <div className="min-w-0">
@@ -70,8 +70,9 @@ function ImportModal({ onClose, onImported }: { onClose: () => void; onImported:
 
 export function Organizations() {
   const toast = useToast()
-  const { session } = useAuth()
-  const isAdmin = session?.mode === 'admin'
+  const { session, isAdmin } = useAuth()
+  // An admin user is still a platform user, so they can import orgs they own.
+  const canImport = session?.mode === 'user'
   const { data, loading, reload } = useLoad(useCallback(() => (isAdmin ? adminApi.orgs() : userApi.orgs()), [isAdmin]))
   const [importing, setImporting] = useState(false)
 
@@ -119,7 +120,7 @@ export function Organizations() {
             : 'Imported organizations you own. Ownership is checked with the platform on every change.'
         }
         actions={
-          !isAdmin && (
+          canImport && (
             <Button variant="primary" onClick={() => setImporting(true)}>
               <Download aria-hidden className="size-4" /> Import organization
             </Button>

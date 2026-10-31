@@ -42,4 +42,8 @@ export interface Me {
   id: string
   login: string
   username: string | null
+  /** True when the user's ID is in GITHUB_ADMIN_ID or GITLAB_ADMIN_ID on the server. */
+  isAdmin?: boolean
 }
+
+export type Providers = Record<Platform, boolean>
