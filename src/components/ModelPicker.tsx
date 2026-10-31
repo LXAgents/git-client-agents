@@ -131,7 +131,6 @@ export function ModelPicker({ title, current, fallback, onSave, onClose }: Props
           type="search"
           aria-label="Search models"
           placeholder="Search by name or id, e.g. claude or :free"
-          autoFocus
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className="block h-10 w-full rounded-xl border border-line bg-canvas-subtle pr-3 pl-9 text-sm shadow-xs placeholder:text-fg-muted/70 focus:border-accent focus:ring-4 focus:ring-accent/20 focus:outline-none"
