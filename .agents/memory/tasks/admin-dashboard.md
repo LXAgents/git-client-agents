@@ -44,3 +44,15 @@ status: in-progress
 - `src/index.css` defines the GitHub dark palette as Tailwind theme colours.
 - `.env.example` documents `VITE_API_URL` and why `VITE_ADMIN_TOKEN` is dev-only.
 - `npm run lint` and `npm run build` pass.
+
+### Task 3 — feat/layout
+
+- `src/services/api.ts`: Axios instance (`VITE_API_URL`, default `http://localhost:3000`)
+  whose interceptor adds `Authorization: Bearer` and, for users, `X-Platform`; typed
+  `adminApi` and `userApi` for every git-server-agents 1.1.0 endpoint; `errorMessage`.
+- `src/auth/`: session in `sessionStorage` (`VITE_ADMIN_TOKEN` only as a dev default);
+  `AuthProvider` verifies a session against the server before keeping it.
+- `src/components/`: sidebar `Layout`, `Button`, `Modal`, `Field`/`Segmented`, `DataTable`,
+  `PageHeader`/`Badge`, `ConfirmDelete`, `ToastProvider`.
+- Pages: `SignIn` (User with GitHub/GitLab token, or Operator) and `Home` (counts and how
+  access works). Lint and build pass.
