@@ -14,7 +14,7 @@ export function PageHeader({ title, description, actions }: { title: string; des
   )
 }
 
-type Tone = 'default' | 'success' | 'attention' | 'accent' | 'danger' | 'free'
+export type Tone = 'default' | 'success' | 'attention' | 'accent' | 'danger' | 'free'
 
 // A soft tinted pill. The tint is mixed from the tone colour, so it works in light and dark.
 const tones: Record<Tone, string> = {

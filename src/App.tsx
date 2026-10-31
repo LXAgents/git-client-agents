@@ -5,6 +5,7 @@ import { Layout } from './components/Layout'
 import { ToastProvider } from './components/Toast'
 import { ApiKeys } from './pages/ApiKeys'
 import { Home } from './pages/Home'
+import { Logs } from './pages/Logs'
 import { Models } from './pages/Models'
 import { Organizations } from './pages/Organizations'
 import { Repositories } from './pages/Repositories'
@@ -30,6 +31,7 @@ function Routed() {
         <Route path="repos" element={<Repositories />} />
         <Route path="models" element={<Models />} />
         <Route path="keys" element={<ApiKeys />} />
+        {isOwner && <Route path="logs" element={<Logs />} />}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>
