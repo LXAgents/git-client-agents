@@ -1,7 +1,7 @@
 # git-client-agents
 
-A dashboard for [git-server-agents](https://github.com/LXAgents/git-server-agents) (1.11.0 or
-later for open login and the Free role). It follows the system light or dark theme. It
+A dashboard for [git-server-agents](https://github.com/LXAgents/git-server-agents) (1.11.2 or
+later for the Logs page). It follows the system light or dark theme. It
 replaces the server's command line for seeing users, importing organizations and
 managing the OpenRouter keys the agent spends.
 
@@ -9,7 +9,7 @@ managing the OpenRouter keys the agent spends.
 
 | Sign in as | With | Pages |
 |---|---|---|
-| **Owner** | Continue with GitHub or GitLab, as the one user in the server's `GITHUB_ADMIN_ID` or `GITLAB_ADMIN_ID` | Dashboard, Users, every Organization and Repository of that platform (list, import your own, remove any), API keys (all), Models |
+| **Owner** | Continue with GitHub or GitLab, as the one user in the server's `GITHUB_ADMIN_ID` or `GITLAB_ADMIN_ID` | Dashboard, Users, every Organization and Repository of that platform (list, import your own, remove any), API keys (all), Models, Logs |
 | **Free** (anyone) | Continue with GitHub or GitLab. There is no sign-up: the first login creates the account | Dashboard, Organizations you own and Repositories you administer (import and remove), Models, API keys (yours, your orgs' and your repositories') |
 
 - **Continue with GitHub / GitLab** appears for each platform whose client ID and secret are set
@@ -36,6 +36,10 @@ managing the OpenRouter keys the agent spends.
 - **Keys** are tried repository first (for collaborators and org members), then organization
   (for org members), then the commenter's own.
 - Keys are shown by their last four characters only.
+- **Logs** (owner only) lists what the server did, newest first: webhooks received or refused
+  and why, answers, model calls and errors. It shows the lines for your platform and the
+  server's own, filtered by level and source, with Load more for older lines. The server keeps
+  them `LOG_RETENTION_DAYS` days (14 by default).
 
 The token is kept in memory only, never in browser storage.
 

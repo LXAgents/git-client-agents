@@ -93,3 +93,21 @@ export interface Me extends Profile {
 }
 
 export type Providers = Record<Platform, boolean>
+
+// A server log line, from GET /api/admin/logs. `platform` is null for lines about the server itself.
+export type LogLevel = 'info' | 'warn' | 'error'
+
+export interface LogLine {
+  id: string
+  level: LogLevel
+  source: string
+  message: string
+  platform: Platform | null
+  taskId: string | null
+  createdAt: string
+}
+
+export interface LogPage {
+  logs: LogLine[]
+  next: string | null
+}

@@ -2,7 +2,7 @@ import axios, { isAxiosError } from 'axios'
 import { authHeaders, type Session } from '../auth/session'
 import { apiBaseUrl } from '../config'
 import { trimTrailingSlashes } from '../utils/strings'
-import type { Account, ApiKey, ImportableOrg, ImportableRepo, Me, Modality, ModelInfo, ModelSettings, Org, Platform, Providers, Repo } from '../types'
+import type { Account, ApiKey, ImportableOrg, ImportableRepo, LogLevel, LogPage, Me, Modality, ModelInfo, ModelSettings, Org, Platform, Providers, Repo } from '../types'
 
 export const api = axios.create({
   baseURL: apiBaseUrl(),
@@ -72,6 +72,9 @@ export const adminApi = {
   deleteKey: (id: string) => api.delete(`/api/admin/keys/${id}`),
   repos: () => data(api.get<Repo[]>('/api/admin/repos')),
   deleteRepo: (id: string) => api.delete(`/api/admin/repos/${id}`),
+  // Newest first. `level` is the lowest level shown; pass the previous page's `next` as `before`.
+  logs: (params: { level?: LogLevel; source?: string; before?: string; limit?: number } = {}) =>
+    data(api.get<LogPage>('/api/admin/logs', { params })),
 }
 
 // Signed-in user endpoints (platform token). The server re-checks org ownership every call.
