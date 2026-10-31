@@ -2,6 +2,7 @@
 
 | Version | Summary | Files |
 |---|---|---|
+| [1.7.0](1/7/0/CHANGELOG.md) | Owner badge, platform profiles, one platform per session | `CHANGELOG.md` |
 | [1.6.2](1/6/2/CHANGELOG.md) | Model picker loads more models as you scroll | `CHANGELOG.md` |
 | [1.6.1](1/6/1/CHANGELOG.md) | Platform logo centered in its column | `CHANGELOG.md` |
 | [1.6.0](1/6/0/CHANGELOG.md) | Platform logos, import search, OAuth sign-in survives reload | `CHANGELOG.md` |

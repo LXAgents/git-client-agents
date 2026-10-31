@@ -1,7 +1,7 @@
 ---
 name: profiles-roles-platform
 description: Task record for platform profiles, the owner role and one platform per session (1.7.0).
-status: in-progress
+status: done
 ---
 
 # Profiles from the platform, the owner role, one platform per session
@@ -22,6 +22,6 @@ status: in-progress
 
 | # | Title | Scope | Repository | Branch | Files / areas | PR |
 |---|---|---|---|---|---|---|
-| 1 | Task record | This record | git-client-agents | `plan/profiles-roles-platform` | `.agents/` | |
-| 2 | Profiles, Owner badge, one platform | Avatar sidebar, Owner badge, no Platform columns, operator platform, tests | git-client-agents | `feat/profiles-roles-platform` | `src/`, `README.md` | |
-| 3 | Release | 1.7.0 changelog and version | git-client-agents | `release/1.7.0` | `wiki/logs/`, `package.json` | |
+| 1 | Task record | This record | git-client-agents | `plan/profiles-roles-platform` | `.agents/` | #42 |
+| 2 | Profiles, Owner badge, one platform | Avatar sidebar, Owner badge, no Platform columns, operator platform, tests | git-client-agents | `feat/profiles-roles-platform` | `src/`, `README.md` | #43 |
+| 3 | Release | 1.7.0 changelog and version | git-client-agents | `release/1.7.0` | `wiki/logs/`, `package.json` | #44 |
