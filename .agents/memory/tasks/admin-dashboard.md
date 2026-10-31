@@ -71,3 +71,12 @@ status: in-progress
   operator sign-in (bad token rejected), whitelist a user, user sign-in, import acme, add
   and delete own and org keys, member (bob) cannot import acme, stranger told they are not
   whitelisted, 390px layout.
+
+### Task 5 — ci/workflow
+
+- Vitest 5 + Testing Library + jsdom (`vitest.config.ts`, `src/test/`): session headers and
+  storage, sign-in (user, not whitelisted, bad operator token), org import from the owned
+  list only and operator delete with no add, API keys (own + org keys, org toggle, org-route
+  delete). 11 tests pass.
+- `.github/workflows/ci.yml`: one job (lint, test, type-check + build) on pushes to `master`
+  and PRs into `master` only, doc-only changes skipped, superseded runs cancelled, 10-minute cap.
