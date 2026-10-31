@@ -1,7 +1,7 @@
 ---
 name: center-platform-logo
 description: Task record for centering the platform logo in the dashboard tables (1.6.1).
-status: in-progress
+status: done
 ---
 
 # Center the platform logo
@@ -17,6 +17,6 @@ status: in-progress
 
 | # | Title | Scope | Repository | Branch | Files / areas | PR |
 |---|---|---|---|---|---|---|
-| 1 | Task record | This record | git-client-agents | `plan/center-platform-logo` | `.agents/` | |
-| 2 | Center the logo | Platform column alignment, test | git-client-agents | `feat/center-platform-logo` | `src/` | |
-| 3 | Release | 1.6.1 changelog and version | git-client-agents | `release/1.6.1` | `wiki/logs/`, `package.json` | |
+| 1 | Task record | This record | git-client-agents | `plan/center-platform-logo` | `.agents/` | #36 |
+| 2 | Center the logo | Platform column alignment, test | git-client-agents | `feat/center-platform-logo` | `src/` | #37 |
+| 3 | Release | 1.6.1 changelog and version | git-client-agents | `release/1.6.1` | `wiki/logs/`, `package.json` | #38 |
