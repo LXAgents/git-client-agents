@@ -15,7 +15,7 @@ interface Stat {
 }
 
 const ACCESS_RULES = [
-  'The operator and owners whitelist users. Nobody else can.',
+  'Only the platform owner whitelists users.',
   'Organizations are only ever imported by one of their owners, and only when the app is installed.',
   'Org keys can be changed by org owners only. The server asks GitHub or GitLab every time.',
   'Repositories are imported by their admins, inside an imported organization.',
@@ -24,7 +24,7 @@ const ACCESS_RULES = [
 ]
 
 export function Home() {
-  const { session, me, isOwner } = useAuth()
+  const { me, isOwner } = useAuth()
   const toast = useToast()
   const [counts, setCounts] = useState<Record<string, number> | null>(null)
 
@@ -56,7 +56,7 @@ export function Home() {
   return (
     <>
       <PageHeader
-        title={session?.mode === 'admin' ? 'Welcome, operator' : `Welcome${me ? `, ${me.name ?? me.login}` : ''}`}
+        title={`Welcome${me ? `, ${me.name ?? me.login}` : ''}`}
         description="Manage who can use the agent server, which organizations it serves, and the API keys it spends."
       />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

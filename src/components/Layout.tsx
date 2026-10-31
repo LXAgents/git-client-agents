@@ -27,9 +27,8 @@ export function Layout({ nav = NAV }: { nav?: NavItem[] }) {
     navigate('/')
     endSession()
   }
-  const operator = session?.mode === 'admin'
-  const items = nav.filter((item) => (isOwner || !item.adminOnly) && !(operator && item.userOnly))
-  const name = operator ? 'Operator' : (me?.name ?? me?.login ?? '')
+  const items = nav.filter((item) => isOwner || !item.adminOnly)
+  const name = me?.name ?? me?.login ?? ''
 
   const signOutButton = (
     <button

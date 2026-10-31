@@ -74,8 +74,7 @@ function ImportModal({ onClose, onImported }: { onClose: () => void; onImported:
 
 export function Repositories() {
   const toast = useToast()
-  const { session, isOwner } = useAuth()
-  const canImport = session?.mode === 'user'
+  const { isOwner } = useAuth()
   const { data, loading, reload } = useLoad(useCallback(() => (isOwner ? adminApi.repos() : userApi.repos()), [isOwner]))
   const [importing, setImporting] = useState(false)
 
@@ -122,11 +121,9 @@ export function Repositories() {
             : 'Repositories you administer, with their own model and keys. Set the model on the Models page and keys on the API keys page.'
         }
         actions={
-          canImport && (
-            <Button variant="primary" onClick={() => setImporting(true)}>
-              <Download aria-hidden className="size-4" /> Import repository
-            </Button>
-          )
+          <Button variant="primary" onClick={() => setImporting(true)}>
+            <Download aria-hidden className="size-4" /> Import repository
+          </Button>
         }
       />
       <DataTable

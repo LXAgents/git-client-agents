@@ -27,7 +27,7 @@ describe('Repositories as a user', () => {
     ])
     const importRepo = vi.spyOn(userApi, 'importRepo').mockResolvedValue(web)
 
-    renderAs({ mode: 'user', platform: 'github', token: 'ghp' }, <Repositories />)
+    renderAs({ platform: 'github', token: 'ghp' }, <Repositories />)
     expect(await screen.findByText('You have not imported any repositories you administer.')).toBeInTheDocument()
     await userEvent.click(screen.getByRole('button', { name: 'Import repository' }))
     const list = await screen.findByRole('list', { name: 'Repositories you administer' })
@@ -47,7 +47,7 @@ describe('Repositories as a user', () => {
       { externalId: '41', fullName: 'grp/app', org: 'grp', importable: true, reason: null },
       { externalId: '42', fullName: 'grp/docs', org: 'grp', importable: true, reason: null },
     ])
-    renderAs({ mode: 'user', platform: 'gitlab', token: 'glpat' }, <Repositories />)
+    renderAs({ platform: 'gitlab', token: 'glpat' }, <Repositories />)
     await userEvent.click(await screen.findByRole('button', { name: 'Import repository' }))
     const list = await screen.findByRole('list', { name: 'Repositories you administer' })
     await userEvent.type(screen.getByRole('searchbox', { name: 'Search repositories' }), 'docs')

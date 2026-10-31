@@ -51,7 +51,7 @@ describe('Models', () => {
   })
 
   it('shows each owner and what falls back to what', async () => {
-    renderAs({ mode: 'user', platform: 'github', token: 'ghp' }, <Models />)
+    renderAs({ platform: 'github', token: 'ghp' }, <Models />)
     const you = await screen.findByRole('list', { name: 'You' })
     expect(you).toHaveTextContent('Not set, so the default (openrouter/free) is used')
     expect(screen.getByRole('list', { name: 'Organizations you own' })).toHaveTextContent('openai/gpt-5')
@@ -60,7 +60,7 @@ describe('Models', () => {
 
   it('searches the live list as you type and saves a repository model', async () => {
     const set = vi.spyOn(userApi, 'setRepoModel').mockResolvedValue({ text: 'anthropic/claude-sonnet' })
-    renderAs({ mode: 'user', platform: 'github', token: 'ghp' }, <Models />)
+    renderAs({ platform: 'github', token: 'ghp' }, <Models />)
     await userEvent.click(await screen.findByRole('button', { name: 'Change model for acme/web' }))
     const dialog = screen.getByRole('dialog')
     const list = await within(dialog).findByRole('list', { name: 'Models' })
@@ -84,7 +84,7 @@ describe('Models', () => {
 
   it('loads the next 100 models when the list is scrolled to the bottom, and a new search starts over', async () => {
     vi.spyOn(userApi, 'models').mockResolvedValue(Array.from({ length: 250 }, (_, i) => model(`vendor/m${i}`, `Model ${i}`)))
-    renderAs({ mode: 'user', platform: 'github', token: 'ghp' }, <Models />)
+    renderAs({ platform: 'github', token: 'ghp' }, <Models />)
     await userEvent.click(await screen.findByRole('button', { name: 'Change model for alice' }))
     const dialog = screen.getByRole('dialog')
     const list = await within(dialog).findByRole('list', { name: 'Models' })
@@ -111,7 +111,7 @@ describe('Models', () => {
   })
 
   it('offers only the Text modality for now; the others are disabled', async () => {
-    renderAs({ mode: 'user', platform: 'github', token: 'ghp' }, <Models />)
+    renderAs({ platform: 'github', token: 'ghp' }, <Models />)
     await userEvent.click(await screen.findByRole('button', { name: 'Change model for alice' }))
     const tabs = within(screen.getByRole('tablist', { name: 'Modality' })).getAllByRole('tab')
     expect(tabs.map((t) => t.textContent)).toEqual(['Text', 'Image', 'Video', 'Speech', 'Decisions', 'Embeddings', 'Rerank', 'Transcription', 'Audio'])
@@ -122,7 +122,7 @@ describe('Models', () => {
 
   it('clears an org model so it falls back', async () => {
     const set = vi.spyOn(userApi, 'setOrgModel').mockResolvedValue({})
-    renderAs({ mode: 'user', platform: 'github', token: 'ghp' }, <Models />)
+    renderAs({ platform: 'github', token: 'ghp' }, <Models />)
     await userEvent.click(await screen.findByRole('button', { name: 'Change model for acme' }))
     await userEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Use fallback' }))
     expect(set).toHaveBeenCalledWith('org1', 'text', null)

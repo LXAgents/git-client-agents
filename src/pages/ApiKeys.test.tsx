@@ -45,7 +45,7 @@ describe('API keys as a user', () => {
     vi.spyOn(userApi, 'keys').mockResolvedValue([])
     vi.spyOn(userApi, 'orgKeys').mockResolvedValue([])
     const create = vi.spyOn(userApi, 'createRepoKey').mockResolvedValue(key('k4', 'repo', 'acme/web', '4444', 0))
-    renderAs({ mode: 'user', platform: 'github', token: 'ghp' }, <ApiKeys />)
+    renderAs({ platform: 'github', token: 'ghp' }, <ApiKeys />)
 
     await screen.findByText('No API keys yet.')
     await userEvent.click(screen.getByRole('button', { name: 'Add key' }))
@@ -68,7 +68,7 @@ describe('API keys as a user', () => {
   it('shows own and owned-org keys by last four only', async () => {
     vi.spyOn(userApi, 'keys').mockResolvedValue([key('k1', 'user', 'alice', '1111', 0)])
     vi.spyOn(userApi, 'orgKeys').mockResolvedValue([key('k2', 'org', 'acme', '2222', 5)])
-    renderAs({ mode: 'user', platform: 'github', token: 'ghp' }, <ApiKeys />)
+    renderAs({ platform: 'github', token: 'ghp' }, <ApiKeys />)
 
     await screen.findByText('••••2222')
     const rows = screen.getAllByRole('row')
@@ -81,7 +81,7 @@ describe('API keys as a user', () => {
     vi.spyOn(userApi, 'keys').mockResolvedValue([])
     vi.spyOn(userApi, 'orgKeys').mockResolvedValue([])
     const create = vi.spyOn(userApi, 'createOrgKey').mockResolvedValue(key('k3', 'org', 'acme', '9999', 3))
-    renderAs({ mode: 'user', platform: 'github', token: 'ghp' }, <ApiKeys />)
+    renderAs({ platform: 'github', token: 'ghp' }, <ApiKeys />)
 
     await screen.findByText('No API keys yet.')
     await userEvent.click(screen.getByRole('button', { name: 'Add key' }))
@@ -100,7 +100,7 @@ describe('API keys as a user', () => {
     vi.spyOn(userApi, 'keys').mockResolvedValue([])
     vi.spyOn(userApi, 'orgKeys').mockResolvedValue([key('k2', 'org', 'acme', '2222', 5)])
     const del = vi.spyOn(userApi, 'deleteOrgKey').mockResolvedValue({} as never)
-    renderAs({ mode: 'user', platform: 'github', token: 'ghp' }, <ApiKeys />)
+    renderAs({ platform: 'github', token: 'ghp' }, <ApiKeys />)
 
     await userEvent.click(await screen.findByRole('button', { name: /Delete key ending 2222/ }))
     await userEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Delete' }))

@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { adminApi, authApi, errorStatus, setApiSession, userApi } from '../services/api'
+import { authApi, errorStatus, setApiSession, userApi } from '../services/api'
 import type { Me, Platform } from '../types'
 import { browser } from './browser'
 import { beginOAuth, forgetOAuth, loadSession, oauthToResume, rememberOAuth, saveSession, takeOAuthReturn, type OAuthReturn, type Session } from './session'
@@ -7,7 +7,7 @@ import { beginOAuth, forgetOAuth, loadSession, oauthToResume, rememberOAuth, sav
 interface AuthState {
   session: Session | null
   me: Me | null
-  /** The operator token, or a user whose ID the server lists in GITHUB_ADMIN_ID / GITLAB_ADMIN_ID. */
+  /** The platform's owner: the user whose ID the server has in GITHUB_ADMIN_ID / GITLAB_ADMIN_ID. */
   isOwner: boolean
   checking: boolean
   /** Why the last "Continue with GitHub/GitLab" failed, for the sign-in page. */
@@ -18,14 +18,9 @@ interface AuthState {
 
 const AuthContext = createContext<AuthState | null>(null)
 
-// Proves a session works before keeping it: the admin token must open /api/admin, and a
-// platform token must belong to a whitelisted user.
-async function verify(session: Session): Promise<Me | null> {
+// Proves a session works before keeping it: the platform token must belong to a whitelisted user.
+async function verify(session: Session): Promise<Me> {
   setApiSession(session)
-  if (session.mode === 'admin') {
-    await adminApi.accounts()
-    return null
-  }
   return userApi.me()
 }
 
@@ -58,12 +53,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       authApi
         .exchange(oauthReturn.code)
         .then(({ platform, token }) => {
-          next = { mode: 'user', platform, token }
+          next = { platform, token }
           return verify(next)
         })
         .then((who) => {
           saveSession(next)
-          if (next.mode === 'user') rememberOAuth(next.platform)
+          rememberOAuth(next.platform)
           setSession(next)
           setMe(who)
         })
@@ -103,7 +98,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [session],
   )
 
-  const isOwner = session?.mode === 'admin' || me?.role === 'owner'
+  const isOwner = me?.role === 'owner'
   const value = useMemo(
     () => ({ session, me, isOwner, checking, oauthError, signIn, signOut }),
     [session, me, isOwner, checking, oauthError, signIn, signOut],

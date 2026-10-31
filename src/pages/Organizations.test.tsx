@@ -29,7 +29,7 @@ describe('Organizations as a user', () => {
     ])
     const importOrg = vi.spyOn(userApi, 'importOrg').mockResolvedValue(acme)
 
-    renderAs({ mode: 'user', platform: 'github', token: 'ghp' }, <Organizations />)
+    renderAs({ platform: 'github', token: 'ghp' }, <Organizations />)
     expect(await screen.findByText('You have not imported any organizations you own.')).toBeInTheDocument()
     await userEvent.click(screen.getByRole('button', { name: 'Import organization' }))
 
@@ -46,7 +46,7 @@ describe('Organizations as a user', () => {
 
   it('shows who imported an org, and no Platform column since a session sees one platform', async () => {
     vi.spyOn(userApi, 'orgs').mockResolvedValue([acme])
-    renderAs({ mode: 'user', platform: 'github', token: 'ghp' }, <Organizations />)
+    renderAs({ platform: 'github', token: 'ghp' }, <Organizations />)
     const row = (await screen.findByText('acme')).closest('tr')!
     expect(row).toHaveTextContent('alice')
     expect(screen.queryByRole('columnheader', { name: 'Platform' })).toBeNull()
@@ -58,7 +58,7 @@ describe('Organizations as a user', () => {
       { name: 'acme', kind: 'org', importable: true, reason: null, appInstallationId: null },
       { name: 'beta-labs', kind: 'org', importable: true, reason: null, appInstallationId: null },
     ])
-    renderAs({ mode: 'user', platform: 'github', token: 'ghp' }, <Organizations />)
+    renderAs({ platform: 'github', token: 'ghp' }, <Organizations />)
     await userEvent.click(await screen.findByRole('button', { name: 'Import organization' }))
     const list = await screen.findByRole('list', { name: 'Organizations you own' })
     await userEvent.type(screen.getByRole('searchbox', { name: 'Search organizations' }), 'BETA')
@@ -69,32 +69,22 @@ describe('Organizations as a user', () => {
   })
 })
 
-describe('Organizations as the operator', () => {
-  it('lists and deletes orgs but offers no way to add one', async () => {
-    vi.spyOn(adminApi, 'accounts').mockResolvedValue([])
-    vi.spyOn(adminApi, 'orgs').mockResolvedValueOnce([acme]).mockResolvedValue([])
-    const del = vi.spyOn(adminApi, 'deleteOrg').mockResolvedValue({} as never)
-
-    renderAs({ mode: 'admin', platform: 'github', token: 'admin' }, <Organizations />)
-    expect(await screen.findByRole('cell', { name: 'acme' })).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /Import/ })).toBeNull()
-
-    await userEvent.click(screen.getByRole('button', { name: 'Remove acme' }))
-    await userEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Delete' }))
-    expect(del).toHaveBeenCalledWith('org1')
-    expect(await screen.findByText('No organizations have been imported yet.')).toBeInTheDocument()
-  })
-})
-
-describe('Organizations as an admin user', () => {
-  it('lists every org through the admin API and can still import their own', async () => {
+describe('Organizations as the platform owner', () => {
+  it('lists every org through the admin API, imports their own and deletes any', async () => {
     vi.spyOn(userApi, 'me').mockResolvedValue({ platform: 'github', id: '9', login: 'owen', name: null, avatarUrl: null, role: 'owner' })
     vi.spyOn(userApi, 'orgs').mockResolvedValue([])
     const adminOrgs = vi.spyOn(adminApi, 'orgs').mockResolvedValue([acme])
 
-    renderAs({ mode: 'user', platform: 'github', token: 'gho' }, <Organizations />)
+    renderAs({ platform: 'github', token: 'gho' }, <Organizations />)
     expect(await screen.findByRole('cell', { name: 'acme' })).toBeInTheDocument()
     expect(adminOrgs).toHaveBeenCalled()
     expect(screen.getByRole('button', { name: /Import organization/ })).toBeInTheDocument()
+
+    const del = vi.spyOn(adminApi, 'deleteOrg').mockResolvedValue({} as never)
+    adminOrgs.mockResolvedValue([])
+    await userEvent.click(screen.getByRole('button', { name: 'Remove acme' }))
+    await userEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Delete' }))
+    expect(del).toHaveBeenCalledWith('org1')
+    expect(await screen.findByText('No organizations have been imported yet.')).toBeInTheDocument()
   })
 })

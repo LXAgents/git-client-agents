@@ -5,8 +5,6 @@ export interface NavItem {
   label: string
   icon: LucideIcon
   adminOnly?: boolean
-  /** Needs a platform sign-in (not the operator's ADMIN_TOKEN). */
-  userOnly?: boolean
 }
 
 export const NAV: NavItem[] = [
@@ -14,6 +12,6 @@ export const NAV: NavItem[] = [
   { to: '/users', label: 'Users', icon: Users, adminOnly: true },
   { to: '/orgs', label: 'Organizations', icon: Building2 },
   { to: '/repos', label: 'Repositories', icon: FolderGit2 },
-  { to: '/models', label: 'Models', icon: Sparkles, userOnly: true },
+  { to: '/models', label: 'Models', icon: Sparkles },
   { to: '/keys', label: 'API keys', icon: KeyRound },
 ]

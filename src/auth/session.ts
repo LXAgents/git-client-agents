@@ -1,9 +1,9 @@
 import type { Platform } from '../types'
 
-// Who the dashboard is calling the server as. The operator uses the server's ADMIN_TOKEN;
-// a user signs in with GitHub or GitLab (OAuth) or pastes a personal access token.
-// Every session works on one platform: it sees only that platform's users, orgs, repos and keys.
-export type Session = { mode: 'admin' | 'user'; platform: Platform; token: string }
+// Who the dashboard is calling the server as: a user signed in with GitHub or GitLab (OAuth) or
+// with a pasted personal access token. Every session works on one platform: it sees only that
+// platform's users, orgs, repos and keys. The platform's owner gets the owner pages.
+export type Session = { platform: Platform; token: string }
 
 // Older versions kept the session in sessionStorage under this key. It is only ever removed now.
 const LEGACY_STORAGE_KEY = 'git-client-agents.session'
@@ -16,7 +16,7 @@ export function isSession(value: unknown): value is Session {
   if (typeof value !== 'object' || value === null) return false
   const v = value as Record<string, unknown>
   if (typeof v.token !== 'string' || !TOKEN.test(v.token)) return false
-  return (v.mode === 'admin' || v.mode === 'user') && (v.platform === 'github' || v.platform === 'gitlab') && Object.keys(v).length === 3
+  return (v.platform === 'github' || v.platform === 'gitlab') && Object.keys(v).length === 2
 }
 
 // The token lives only in this page's memory. Nothing is written to browser storage, so no
@@ -35,16 +35,13 @@ function forgetLegacy() {
 forgetLegacy()
 
 export function loadSession(): Session | null {
-  if (current) return current
-  const devToken = import.meta.env.VITE_ADMIN_TOKEN
-  const devPlatform: Platform = import.meta.env.VITE_ADMIN_PLATFORM === 'gitlab' ? 'gitlab' : 'github'
-  return devToken ? { mode: 'admin', platform: devPlatform, token: devToken } : null
+  return current
 }
 
 // Only a checked session is kept, rebuilt field by field so nothing else rides along.
 export function saveSession(session: Session | null) {
   if (session && isSession(session)) {
-    current = { mode: session.mode, platform: session.platform, token: session.token }
+    current = { platform: session.platform, token: session.token }
   } else {
     current = null
   }

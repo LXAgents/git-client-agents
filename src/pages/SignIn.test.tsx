@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { AuthProvider } from '../auth/AuthContext'
 import { loadSession } from '../auth/session'
 import { ToastProvider } from '../components/Toast'
-import { adminApi, authApi, userApi } from '../services/api'
+import { authApi, userApi } from '../services/api'
 import { SignIn } from './SignIn'
 
 function httpError(status: number) {
@@ -61,7 +61,7 @@ describe('SignIn', () => {
     await vi.waitFor(() => expect(me).toHaveBeenCalled())
     expect(exchange).toHaveBeenCalledWith('sealed-abc')
     await vi.waitFor(() =>
-      expect(loadSession()).toEqual({ mode: 'user', platform: 'github', token: 'gho_abc' }),
+      expect(loadSession()).toEqual({ platform: 'github', token: 'gho_abc' }),
     )
     expect(window.location.hash).toBe('')
     expect(window.location.search).toBe('')
@@ -92,7 +92,7 @@ describe('SignIn', () => {
     await userEvent.type(screen.getByLabelText('Personal access token'), 'glpat-x')
     await userEvent.click(screen.getByRole('button', { name: 'Sign in' }))
     expect(me).toHaveBeenCalled()
-    expect(loadSession()).toEqual({ mode: 'user', platform: 'gitlab', token: 'glpat-x' })
+    expect(loadSession()).toEqual({ platform: 'gitlab', token: 'glpat-x' })
   })
 
   it('explains a user who is not whitelisted', async () => {
@@ -104,23 +104,10 @@ describe('SignIn', () => {
     expect(loadSession()).toBeNull()
   })
 
-  it('signs the operator in for the platform they pick', async () => {
-    const accounts = vi.spyOn(adminApi, 'accounts').mockResolvedValue([])
+  it('has no operator sign-in: only GitHub, GitLab or a personal access token', async () => {
     renderSignIn()
-    await userEvent.click(screen.getByRole('button', { name: 'Operator' }))
-    await userEvent.selectOptions(screen.getByLabelText('Platform'), 'gitlab')
-    await userEvent.type(screen.getByLabelText('Admin token'), 'op-token')
-    await userEvent.click(screen.getByRole('button', { name: 'Sign in' }))
-    await vi.waitFor(() => expect(loadSession()).toEqual({ mode: 'admin', platform: 'gitlab', token: 'op-token' }))
-    expect(accounts).toHaveBeenCalled()
-  })
-
-  it('rejects a wrong operator token', async () => {
-    vi.spyOn(adminApi, 'accounts').mockRejectedValue(httpError(401))
-    renderSignIn()
-    await userEvent.click(screen.getByRole('button', { name: 'Operator' }))
-    await userEvent.type(screen.getByLabelText('Admin token'), 'nope')
-    await userEvent.click(screen.getByRole('button', { name: 'Sign in' }))
-    expect(await screen.findByRole('alert')).toHaveTextContent('admin token was rejected')
+    expect(await screen.findByLabelText('Personal access token')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Operator' })).toBeNull()
+    expect(screen.queryByLabelText('Admin token')).toBeNull()
   })
 })

@@ -9,8 +9,7 @@ managing the OpenRouter keys the agent spends.
 
 | Sign in as | With | Pages |
 |---|---|---|
-| **Operator** | The server's `ADMIN_TOKEN`, and a platform picked at sign-in | Dashboard, Users, Organizations and Repositories (list and remove), API keys (all), for that platform |
-| **Owner** | Continue with GitHub or GitLab, when your account's role is `owner` (users in the server's `GITHUB_ADMIN_ID` or `GITLAB_ADMIN_ID` become owners) | Everything the operator sees, plus importing your own orgs and repositories, and Models |
+| **Owner** | Continue with GitHub or GitLab, as the one user in the server's `GITHUB_ADMIN_ID` or `GITLAB_ADMIN_ID` | Dashboard, Users, every Organization and Repository of that platform (list, import your own, remove any), API keys (all), Models |
 | **User** | Continue with GitHub or GitLab, or a personal access token (GitHub `read:org`, GitLab `read_api`) | Dashboard, Organizations you own and Repositories you administer (import and remove), Models, API keys (yours, your orgs' and your repositories') |
 
 - **Continue with GitHub / GitLab** appears for each platform whose client ID and secret are set
@@ -20,7 +19,7 @@ managing the OpenRouter keys the agent spends.
   keys, and a GitLab sign-in only GitLab ones, so the tables have no Platform column.
 - **Profiles come from the platform.** Your avatar, name and login, and those on the Users page,
   are read from GitHub or GitLab by the server. Only the numeric user ID and role are stored.
-- Only the operator and owners can whitelist users, by numeric user ID. A user who isn't
+- Only the platform's owner can whitelist users, by numeric user ID. A user who isn't
   whitelisted is told so at sign-in.
 - Organizations are **imported, never typed in**. The import dialog lists the orgs that GitHub
   or GitLab says you own. On GitHub the App must be installed on the org first.
@@ -42,7 +41,7 @@ The token is kept in memory only, never in browser storage.
   which platform you used, as a fixed marker in `sessionStorage`. A reload goes back through
   that platform's OAuth, which returns at once for an app you already authorized. Signing out
   or an OAuth error clears the marker.
-- **A pasted token or the operator token** is not kept, so a reload asks for it again.
+- **A pasted token** is not kept, so a reload asks for it again.
 - **A new tab** always asks you to sign in.
 
 ## Run it
@@ -62,7 +61,6 @@ default), or your deployed URL.
 | Variable | Purpose |
 |---|---|
 | `VITE_API_URL` | git-server-agents base URL (default `http://localhost:3000`) |
-| `VITE_ADMIN_TOKEN` | **Development only.** Signs you in as the operator automatically, for `VITE_ADMIN_PLATFORM` (`github`, the default, or `gitlab`). Anything `VITE_*` is compiled into the JavaScript bundle and readable by anyone who loads the site, so leave it empty for any build that others can reach. |
 
 ## Run with Docker
 
@@ -86,7 +84,6 @@ How it works:
   `VITE_API_URL`.
 - Deep links such as `/users` load the app.
 - Hashed assets are cached for a year. `config.js` is never cached.
-- The admin token is never put in the image. Operators enter it at sign-in.
 
 On the server, set `CORS_ORIGINS` to this container's public URL.
 
