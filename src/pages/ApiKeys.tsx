@@ -1,5 +1,5 @@
 import { useCallback, useState, type FormEvent } from 'react'
-import { Building2, Plus, User } from 'lucide-react'
+import { Building2, FolderGit2, Plus, User } from 'lucide-react'
 import { useAuth } from '../auth/AuthContext'
 import { Button } from '../components/Button'
 import { ConfirmDelete } from '../components/ConfirmDelete'
@@ -11,28 +11,32 @@ import { useToast } from '../components/Toast'
 import { formatDate } from '../format'
 import { useLoad } from '../hooks/useLoad'
 import { adminApi, errorMessage, userApi } from '../services/api'
-import type { Account, ApiKey, Org } from '../types'
+import type { Account, ApiKey, Org, Repo } from '../types'
 
-type Target = 'user' | 'org'
+type Target = 'user' | 'org' | 'repo'
 
 interface KeysData {
   keys: ApiKey[]
   orgs: Org[]
+  repos: Repo[]
   accounts: Account[]
 }
 
 async function loadAdmin(): Promise<KeysData> {
   const [keys, orgs, accounts] = await Promise.all([adminApi.keys(), adminApi.orgs(), adminApi.accounts()])
-  return { keys, orgs, accounts }
+  return { keys, orgs, repos: [], accounts }
 }
 
-// A user sees their own keys and the keys of each org they own; the server checks
-// ownership again for every org request.
+// A user sees their own keys and the keys of each org they own and each repository they
+// administer; the server checks ownership again for every org and repository request.
 async function loadUser(): Promise<KeysData> {
-  const [own, orgs] = await Promise.all([userApi.keys(), userApi.orgs()])
-  const orgKeys = await Promise.all(orgs.map((o) => userApi.orgKeys(o.id)))
-  const keys = [...own, ...orgKeys.flat()].sort((a, b) => b.priority - a.priority)
-  return { keys, orgs, accounts: [] }
+  const [own, orgs, repos] = await Promise.all([userApi.keys(), userApi.orgs(), userApi.repos()])
+  const [orgKeys, repoKeys] = await Promise.all([
+    Promise.all(orgs.map((o) => userApi.orgKeys(o.id))),
+    Promise.all(repos.map((r) => userApi.repoKeys(r.id))),
+  ])
+  const keys = [...own, ...orgKeys.flat(), ...repoKeys.flat()].sort((a, b) => b.priority - a.priority)
+  return { keys, orgs, repos, accounts: [] }
 }
 
 function AddKeyModal({ data, onClose, onAdded }: { data: KeysData; onClose: () => void; onAdded: () => void }) {
@@ -41,11 +45,13 @@ function AddKeyModal({ data, onClose, onAdded }: { data: KeysData; onClose: () =
   const [target, setTarget] = useState<Target>('user')
   const [accountKey, setAccountKey] = useState(data.accounts[0] ? `${data.accounts[0].platform}:${data.accounts[0].id}` : '')
   const [orgId, setOrgId] = useState(data.orgs[0]?.id ?? '')
+  const [repoId, setRepoId] = useState(data.repos[0]?.id ?? '')
   const [apiKey, setApiKey] = useState('')
   const [priority, setPriority] = useState('0')
   const [busy, setBusy] = useState(false)
 
   const noOrgs = target === 'org' && data.orgs.length === 0
+  const noRepos = target === 'repo' && data.repos.length === 0
   const noUsers = isAdmin && target === 'user' && data.accounts.length === 0
 
   const submit = async (e: FormEvent) => {
@@ -60,8 +66,10 @@ function AddKeyModal({ data, onClose, onAdded }: { data: KeysData; onClose: () =
         await adminApi.createOrgKey(orgId, key)
       } else if (target === 'user') {
         await userApi.createKey(key)
-      } else {
+      } else if (target === 'org') {
         await userApi.createOrgKey(orgId, key)
+      } else {
+        await userApi.createRepoKey(repoId, key)
       }
       toast.success('API key added')
       onAdded()
@@ -83,6 +91,7 @@ function AddKeyModal({ data, onClose, onAdded }: { data: KeysData; onClose: () =
           options={[
             { value: 'user', label: 'User' },
             { value: 'org', label: 'Organization' },
+            ...(isAdmin ? [] : [{ value: 'repo' as const, label: 'Repository' }]),
           ]}
         />
         {target === 'user' &&
@@ -96,7 +105,7 @@ function AddKeyModal({ data, onClose, onAdded }: { data: KeysData; onClose: () =
             </SelectField>
           ) : (
             <p className="rounded-xl bg-overlay px-3.5 py-2.5 text-sm">
-              Your key{me ? <> as <span className="font-semibold">{me.login}</span></> : null}. Used first when you trigger the agent.
+              Your key{me ? <> as <span className="font-semibold">{me.login}</span></> : null}. Used after any repository and organization keys you may use.
             </p>
           ))}
         {target === 'org' && (
@@ -105,11 +114,26 @@ function AddKeyModal({ data, onClose, onAdded }: { data: KeysData; onClose: () =
             required
             value={orgId}
             onChange={(e) => setOrgId(e.target.value)}
-            hint={noOrgs ? (isAdmin ? 'No organizations have been imported yet.' : 'Import an organization you own first.') : 'Used after the triggering user’s own keys.'}
+            hint={noOrgs ? (isAdmin ? 'No organizations have been imported yet.' : 'Import an organization you own first.') : 'Used for members of the organization, after repository keys.'}
           >
             {data.orgs.map((o) => (
               <option key={o.id} value={o.id}>
                 {o.orgName} ({o.platform})
+              </option>
+            ))}
+          </SelectField>
+        )}
+        {target === 'repo' && (
+          <SelectField
+            label="Repository"
+            required
+            value={repoId}
+            onChange={(e) => setRepoId(e.target.value)}
+            hint={noRepos ? 'Import a repository you administer first.' : 'Used first, for collaborators on the repository and members of its organization.'}
+          >
+            {data.repos.map((r) => (
+              <option key={r.id} value={r.id}>
+                {r.fullName} ({r.platform})
               </option>
             ))}
           </SelectField>
@@ -125,13 +149,20 @@ function AddKeyModal({ data, onClose, onAdded }: { data: KeysData; onClose: () =
         />
         <div className="flex justify-end gap-2 pt-2">
           <Button onClick={onClose}>Cancel</Button>
-          <Button type="submit" variant="primary" busy={busy} disabled={noOrgs || noUsers}>
+          <Button type="submit" variant="primary" busy={busy} disabled={noOrgs || noRepos || noUsers}>
             Add key
           </Button>
         </div>
       </form>
     </Modal>
   )
+}
+
+const OWNER_LABEL: Record<ApiKey['owner']['type'], string> = { user: 'User', org: 'Organization', repo: 'Repository' }
+
+function OwnerIcon({ type }: { type: ApiKey['owner']['type'] }) {
+  const Icon = type === 'org' ? Building2 : type === 'repo' ? FolderGit2 : User
+  return <Icon aria-hidden className="size-4 text-fg-muted" />
 }
 
 export function ApiKeys() {
@@ -144,6 +175,7 @@ export function ApiKeys() {
     try {
       if (isAdmin) await adminApi.deleteKey(key.id)
       else if (key.owner.type === 'org') await userApi.deleteOrgKey(key.owner.id, key.id)
+      else if (key.owner.type === 'repo') await userApi.deleteRepoKey(key.owner.id, key.id)
       else await userApi.deleteKey(key.id)
       toast.success('API key deleted')
       await reload()
@@ -157,9 +189,9 @@ export function ApiKeys() {
       header: 'Owner',
       cell: (k) => (
         <span className="inline-flex items-center gap-2">
-          {k.owner.type === 'org' ? <Building2 aria-hidden className="size-4 text-fg-muted" /> : <User aria-hidden className="size-4 text-fg-muted" />}
+          <OwnerIcon type={k.owner.type} />
           <span className="font-semibold">{k.owner.name}</span>
-          <Badge tone={k.owner.type === 'org' ? 'accent' : 'default'}>{k.owner.type === 'org' ? 'Organization' : 'User'}</Badge>
+          <Badge tone={k.owner.type === 'user' ? 'default' : 'accent'}>{OWNER_LABEL[k.owner.type]}</Badge>
         </span>
       ),
     },
@@ -190,7 +222,7 @@ export function ApiKeys() {
         description={
           isAdmin
             ? 'Every OpenRouter key on the server. Keys are shown by their last four characters only.'
-            : 'Your own keys, and the keys of organizations you own. Only owners can change organization keys.'
+            : 'Your own keys, and the keys of organizations you own and repositories you administer. The agent tries repository keys, then organization keys, then the commenter’s own.'
         }
         actions={
           <Button variant="primary" onClick={() => setAdding(true)} disabled={!data}>

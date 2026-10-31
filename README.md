@@ -9,9 +9,9 @@ managing the OpenRouter keys the agent spends.
 
 | Sign in as | With | Pages |
 |---|---|---|
-| **Operator** | The server's `ADMIN_TOKEN` | Dashboard, Users, Organizations (list and remove), API keys (all) |
-| **Admin user** | Continue with GitHub or GitLab, when the server lists your user ID in `GITHUB_ADMIN_ID` or `GITLAB_ADMIN_ID` | Everything the operator sees, plus importing your own orgs |
-| **User** | Continue with GitHub or GitLab, or a personal access token (GitHub `read:org`, GitLab `read_api`) | Dashboard, Organizations you own (import and remove), API keys (yours and your orgs') |
+| **Operator** | The server's `ADMIN_TOKEN` | Dashboard, Users, Organizations and Repositories (list and remove), API keys (all) |
+| **Admin user** | Continue with GitHub or GitLab, when the server lists your user ID in `GITHUB_ADMIN_ID` or `GITLAB_ADMIN_ID` | Everything the operator sees, plus importing your own orgs and repositories, and Models |
+| **User** | Continue with GitHub or GitLab, or a personal access token (GitHub `read:org`, GitLab `read_api`) | Dashboard, Organizations you own and Repositories you administer (import and remove), Models, API keys (yours, your orgs' and your repositories') |
 
 - **Continue with GitHub / GitLab** appears for each platform whose client ID and secret are set
   on the server. The server sends you back with the token in the URL fragment. The dashboard
@@ -21,6 +21,14 @@ managing the OpenRouter keys the agent spends.
   or GitLab says you own. On GitHub the App must be installed on the org first.
 - Organization keys can be added or deleted by owners only. The dashboard offers only orgs
   you own, and the server checks with the platform again on every request.
+- Repositories are imported the same way, from the ones you administer (GitHub admin, GitLab
+  Maintainer or Owner) inside an imported organization.
+- **Models:** a comment that starts with `@agents` uses the repository's model, then the
+  organization's, then the commenter's own, then `openrouter/free`. The Models page sets each
+  one. Its picker loads OpenRouter's model list live and filters it as you type. All nine
+  modalities are shown, and only Text can be picked for now.
+- **Keys** are tried repository first (for collaborators and org members), then organization
+  (for org members), then the commenter's own.
 - Keys are shown by their last four characters only.
 
 The token is kept in memory only, never in browser storage. Reloading the page or opening a
@@ -91,5 +99,5 @@ Vitest, Testing Library and jsdom.
 src/services/api.ts   Axios client and typed admin/user endpoints
 src/auth/             session storage and the sign-in context
 src/components/       layout, table, modal, form fields, toasts, confirm-delete
-src/pages/            SignIn, Home, Users, Organizations, ApiKeys
+src/pages/            SignIn, Home, Users, Organizations, Repositories, Models, ApiKeys
 ```

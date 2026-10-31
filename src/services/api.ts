@@ -2,7 +2,7 @@ import axios, { isAxiosError } from 'axios'
 import { authHeaders, type Session } from '../auth/session'
 import { apiBaseUrl } from '../config'
 import { trimTrailingSlashes } from '../utils/strings'
-import type { Account, ApiKey, ImportableOrg, Me, Org, Platform, Providers } from '../types'
+import type { Account, ApiKey, ImportableOrg, ImportableRepo, Me, Modality, ModelInfo, ModelSettings, Org, Platform, Providers, Repo } from '../types'
 
 export const api = axios.create({
   baseURL: apiBaseUrl(),
@@ -70,6 +70,8 @@ export const adminApi = {
   createOrgKey: (appInstallationId: string, key: NewKey) =>
     data(api.post<ApiKey>('/api/admin/keys', { target: 'org', appInstallationId, ...key })),
   deleteKey: (id: string) => api.delete(`/api/admin/keys/${id}`),
+  repos: () => data(api.get<Repo[]>('/api/admin/repos')),
+  deleteRepo: (id: string) => api.delete(`/api/admin/repos/${id}`),
 }
 
 // Signed-in user endpoints (platform token). The server re-checks org ownership every call.
@@ -85,4 +87,22 @@ export const userApi = {
   orgKeys: (orgId: string) => data(api.get<ApiKey[]>(`/api/user/orgs/${orgId}/keys`)),
   createOrgKey: (orgId: string, key: NewKey) => data(api.post<ApiKey>(`/api/user/orgs/${orgId}/keys`, key)),
   deleteOrgKey: (orgId: string, keyId: string) => api.delete(`/api/user/orgs/${orgId}/keys/${keyId}`),
+  setOrgModel: (orgId: string, modality: Modality, model: string | null) =>
+    data(api.put<ModelSettings>(`/api/user/orgs/${orgId}/models`, { modality, model })),
+
+  // OpenRouter's live model list (the server keeps it for a few minutes).
+  models: (modality: Modality) => data(api.get<ModelInfo[]>('/api/user/models', { params: { modality } })),
+  ownModels: () => data(api.get<ModelSettings>('/api/user/models/settings')),
+  setOwnModel: (modality: Modality, model: string | null) => data(api.put<ModelSettings>('/api/user/models/settings', { modality, model })),
+
+  // Repositories the user administers. The server asks the platform again on every call.
+  repos: () => data(api.get<Repo[]>('/api/user/repos')),
+  importableRepos: () => data(api.get<ImportableRepo[]>('/api/user/repos/importable')),
+  importRepo: (externalId: string) => data(api.post<Repo>('/api/user/repos/import', { externalId })),
+  deleteRepo: (id: string) => api.delete(`/api/user/repos/${id}`),
+  repoKeys: (repoId: string) => data(api.get<ApiKey[]>(`/api/user/repos/${repoId}/keys`)),
+  createRepoKey: (repoId: string, key: NewKey) => data(api.post<ApiKey>(`/api/user/repos/${repoId}/keys`, key)),
+  deleteRepoKey: (repoId: string, keyId: string) => api.delete(`/api/user/repos/${repoId}/keys/${keyId}`),
+  setRepoModel: (repoId: string, modality: Modality, model: string | null) =>
+    data(api.put<ModelSettings>(`/api/user/repos/${repoId}/models`, { modality, model })),
 }
