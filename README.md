@@ -1,8 +1,8 @@
 # git-client-agents
 
-A dashboard for [git-server-agents](https://github.com/LXAgents/git-server-agents) (1.7.0 or
-later for roles, platform profiles and per-platform sessions). It follows the system light or dark theme. It
-replaces the server's command line for whitelisting users, importing organizations and
+A dashboard for [git-server-agents](https://github.com/LXAgents/git-server-agents) (1.11.0 or
+later for open login and the Free role). It follows the system light or dark theme. It
+replaces the server's command line for seeing users, importing organizations and
 managing the OpenRouter keys the agent spends.
 
 ## Who signs in, and what they see
@@ -10,7 +10,7 @@ managing the OpenRouter keys the agent spends.
 | Sign in as | With | Pages |
 |---|---|---|
 | **Owner** | Continue with GitHub or GitLab, as the one user in the server's `GITHUB_ADMIN_ID` or `GITLAB_ADMIN_ID` | Dashboard, Users, every Organization and Repository of that platform (list, import your own, remove any), API keys (all), Models |
-| **User** | Continue with GitHub or GitLab | Dashboard, Organizations you own and Repositories you administer (import and remove), Models, API keys (yours, your orgs' and your repositories') |
+| **Free** (anyone) | Continue with GitHub or GitLab. There is no sign-up: the first login creates the account | Dashboard, Organizations you own and Repositories you administer (import and remove), Models, API keys (yours, your orgs' and your repositories') |
 
 - **Continue with GitHub / GitLab** appears for each platform whose client ID and secret are set
   on the server. The server sends you back with the token in the URL fragment. The dashboard
@@ -20,8 +20,9 @@ managing the OpenRouter keys the agent spends.
   keys, and a GitLab sign-in only GitLab ones, so the tables have no Platform column.
 - **Profiles come from the platform.** Your avatar, name and login, and those on the Users page,
   are read from GitHub or GitLab by the server. Only the numeric user ID and role are stored.
-- Only the platform's owner can whitelist users, by numeric user ID. A user who isn't
-  whitelisted is told so at sign-in.
+- **Roles:** the sidebar and the Users page show the role. The owner gets **Owner**, and
+  everyone else a light green **Free**.
+- The owner can remove a user (their orgs and keys go too); they can log in again as Free.
 - Organizations are **imported, never typed in**. The import dialog lists the orgs that GitHub
   or GitLab says you own. On GitHub the App must be installed on the org first.
 - Organization keys can be added or deleted by owners only. The dashboard offers only orgs
