@@ -1,6 +1,6 @@
 # git-client-agents
 
-A dashboard for [git-server-agents](https://github.com/LXAgents/git-server-agents) (1.11.2 or
+A dashboard for [git-server-agents](https://github.com/LXAgents/git-server-agents) (1.12.0 or
 later for the Logs page). It follows the system light or dark theme. It
 replaces the server's command line for seeing users, importing organizations and
 managing the OpenRouter keys the agent spends.
