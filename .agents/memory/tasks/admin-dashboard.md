@@ -35,3 +35,12 @@ status: in-progress
 ### Task 1 — plan/admin-dashboard
 
 - Created this record, the memory index and `.gitignore` (excludes `.agents/plans/`).
+
+### Task 2 — build/vite-app
+
+- Scaffolded with `create-vite` (react-ts template: React 19, TypeScript 7, Vite 8, oxlint
+  instead of ESLint, which is the template's current default). Added Tailwind CSS 4 via
+  `@tailwindcss/vite`, `react-router` 8, `axios`, `lucide-react`.
+- `src/index.css` defines the GitHub dark palette as Tailwind theme colours.
+- `.env.example` documents `VITE_API_URL` and why `VITE_ADMIN_TOKEN` is dev-only.
+- `npm run lint` and `npm run build` pass.
