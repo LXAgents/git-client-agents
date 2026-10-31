@@ -1,7 +1,7 @@
 ---
 name: logos-search-resume
 description: Task record for platform logos, search in the import popups and staying signed in on reload (1.6.0).
-status: in-progress
+status: done
 ---
 
 # Logos, import search, sign-in across reloads
