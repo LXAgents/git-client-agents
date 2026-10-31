@@ -1,7 +1,7 @@
 ---
 name: remove-operator
 description: Task record for removing the ADMIN_TOKEN operator sign-in; platform owners cover it.
-status: in-progress
+status: done
 ---
 
 # Remove the operator sign-in
@@ -18,6 +18,6 @@ status: in-progress
 
 | # | Title | Scope | Repository | Branch | Files / areas | PR |
 |---|---|---|---|---|---|---|
-| 1 | Task record | This record | git-client-agents | `plan/remove-operator` | `.agents/` | |
-| 2 | Remove operator | Operator tab, session mode, dev token, tests, docs | git-client-agents | `feat/remove-operator` | `src/`, `README.md` | |
-| 3 | Release | 1.8.0 changelog and version | git-client-agents | `release/1.8.0` | `wiki/logs/`, `package.json` | |
+| 1 | Task record | This record | git-client-agents | `plan/remove-operator` | `.agents/` | #45 |
+| 2 | Remove operator | Operator tab, session mode, dev token, tests, docs | git-client-agents | `feat/remove-operator` | `src/`, `README.md` | #46 |
+| 3 | Release | 1.8.0 changelog and version | git-client-agents | `release/1.8.0` | `wiki/logs/`, `package.json` | #47 |
