@@ -12,7 +12,6 @@ interface AuthState {
   checking: boolean
   /** Why the last "Continue with GitHub/GitLab" failed, for the sign-in page. */
   oauthError: unknown
-  signIn: (session: Session) => Promise<void>
   signOut: () => void
 }
 
@@ -80,28 +79,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .finally(() => setChecking(false))
   }, [oauthReturn, resume, signOut])
 
-  const signIn = useCallback(
-    async (next: Session) => {
-      try {
-        const who = await verify(next)
-        // A pasted token replaces any OAuth sign-in this tab would otherwise resume.
-        forgetOAuth()
-        saveSession(next)
-        setSession(next)
-        setMe(who)
-        setOauthError(null)
-      } catch (err) {
-        setApiSession(session)
-        throw err
-      }
-    },
-    [session],
-  )
-
   const isOwner = me?.role === 'owner'
   const value = useMemo(
-    () => ({ session, me, isOwner, checking, oauthError, signIn, signOut }),
-    [session, me, isOwner, checking, oauthError, signIn, signOut],
+    () => ({ session, me, isOwner, checking, oauthError, signOut }),
+    [session, me, isOwner, checking, oauthError, signOut],
   )
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

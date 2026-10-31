@@ -27,7 +27,7 @@ describe('SignIn', () => {
     vi.spyOn(authApi, 'providers').mockResolvedValue({ github: false, gitlab: false })
   })
 
-  it('offers Continue with GitHub and GitLab when the server has client IDs, and keeps the token form behind a toggle', async () => {
+  it('offers Continue with GitHub and GitLab when the server has client IDs', async () => {
     vi.spyOn(authApi, 'providers').mockResolvedValue({ github: true, gitlab: true })
     renderSignIn()
     const github = await screen.findByRole('link', { name: 'Continue with GitHub' })
@@ -40,9 +40,6 @@ describe('SignIn', () => {
     expect(assign).toHaveBeenCalledWith(`http://localhost:3000/api/auth/github/start?redirect=${encodeURIComponent(`http://localhost:3000/?signin=${nonce}`)}`)
     vi.unstubAllGlobals()
     expect(screen.getByRole('link', { name: 'Continue with GitLab' })).toBeInTheDocument()
-    expect(screen.queryByLabelText('Personal access token')).toBeNull()
-    await userEvent.click(screen.getByRole('button', { name: /personal access token instead/ }))
-    expect(screen.getByLabelText('Personal access token')).toBeInTheDocument()
   })
 
   it('shows only the platforms that are configured', async () => {
@@ -85,29 +82,29 @@ describe('SignIn', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('started in another browser')
   })
 
-  it('signs a user in with their platform token and keeps it for the page', async () => {
-    const me = vi.spyOn(userApi, 'me').mockResolvedValue({ platform: 'gitlab', id: '7', login: 'carol', name: null, avatarUrl: null, role: 'member' as const })
-    renderSignIn()
-    await userEvent.selectOptions(await screen.findByLabelText('Platform'), 'gitlab')
-    await userEvent.type(screen.getByLabelText('Personal access token'), 'glpat-x')
-    await userEvent.click(screen.getByRole('button', { name: 'Sign in' }))
-    expect(me).toHaveBeenCalled()
-    expect(loadSession()).toEqual({ platform: 'gitlab', token: 'glpat-x' })
-  })
-
-  it('explains a user who is not whitelisted', async () => {
+  it('explains a user who is not whitelisted after OAuth', async () => {
     vi.spyOn(userApi, 'me').mockRejectedValue(httpError(403))
+    vi.spyOn(authApi, 'exchange').mockResolvedValue({ platform: 'github', token: 'ghu_abc' })
+    sessionStorage.setItem('git-client-agents.oauth-nonce', 'n4')
+    window.history.replaceState(null, '', '/?signin=n4#code=sealed-x')
     renderSignIn()
-    await userEvent.type(await screen.findByLabelText('Personal access token'), 'ghp')
-    await userEvent.click(screen.getByRole('button', { name: 'Sign in' }))
     expect(await screen.findByRole('alert')).toHaveTextContent('not whitelisted')
     expect(loadSession()).toBeNull()
   })
 
-  it('has no operator sign-in: only GitHub, GitLab or a personal access token', async () => {
+  it('has no personal access token or operator sign-in: only GitHub and GitLab', async () => {
+    vi.spyOn(authApi, 'providers').mockResolvedValue({ github: true, gitlab: true })
     renderSignIn()
-    expect(await screen.findByLabelText('Personal access token')).toBeInTheDocument()
+    expect(await screen.findByRole('link', { name: 'Continue with GitHub' })).toBeInTheDocument()
+    expect(screen.queryByText(/personal access token/i)).toBeNull()
+    expect(screen.queryByLabelText('Personal access token')).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Sign in' })).toBeNull()
     expect(screen.queryByRole('button', { name: 'Operator' })).toBeNull()
-    expect(screen.queryByLabelText('Admin token')).toBeNull()
+  })
+
+  it('says sign-in is not set up when the server has no client IDs', async () => {
+    renderSignIn()
+    expect(await screen.findByText(/No sign-in is set up on the server yet/)).toBeInTheDocument()
+    expect(screen.queryByRole('link')).toBeNull()
   })
 })
