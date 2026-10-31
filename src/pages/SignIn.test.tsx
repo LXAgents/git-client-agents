@@ -31,6 +31,13 @@ describe('SignIn', () => {
     renderSignIn()
     const github = await screen.findByRole('link', { name: 'Continue with GitHub' })
     expect(github).toHaveAttribute('href', `http://localhost:3000/api/auth/github/start?redirect=${encodeURIComponent('http://localhost:3000/')}`)
+    const assign = vi.fn()
+    vi.stubGlobal('location', { ...window.location, origin: window.location.origin, assign })
+    await userEvent.click(github)
+    const nonce = sessionStorage.getItem('git-client-agents.oauth-nonce')
+    expect(nonce).toMatch(/^[0-9a-f-]{36}$/)
+    expect(assign).toHaveBeenCalledWith(`http://localhost:3000/api/auth/github/start?redirect=${encodeURIComponent(`http://localhost:3000/?signin=${nonce}`)}`)
+    vi.unstubAllGlobals()
     expect(screen.getByRole('link', { name: 'Continue with GitLab' })).toBeInTheDocument()
     expect(screen.queryByLabelText('Personal access token')).toBeNull()
     await userEvent.click(screen.getByRole('button', { name: /personal access token instead/ }))
@@ -46,17 +53,29 @@ describe('SignIn', () => {
 
   it('signs in with the token the server returns after OAuth', async () => {
     const me = vi.spyOn(userApi, 'me').mockResolvedValue({ platform: 'github', id: '1', login: 'owen', username: 'owen', isAdmin: true })
-    window.history.replaceState(null, '', '/#platform=github&token=gho_abc')
+    sessionStorage.setItem('git-client-agents.oauth-nonce', 'n1')
+    window.history.replaceState(null, '', '/?signin=n1#platform=github&token=gho_abc')
     renderSignIn()
     await vi.waitFor(() => expect(me).toHaveBeenCalled())
     await vi.waitFor(() =>
       expect(JSON.parse(sessionStorage.getItem('git-client-agents.session')!)).toEqual({ mode: 'user', platform: 'github', token: 'gho_abc' }),
     )
     expect(window.location.hash).toBe('')
+    expect(window.location.search).toBe('')
+  })
+
+  it('refuses a token link that this tab did not start, and keeps nothing', async () => {
+    const me = vi.spyOn(userApi, 'me')
+    window.history.replaceState(null, '', '/#platform=github&token=gho_attacker')
+    renderSignIn()
+    expect(await screen.findByRole('alert')).toHaveTextContent("wasn't started from this tab")
+    expect(me).not.toHaveBeenCalled()
+    expect(sessionStorage.getItem('git-client-agents.session')).toBeNull()
   })
 
   it('shows why an OAuth sign-in failed', async () => {
-    window.history.replaceState(null, '', '/#error=Sign-in%20was%20started%20in%20another%20browser.')
+    sessionStorage.setItem('git-client-agents.oauth-nonce', 'n2')
+    window.history.replaceState(null, '', '/?signin=n2#error=Sign-in%20was%20started%20in%20another%20browser.')
     renderSignIn()
     expect(await screen.findByRole('alert')).toHaveTextContent('started in another browser')
   })

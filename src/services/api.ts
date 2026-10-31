@@ -45,8 +45,12 @@ const data = <T>(p: Promise<{ data: T }>) => p.then((r) => r.data)
 // must open in the browser, and the server sends the browser back to `redirect`.
 export const authApi = {
   providers: () => data(api.get<Providers>('/api/auth/providers')),
-  startUrl: (platform: Platform, redirect = `${window.location.origin}/`) =>
-    `${trimTrailingSlashes(apiBaseUrl())}/api/auth/${platform}/start?redirect=${encodeURIComponent(redirect)}`,
+  // `nonce` comes back as ?signin=… and ties the return to this tab (see beginOAuth).
+  startUrl: (platform: Platform, nonce?: string) => {
+    const back = new URL('/', window.location.origin)
+    if (nonce) back.searchParams.set('signin', nonce)
+    return `${trimTrailingSlashes(apiBaseUrl())}/api/auth/${platform}/start?redirect=${encodeURIComponent(back.toString())}`
+  },
 }
 
 // Operator endpoints: ADMIN_TOKEN, or the platform token of a user in GITHUB_ADMIN_ID / GITLAB_ADMIN_ID.
