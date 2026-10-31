@@ -2,6 +2,7 @@
 
 | Version | Summary | Files |
 |---|---|---|
+| [1.10.0](1/10/0/CHANGELOG.md) | Light green Free badge, open login wording | `CHANGELOG.md` |
 | [1.9.0](1/9/0/CHANGELOG.md) | Personal access token sign-in removed; scoped package name | `CHANGELOG.md` |
 | [1.8.0](1/8/0/CHANGELOG.md) | Operator sign-in removed | `CHANGELOG.md` |
 | [1.7.0](1/7/0/CHANGELOG.md) | Owner badge, platform profiles, one platform per session | `CHANGELOG.md` |
