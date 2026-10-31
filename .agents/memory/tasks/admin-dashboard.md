@@ -1,7 +1,7 @@
 ---
 name: admin-dashboard
 description: Task record for the git-client-agents React dashboard that manages git-server-agents.
-status: in-progress
+status: done
 ---
 
 # Admin dashboard
@@ -23,12 +23,12 @@ status: in-progress
 
 | # | Title | Scope | Repository | Branch | Files / areas | PR |
 |---|---|---|---|---|---|---|
-| 1 | Task record | This record, `.gitignore` | git-client-agents | `plan/admin-dashboard` | `.agents/`, `.gitignore` | |
-| 2 | Vite app | React + TS, Tailwind, Router, Axios, Lucide, ESLint | git-client-agents | `build/vite-app` | `package.json`, `vite.config.ts`, `src/main.tsx` | |
-| 3 | Layout | Shell, sidebar, sign-in, home, toasts, API client | git-client-agents | `feat/layout` | `src/components/`, `src/services/api.ts`, `src/auth/` | |
-| 4 | Pages | Users, Organizations (import), API Keys | git-client-agents | `feat/admin-pages` | `src/pages/` | |
-| 5 | Tests and CI | Vitest + Testing Library, GitHub Actions | git-client-agents | `ci/workflow` | `src/**/*.test.tsx`, `.github/workflows/` | |
-| 6 | Release | README, changelog, close-out | git-client-agents | `release/1.0.0` | `wiki/logs/1/0/0/`, `README.md` | |
+| 1 | Task record | This record, `.gitignore` | git-client-agents | `plan/admin-dashboard` | `.agents/`, `.gitignore` | #1 |
+| 2 | Vite app | React + TS, Tailwind, Router, Axios, Lucide, ESLint | git-client-agents | `build/vite-app` | `package.json`, `vite.config.ts`, `src/main.tsx` | #2 |
+| 3 | Layout | Shell, sidebar, sign-in, home, toasts, API client | git-client-agents | `feat/layout` | `src/components/`, `src/services/api.ts`, `src/auth/` | #3 |
+| 4 | Pages | Users, Organizations (import), API Keys | git-client-agents | `feat/admin-pages` | `src/pages/` | #4 |
+| 5 | Tests and CI | Vitest + Testing Library, GitHub Actions | git-client-agents | `ci/workflow` | `src/**/*.test.tsx`, `.github/workflows/` | #5 |
+| 6 | Release | README, changelog, close-out | git-client-agents | `release/1.0.0` | `wiki/logs/1/0/0/`, `README.md` | #6 |
 
 ## Progress
 
@@ -80,3 +80,9 @@ status: in-progress
   delete). 11 tests pass.
 - `.github/workflows/ci.yml`: one job (lint, test, type-check + build) on pushes to `master`
   and PRs into `master` only, doc-only changes skipped, superseded runs cancelled, 10-minute cap.
+
+### Task 6 — release/1.0.0
+
+- Version 1.0.0 (first release). README covers roles, import-only orgs, running, env vars
+  and why `VITE_ADMIN_TOKEN` is dev-only; `wiki/logs/1/0/0/CHANGELOG.md` and the log index
+  added. PR column filled. Record closed.
