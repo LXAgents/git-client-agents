@@ -1,6 +1,7 @@
 import axios, { isAxiosError } from 'axios'
 import { authHeaders, type Session } from '../auth/session'
 import { apiBaseUrl } from '../config'
+import { trimTrailingSlashes } from '../utils/strings'
 import type { Account, ApiKey, ImportableOrg, Me, Org, Platform, Providers } from '../types'
 
 export const api = axios.create({
@@ -45,7 +46,7 @@ const data = <T>(p: Promise<{ data: T }>) => p.then((r) => r.data)
 export const authApi = {
   providers: () => data(api.get<Providers>('/api/auth/providers')),
   startUrl: (platform: Platform, redirect = `${window.location.origin}/`) =>
-    `${apiBaseUrl().replace(/\/+$/, '')}/api/auth/${platform}/start?redirect=${encodeURIComponent(redirect)}`,
+    `${trimTrailingSlashes(apiBaseUrl())}/api/auth/${platform}/start?redirect=${encodeURIComponent(redirect)}`,
 }
 
 // Operator endpoints: ADMIN_TOKEN, or the platform token of a user in GITHUB_ADMIN_ID / GITLAB_ADMIN_ID.

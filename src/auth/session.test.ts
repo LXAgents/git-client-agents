@@ -20,6 +20,14 @@ describe('session', () => {
     expect(loadSession()).toBeNull()
   })
 
+  it('drops anything in storage that is not a well-formed session', () => {
+    for (const bad of ['{"mode":"admin"}', '{"mode":"user","platform":"bitbucket","token":"t"}', '{"mode":"admin","token":"a b"}', '[1]', 'null', '{not json']) {
+      sessionStorage.setItem('git-client-agents.session', bad)
+      expect(loadSession()).toBeNull()
+    }
+    expect(sessionStorage.getItem('git-client-agents.session')).toBeNull()
+  })
+
   it('reads the token or the error the server puts in the fragment after OAuth', () => {
     expect(readOAuthReturn('#platform=gitlab&token=gloas-1')).toEqual({ session: { mode: 'user', platform: 'gitlab', token: 'gloas-1' } })
     expect(readOAuthReturn('#error=Access%20denied')).toEqual({ error: 'Access denied' })
