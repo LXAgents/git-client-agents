@@ -91,7 +91,7 @@ export function Repositories() {
 
   const columns: Column<Repo>[] = [
     { header: 'Repository', cell: (r) => <span className="font-semibold">{r.fullName}</span> },
-    { header: 'Platform', cell: (r) => <PlatformBadge platform={r.platform} /> },
+    { header: 'Platform', className: 'text-center', cell: (r) => <PlatformBadge platform={r.platform} /> },
     { header: 'Organization', cell: (r) => r.org.name ?? '—' },
     {
       header: 'Text model',

@@ -78,7 +78,7 @@ export function Users() {
 
   const columns: Column<Account>[] = [
     { header: 'User', cell: (a) => <span className="font-semibold">{a.username || '—'}</span> },
-    { header: 'Platform', cell: (a) => <PlatformBadge platform={a.platform} /> },
+    { header: 'Platform', className: 'text-center', cell: (a) => <PlatformBadge platform={a.platform} /> },
     { header: 'User ID', cell: (a) => <code className="font-mono text-xs text-fg-muted">{a.id}</code> },
     { header: 'Keys', cell: (a) => a.keyCount, className: 'tabular-nums' },
     { header: 'Orgs', cell: (a) => a.orgCount, className: 'tabular-nums' },
