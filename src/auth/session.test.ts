@@ -3,7 +3,7 @@ import { authHeaders, beginOAuth, FOREIGN_SIGNIN, loadSession, readOAuthReturn, 
 
 describe('session', () => {
   it('sends only a bearer token for the operator', () => {
-    expect(authHeaders({ mode: 'admin', token: 't' })).toEqual({ Authorization: 'Bearer t' })
+    expect(authHeaders({ mode: 'admin', platform: 'github', token: 't' })).toEqual({ Authorization: 'Bearer t', 'X-Platform': 'github' })
   })
 
   it('adds the platform for a user', () => {
@@ -58,9 +58,9 @@ describe('session', () => {
   it('never keeps a malformed session', () => {
     saveSession({ mode: 'user', platform: 'github', token: 'has space' } as never)
     expect(loadSession()).toBeNull()
-    saveSession({ mode: 'admin', token: 't', extra: 'x' } as never)
+    saveSession({ mode: 'admin', platform: 'github', token: 't', extra: 'x' } as never)
     expect(loadSession()).toBeNull()
-    saveSession({ mode: 'admin', token: 't' })
-    expect(loadSession()).toEqual({ mode: 'admin', token: 't' })
+    saveSession({ mode: 'admin', platform: 'github', token: 't' })
+    expect(loadSession()).toEqual({ mode: 'admin', platform: 'github', token: 't' })
   })
 })

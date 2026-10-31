@@ -65,7 +65,7 @@ export function SignIn() {
     setBusy(true)
     setError(null)
     try {
-      await signIn(mode === 'admin' ? { mode, token: token.trim() } : { mode, platform, token: token.trim() })
+      await signIn({ mode, platform, token: token.trim() })
     } catch (err) {
       setError(explain(err, mode))
     } finally {
@@ -128,12 +128,11 @@ export function SignIn() {
 
           {tokenFormOpen && (
             <form onSubmit={submit} className="enter space-y-4">
-              {mode === 'user' && (
-                <SelectField label="Platform" value={platform} onChange={(e) => setPlatform(e.target.value as Platform)}>
-                  <option value="github">GitHub</option>
-                  <option value="gitlab">GitLab</option>
-                </SelectField>
-              )}
+              {/* The operator works on one platform at a time too, and sees only its content. */}
+              <SelectField label="Platform" value={platform} onChange={(e) => setPlatform(e.target.value as Platform)}>
+                <option value="github">GitHub</option>
+                <option value="gitlab">GitLab</option>
+              </SelectField>
               <TextField
                 label={mode === 'admin' ? 'Admin token' : 'Personal access token'}
                 type="password"
