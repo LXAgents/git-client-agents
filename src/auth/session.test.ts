@@ -13,19 +13,18 @@ describe('session', () => {
     })
   })
 
-  it('keeps the session in sessionStorage and clears it on sign-out', () => {
+  it('keeps the session in memory only and clears it on sign-out', () => {
     saveSession({ mode: 'user', platform: 'github', token: 'ghp' })
     expect(loadSession()).toEqual({ mode: 'user', platform: 'github', token: 'ghp' })
+    expect(sessionStorage.length).toBe(0)
+    expect(localStorage.length).toBe(0)
     saveSession(null)
     expect(loadSession()).toBeNull()
   })
 
-  it('drops anything in storage that is not a well-formed session', () => {
-    for (const bad of ['{"mode":"admin"}', '{"mode":"user","platform":"bitbucket","token":"t"}', '{"mode":"admin","token":"a b"}', '[1]', 'null', '{not json']) {
-      sessionStorage.setItem('git-client-agents.session', bad)
-      expect(loadSession()).toBeNull()
-    }
-    expect(sessionStorage.getItem('git-client-agents.session')).toBeNull()
+  it('ignores a session left in storage by an older version', () => {
+    sessionStorage.setItem('git-client-agents.session', '{"mode":"admin","token":"planted"}')
+    expect(loadSession()).toBeNull()
   })
 
   it('reads the token or the error the server puts in the fragment after OAuth', () => {
@@ -56,12 +55,12 @@ describe('session', () => {
     expect(window.location.href).not.toContain('sealed-')
   })
 
-  it('never writes a malformed session', () => {
+  it('never keeps a malformed session', () => {
     saveSession({ mode: 'user', platform: 'github', token: 'has space' } as never)
-    expect(sessionStorage.getItem('git-client-agents.session')).toBeNull()
+    expect(loadSession()).toBeNull()
     saveSession({ mode: 'admin', token: 't', extra: 'x' } as never)
-    expect(sessionStorage.getItem('git-client-agents.session')).toBeNull()
+    expect(loadSession()).toBeNull()
     saveSession({ mode: 'admin', token: 't' })
-    expect(JSON.parse(sessionStorage.getItem('git-client-agents.session')!)).toEqual({ mode: 'admin', token: 't' })
+    expect(loadSession()).toEqual({ mode: 'admin', token: 't' })
   })
 })

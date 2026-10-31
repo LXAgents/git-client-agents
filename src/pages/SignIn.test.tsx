@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { AxiosError, AxiosHeaders } from 'axios'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { AuthProvider } from '../auth/AuthContext'
+import { loadSession } from '../auth/session'
 import { ToastProvider } from '../components/Toast'
 import { adminApi, authApi, userApi } from '../services/api'
 import { SignIn } from './SignIn'
@@ -60,7 +61,7 @@ describe('SignIn', () => {
     await vi.waitFor(() => expect(me).toHaveBeenCalled())
     expect(exchange).toHaveBeenCalledWith('sealed-abc')
     await vi.waitFor(() =>
-      expect(JSON.parse(sessionStorage.getItem('git-client-agents.session')!)).toEqual({ mode: 'user', platform: 'github', token: 'gho_abc' }),
+      expect(loadSession()).toEqual({ mode: 'user', platform: 'github', token: 'gho_abc' }),
     )
     expect(window.location.hash).toBe('')
     expect(window.location.search).toBe('')
@@ -74,7 +75,7 @@ describe('SignIn', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent("wasn't started from this tab")
     expect(exchange).not.toHaveBeenCalled()
     expect(me).not.toHaveBeenCalled()
-    expect(sessionStorage.getItem('git-client-agents.session')).toBeNull()
+    expect(loadSession()).toBeNull()
   })
 
   it('shows why an OAuth sign-in failed', async () => {
@@ -84,14 +85,14 @@ describe('SignIn', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('started in another browser')
   })
 
-  it('signs a user in with their platform token and keeps it for the tab', async () => {
+  it('signs a user in with their platform token and keeps it for the page', async () => {
     const me = vi.spyOn(userApi, 'me').mockResolvedValue({ platform: 'gitlab', id: '7', login: 'carol', username: 'carol' })
     renderSignIn()
     await userEvent.selectOptions(await screen.findByLabelText('Platform'), 'gitlab')
     await userEvent.type(screen.getByLabelText('Personal access token'), 'glpat-x')
     await userEvent.click(screen.getByRole('button', { name: 'Sign in' }))
     expect(me).toHaveBeenCalled()
-    expect(JSON.parse(sessionStorage.getItem('git-client-agents.session')!)).toEqual({ mode: 'user', platform: 'gitlab', token: 'glpat-x' })
+    expect(loadSession()).toEqual({ mode: 'user', platform: 'gitlab', token: 'glpat-x' })
   })
 
   it('explains a user who is not whitelisted', async () => {
@@ -100,7 +101,7 @@ describe('SignIn', () => {
     await userEvent.type(await screen.findByLabelText('Personal access token'), 'ghp')
     await userEvent.click(screen.getByRole('button', { name: 'Sign in' }))
     expect(await screen.findByRole('alert')).toHaveTextContent('not whitelisted')
-    expect(sessionStorage.getItem('git-client-agents.session')).toBeNull()
+    expect(loadSession()).toBeNull()
   })
 
   it('rejects a wrong operator token', async () => {

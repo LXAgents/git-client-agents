@@ -23,8 +23,8 @@ managing the OpenRouter keys the agent spends.
   you own, and the server checks with the platform again on every request.
 - Keys are shown by their last four characters only.
 
-The token is kept in `sessionStorage`, so it stays with this browser tab and is cleared when
-the tab closes.
+The token is kept in memory only, never in browser storage. Reloading the page or opening a
+new tab asks you to sign in again.
 
 ## Run it
 
