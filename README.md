@@ -41,6 +41,32 @@ default), or your deployed URL.
 | `VITE_API_URL` | git-server-agents base URL (default `http://localhost:3000`) |
 | `VITE_ADMIN_TOKEN` | **Development only.** Signs you in as the operator automatically. Anything `VITE_*` is compiled into the JavaScript bundle and readable by anyone who loads the site, so leave it empty for any build that others can reach. |
 
+## Run with Docker
+
+The root `Dockerfile` builds the app with Node and serves it with nginx. It runs on any platform
+that deploys a Dockerfile, such as Render, Railway, Fly.io, Cloud Run or Koyeb.
+
+```bash
+docker build -t git-client-agents .
+docker run -p 8080:8080 -e API_URL=https://your-server.example git-client-agents
+```
+
+| Variable | Purpose |
+|---|---|
+| `API_URL` | git-server-agents base URL, read when the container starts. To change it, restart the container. There is no need to rebuild. |
+| `PORT` | Port nginx listens on (default 8080). Platforms set this themselves. |
+| `VITE_API_URL` | Optional build argument (`--build-arg`). It is only used when `API_URL` is empty. |
+
+How it works:
+
+- The container writes `/config.js` from `API_URL` on every start, and the app reads it before
+  `VITE_API_URL`.
+- Deep links such as `/users` load the app.
+- Hashed assets are cached for a year. `config.js` is never cached.
+- The admin token is never put in the image. Operators enter it at sign-in.
+
+On the server, set `CORS_ORIGINS` to this container's public URL.
+
 ## Scripts
 
 | Command | Does |

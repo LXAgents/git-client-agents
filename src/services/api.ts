@@ -1,9 +1,10 @@
 import axios, { isAxiosError } from 'axios'
 import { authHeaders, type Session } from '../auth/session'
+import { apiBaseUrl } from '../config'
 import type { Account, ApiKey, ImportableOrg, Me, Org, Platform } from '../types'
 
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000',
+  baseURL: apiBaseUrl(),
   timeout: 20_000,
 })
 
