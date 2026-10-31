@@ -4,6 +4,7 @@ import { useAuth } from '../auth/AuthContext'
 import { Button } from '../components/Button'
 import { ConfirmDelete } from '../components/ConfirmDelete'
 import { DataTable, type Column } from '../components/DataTable'
+import { SearchField } from '../components/Field'
 import { Modal } from '../components/Modal'
 import { Badge, PageHeader, PlatformBadge } from '../components/PageHeader'
 import { useToast } from '../components/Toast'
@@ -18,6 +19,9 @@ function ImportModal({ onClose, onImported }: { onClose: () => void; onImported:
   const { me } = useAuth()
   const { data, loading, reload } = useLoad(useCallback(() => userApi.importable(), []))
   const [busy, setBusy] = useState<string | null>(null)
+  const [query, setQuery] = useState('')
+  const needle = query.trim().toLowerCase()
+  const shown = data?.filter((x) => x.name.toLowerCase().includes(needle))
 
   const importOrg = async (org: ImportableOrg) => {
     setBusy(org.name)
@@ -39,6 +43,7 @@ function ImportModal({ onClose, onImported }: { onClose: () => void; onImported:
         {me ? platformName(me.platform) : 'The platform'} lists the organizations you own.
         {me?.platform === 'github' && ' The GitHub App must be installed on an organization before it can be imported.'}
       </p>
+      <SearchField label="Search organizations" placeholder="Search by name" value={query} onChange={setQuery} />
       {loading && !data ? (
         <p className="py-6 text-center text-sm text-fg-muted">
           <Loader2 aria-hidden className="mr-2 inline size-4 animate-spin" />
@@ -46,7 +51,7 @@ function ImportModal({ onClose, onImported }: { onClose: () => void; onImported:
         </p>
       ) : (
         <ul aria-label="Organizations you own" className="divide-y divide-line-muted overflow-hidden rounded-xl border border-line">
-          {data?.map((org) => (
+          {shown?.map((org) => (
             <li key={org.name} className="flex items-center justify-between gap-3 px-3 py-2.5">
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold">{org.name}</p>
@@ -62,6 +67,7 @@ function ImportModal({ onClose, onImported }: { onClose: () => void; onImported:
             </li>
           ))}
           {data?.length === 0 && <li className="px-3 py-6 text-center text-sm text-fg-muted">You do not own any organizations.</li>}
+          {data && data.length > 0 && shown?.length === 0 && <li className="px-3 py-6 text-center text-sm text-fg-muted">No organization matches “{query}”.</li>}
         </ul>
       )}
     </Modal>

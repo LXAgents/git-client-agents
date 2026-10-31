@@ -36,5 +36,21 @@ describe('Repositories as a user', () => {
     expect(importRepo).toHaveBeenCalledWith('301')
     expect(await screen.findByText('Imported acme/web')).toBeInTheDocument()
     expect(repos).toHaveBeenCalledTimes(2)
+    expect(await screen.findByRole('img', { name: 'GitHub' })).toBeInTheDocument()
+  })
+
+  it('filters the import list as you type', async () => {
+    vi.spyOn(userApi, 'me').mockResolvedValue({ platform: 'gitlab', id: '7', login: 'carol', username: 'carol' })
+    vi.spyOn(userApi, 'repos').mockResolvedValue([])
+    vi.spyOn(userApi, 'importableRepos').mockResolvedValue([
+      { externalId: '41', fullName: 'grp/app', org: 'grp', importable: true, reason: null },
+      { externalId: '42', fullName: 'grp/docs', org: 'grp', importable: true, reason: null },
+    ])
+    renderAs({ mode: 'user', platform: 'gitlab', token: 'glpat' }, <Repositories />)
+    await userEvent.click(await screen.findByRole('button', { name: 'Import repository' }))
+    const list = await screen.findByRole('list', { name: 'Repositories you administer' })
+    await userEvent.type(screen.getByRole('searchbox', { name: 'Search repositories' }), 'docs')
+    expect(within(list).getByText('grp/docs')).toBeInTheDocument()
+    expect(within(list).queryByText('grp/app')).toBeNull()
   })
 })

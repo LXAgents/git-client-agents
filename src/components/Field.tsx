@@ -1,4 +1,5 @@
 import { useId, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes } from 'react'
+import { Search } from 'lucide-react'
 
 const control =
   'block h-10 w-full rounded-xl border border-line bg-canvas-subtle px-3.5 text-sm text-fg shadow-xs transition-[border-color,box-shadow] placeholder:text-fg-muted/70 hover:border-fg-muted/40 focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/20 disabled:opacity-60'
@@ -73,5 +74,15 @@ export function Segmented<T extends string>({
         ))}
       </div>
     </fieldset>
+  )
+}
+
+// A search box that filters a list as you type. `label` is read by screen readers.
+export function SearchField({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (value: string) => void; placeholder?: string }) {
+  return (
+    <div className="relative">
+      <Search aria-hidden className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-fg-muted" />
+      <input type="search" aria-label={label} placeholder={placeholder} value={value} onChange={(e) => onChange(e.target.value)} className={`${control} pl-9`} />
+    </div>
   )
 }

@@ -33,7 +33,7 @@ function ProviderButton({ platform }: { platform: Platform }) {
       }}
       className={`flex h-11 items-center justify-center gap-2.5 rounded-xl text-sm font-medium shadow-xs transition-[background-color,scale] duration-200 active:scale-[0.98] ${look}`}
     >
-      <BrandIcon platform={platform} />
+      <BrandIcon platform={platform} onDark={platform === 'github'} />
       Continue with {PLATFORM_NAMES[platform]}
     </a>
   )
@@ -155,7 +155,7 @@ export function SignIn() {
             </form>
           )}
         </div>
-        <p className="mt-6 text-center text-xs text-fg-muted">Your sign-in stays in this page only. Reloading or closing it signs you out.</p>
+        <p className="mt-6 text-center text-xs text-fg-muted">After Continue with GitHub or GitLab, a reload signs you straight back in. A pasted token is kept for this page only. Closing the tab signs you out.</p>
       </div>
     </div>
   )

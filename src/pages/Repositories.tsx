@@ -4,6 +4,7 @@ import { useAuth } from '../auth/AuthContext'
 import { Button } from '../components/Button'
 import { ConfirmDelete } from '../components/ConfirmDelete'
 import { DataTable, type Column } from '../components/DataTable'
+import { SearchField } from '../components/Field'
 import { Modal } from '../components/Modal'
 import { Badge, PageHeader, PlatformBadge } from '../components/PageHeader'
 import { useToast } from '../components/Toast'
@@ -18,6 +19,9 @@ function ImportModal({ onClose, onImported }: { onClose: () => void; onImported:
   const { me } = useAuth()
   const { data, loading, reload } = useLoad(useCallback(() => userApi.importableRepos(), []))
   const [busy, setBusy] = useState<string | null>(null)
+  const [query, setQuery] = useState('')
+  const needle = query.trim().toLowerCase()
+  const shown = data?.filter((x) => x.fullName.toLowerCase().includes(needle))
   const platform = me ? platformName(me.platform) : 'The platform'
 
   const importRepo = async (repo: ImportableRepo) => {
@@ -40,6 +44,7 @@ function ImportModal({ onClose, onImported }: { onClose: () => void; onImported:
         {platform} lists the repositories you administer
         {me?.platform === 'gitlab' ? ' (Maintainer or Owner)' : ''}. Import the organization first.
       </p>
+      <SearchField label="Search repositories" placeholder="Search by name" value={query} onChange={setQuery} />
       {loading && !data ? (
         <p className="py-6 text-center text-sm text-fg-muted">
           <Loader2 aria-hidden className="mr-2 inline size-4 animate-spin" />
@@ -47,7 +52,7 @@ function ImportModal({ onClose, onImported }: { onClose: () => void; onImported:
         </p>
       ) : (
         <ul aria-label="Repositories you administer" className="max-h-96 divide-y divide-line-muted overflow-y-auto rounded-xl border border-line">
-          {data?.map((repo) => (
+          {shown?.map((repo) => (
             <li key={repo.externalId} className="flex items-center justify-between gap-3 px-3 py-2.5">
               <p className="min-w-0 truncate text-sm font-semibold">{repo.fullName}</p>
               {repo.importable ? (
@@ -60,6 +65,7 @@ function ImportModal({ onClose, onImported }: { onClose: () => void; onImported:
             </li>
           ))}
           {data?.length === 0 && <li className="px-3 py-6 text-center text-sm text-fg-muted">You do not administer any repositories.</li>}
+          {data && data.length > 0 && shown?.length === 0 && <li className="px-3 py-6 text-center text-sm text-fg-muted">No repository matches “{query}”.</li>}
         </ul>
       )}
     </Modal>

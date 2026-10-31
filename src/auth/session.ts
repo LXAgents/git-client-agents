@@ -20,7 +20,8 @@ export function isSession(value: unknown): value is Session {
 }
 
 // The token lives only in this page's memory. Nothing is written to browser storage, so no
-// other script or tab can plant a session, and a reload asks you to sign in again.
+// other script or tab can plant a session. A reload after an OAuth sign-in signs back in
+// through OAuth (see rememberOAuth); a pasted token has to be entered again.
 let current: Session | null = null
 
 function forgetLegacy() {
@@ -46,6 +47,42 @@ export function saveSession(session: Session | null) {
   } else {
     current = null
   }
+}
+
+// The token itself is never stored (see above), so a reload would sign you out. After a
+// "Continue with GitHub/GitLab" sign-in, this tab instead remembers which platform it used,
+// as a fixed marker under a fixed key. A reload then goes back through that platform's OAuth,
+// which returns at once for an app the user already authorized.
+const RESUME_GITHUB = 'git-client-agents.resume.github'
+const RESUME_GITLAB = 'git-client-agents.resume.gitlab'
+
+export function forgetOAuth() {
+  try {
+    sessionStorage.removeItem(RESUME_GITHUB)
+    sessionStorage.removeItem(RESUME_GITLAB)
+  } catch {
+    // Storage blocked: nothing was remembered.
+  }
+}
+
+export function rememberOAuth(platform: Platform) {
+  forgetOAuth()
+  try {
+    sessionStorage.setItem(platform === 'gitlab' ? RESUME_GITLAB : RESUME_GITHUB, '1')
+  } catch {
+    // Without storage a reload asks you to sign in again.
+  }
+}
+
+// The platform to sign back in with after a reload, or null.
+export function oauthToResume(): Platform | null {
+  try {
+    if (sessionStorage.getItem(RESUME_GITHUB)) return 'github'
+    if (sessionStorage.getItem(RESUME_GITLAB)) return 'gitlab'
+  } catch {
+    // Storage blocked.
+  }
+  return null
 }
 
 export type OAuthReturn = { code: string } | { error: string }

@@ -1,7 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { adminApi, authApi, errorStatus, setApiSession, userApi } from '../services/api'
-import type { Me } from '../types'
-import { loadSession, saveSession, takeOAuthReturn, type OAuthReturn, type Session } from './session'
+import type { Me, Platform } from '../types'
+import { browser } from './browser'
+import { beginOAuth, forgetOAuth, loadSession, oauthToResume, rememberOAuth, saveSession, takeOAuthReturn, type OAuthReturn, type Session } from './session'
 
 interface AuthState {
   session: Session | null
@@ -32,11 +33,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Read once, before the first render, so the token leaves the address bar straight away.
   const [oauthReturn] = useState<OAuthReturn | null>(() => takeOAuthReturn())
   const [session, setSession] = useState<Session | null>(() => (oauthReturn && 'code' in oauthReturn ? null : loadSession()))
+  // A reload after an OAuth sign-in: go back through OAuth instead of showing the sign-in page.
+  const [resume] = useState<Platform | null>(() => (oauthReturn || session ? null : oauthToResume()))
   const [me, setMe] = useState<Me | null>(null)
-  const [checking, setChecking] = useState(() => session !== null || (oauthReturn !== null && 'code' in oauthReturn))
+  const [checking, setChecking] = useState(() => session !== null || resume !== null || (oauthReturn !== null && 'code' in oauthReturn))
   const [oauthError, setOauthError] = useState<unknown>(() => (oauthReturn && 'error' in oauthReturn ? new Error(oauthReturn.error) : null))
 
   const signOut = useCallback(() => {
+    forgetOAuth()
     saveSession(null)
     setApiSession(null)
     setSession(null)
@@ -44,6 +48,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   useEffect(() => {
+    if (resume) {
+      browser.go(authApi.startUrl(resume, beginOAuth()))
+      return
+    }
+    if (oauthReturn && 'error' in oauthReturn) forgetOAuth()
     if (oauthReturn && 'code' in oauthReturn) {
       let next: Session
       authApi
@@ -54,10 +63,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         })
         .then((who) => {
           saveSession(next)
+          if (next.mode === 'user') rememberOAuth(next.platform)
           setSession(next)
           setMe(who)
         })
         .catch((err) => {
+          forgetOAuth()
           setApiSession(null)
           setOauthError(err)
         })
@@ -72,12 +83,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (errorStatus(err) === 401 || errorStatus(err) === 403) signOut()
       })
       .finally(() => setChecking(false))
-  }, [oauthReturn, signOut])
+  }, [oauthReturn, resume, signOut])
 
   const signIn = useCallback(
     async (next: Session) => {
       try {
         const who = await verify(next)
+        // A pasted token replaces any OAuth sign-in this tab would otherwise resume.
+        forgetOAuth()
         saveSession(next)
         setSession(next)
         setMe(who)

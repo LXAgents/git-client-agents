@@ -43,6 +43,22 @@ describe('Organizations as a user', () => {
     expect(await screen.findByText('Imported acme')).toBeInTheDocument()
     expect(orgs).toHaveBeenCalledTimes(2)
   })
+
+  it('filters the import list as you type', async () => {
+    vi.spyOn(userApi, 'orgs').mockResolvedValue([])
+    vi.spyOn(userApi, 'importable').mockResolvedValue([
+      { name: 'acme', kind: 'org', importable: true, reason: null, appInstallationId: null },
+      { name: 'beta-labs', kind: 'org', importable: true, reason: null, appInstallationId: null },
+    ])
+    renderAs({ mode: 'user', platform: 'github', token: 'ghp' }, <Organizations />)
+    await userEvent.click(await screen.findByRole('button', { name: 'Import organization' }))
+    const list = await screen.findByRole('list', { name: 'Organizations you own' })
+    await userEvent.type(screen.getByRole('searchbox', { name: 'Search organizations' }), 'BETA')
+    expect(within(list).getByText('beta-labs')).toBeInTheDocument()
+    expect(within(list).queryByText('acme')).toBeNull()
+    await userEvent.type(screen.getByRole('searchbox'), 'zzz')
+    expect(within(list).getByText('No organization matches “BETAzzz”.')).toBeInTheDocument()
+  })
 })
 
 describe('Organizations as the operator', () => {
