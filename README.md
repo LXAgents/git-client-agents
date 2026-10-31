@@ -10,11 +10,12 @@ managing the OpenRouter keys the agent spends.
 | Sign in as | With | Pages |
 |---|---|---|
 | **Owner** | Continue with GitHub or GitLab, as the one user in the server's `GITHUB_ADMIN_ID` or `GITLAB_ADMIN_ID` | Dashboard, Users, every Organization and Repository of that platform (list, import your own, remove any), API keys (all), Models |
-| **User** | Continue with GitHub or GitLab, or a personal access token (GitHub `read:org`, GitLab `read_api`) | Dashboard, Organizations you own and Repositories you administer (import and remove), Models, API keys (yours, your orgs' and your repositories') |
+| **User** | Continue with GitHub or GitLab | Dashboard, Organizations you own and Repositories you administer (import and remove), Models, API keys (yours, your orgs' and your repositories') |
 
 - **Continue with GitHub / GitLab** appears for each platform whose client ID and secret are set
   on the server. The server sends you back with the token in the URL fragment. The dashboard
-  takes it out of the address bar at once. With no client IDs set, the token form is shown instead.
+  takes it out of the address bar at once. Personal access tokens can't sign in: the server
+  refuses them. With no client IDs set, the page says sign-in isn't set up yet.
 - **One platform per session.** A GitHub sign-in sees only GitHub users, orgs, repositories and
   keys, and a GitLab sign-in only GitLab ones, so the tables have no Platform column.
 - **Profiles come from the platform.** Your avatar, name and login, and those on the Users page,
@@ -41,7 +42,6 @@ The token is kept in memory only, never in browser storage.
   which platform you used, as a fixed marker in `sessionStorage`. A reload goes back through
   that platform's OAuth, which returns at once for an app you already authorized. Signing out
   or an OAuth error clears the marker.
-- **A pasted token** is not kept, so a reload asks for it again.
 - **A new tab** always asks you to sign in.
 
 ## Run it
