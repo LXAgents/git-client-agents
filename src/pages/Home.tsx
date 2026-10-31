@@ -15,7 +15,7 @@ interface Stat {
 }
 
 const ACCESS_RULES = [
-  'Only the platform owner whitelists users.',
+  'Anyone can log in with GitHub or GitLab, as a Free user.',
   'Organizations are only ever imported by one of their owners, and only when the app is installed.',
   'Org keys can be changed by org owners only. The server asks GitHub or GitLab every time.',
   'Repositories are imported by their admins, inside an imported organization.',
@@ -36,7 +36,7 @@ export function Home() {
   }, [isOwner, toast])
 
   const stats: Stat[] = [
-    ...(isOwner ? [{ label: 'Whitelisted users', value: counts?.users ?? null, to: '/users', icon: Users, blurb: 'Who may trigger the agent.' }] : []),
+    ...(isOwner ? [{ label: 'Users', value: counts?.users ?? null, to: '/users', icon: Users, blurb: 'Everyone who has logged in.' }] : []),
     {
       label: isOwner ? 'Organizations' : 'Organizations you own',
       value: counts?.orgs ?? null,

@@ -11,7 +11,6 @@ const PLATFORM_NAMES: Record<Platform, string> = { github: 'GitHub', gitlab: 'Gi
 function explain(err: unknown): string {
   const status = errorStatus(err)
   if (status === 401) return 'GitHub or GitLab did not accept the sign-in. Try again.'
-  if (status === 403) return 'You are not whitelisted on this server yet. Ask the owner to add your account.'
   return errorMessage(err)
 }
 
