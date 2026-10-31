@@ -1,29 +1,105 @@
+@import '@fontsource-variable/inter';
 @import 'tailwindcss';
 
-/* GitHub dark palette, exposed as Tailwind colours (bg-canvas, text-fg-muted, border-line, ...). */
+/*
+ * Design tokens in OKLCH. Each colour is light-dark(light, dark), so the whole UI follows the
+ * system theme with no duplicated rules. Tailwind exposes them as bg-canvas, text-fg-muted,
+ * border-line and so on.
+ */
 @theme {
-  --color-canvas: #0d1117;
-  --color-canvas-subtle: #161b22;
-  --color-canvas-inset: #010409;
-  --color-overlay: #1c2128;
-  --color-line: #30363d;
-  --color-line-muted: #21262d;
-  --color-fg: #e6edf3;
-  --color-fg-muted: #8d96a0;
-  --color-accent: #4493f8;
-  --color-success: #238636;
-  --color-success-hover: #2ea043;
-  --color-danger: #f85149;
-  --color-danger-muted: #da363333;
-  --color-attention: #d29922;
-  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  --color-canvas: light-dark(oklch(0.985 0.003 265), oklch(0.155 0.012 270));
+  --color-canvas-subtle: light-dark(oklch(1 0 0), oklch(0.195 0.014 270));
+  --color-canvas-inset: light-dark(oklch(0.97 0.005 265), oklch(0.135 0.011 270));
+  --color-overlay: light-dark(oklch(0.955 0.007 265), oklch(0.245 0.016 270));
+  --color-line: light-dark(oklch(0.91 0.007 265), oklch(0.295 0.016 270));
+  --color-line-muted: light-dark(oklch(0.945 0.005 265), oklch(0.235 0.013 270));
+  --color-fg: light-dark(oklch(0.22 0.02 270), oklch(0.965 0.005 265));
+  --color-fg-muted: light-dark(oklch(0.52 0.02 270), oklch(0.71 0.016 265));
+  --color-accent: light-dark(oklch(0.55 0.21 277), oklch(0.7 0.16 278));
+  --color-accent-strong: light-dark(oklch(0.48 0.22 280), oklch(0.62 0.19 282));
+  --color-accent-2: light-dark(oklch(0.6 0.22 318), oklch(0.7 0.18 318));
+  --color-success: light-dark(oklch(0.56 0.15 155), oklch(0.74 0.16 155));
+  --color-success-hover: light-dark(oklch(0.5 0.15 155), oklch(0.8 0.15 155));
+  --color-danger: light-dark(oklch(0.57 0.21 25), oklch(0.7 0.18 22));
+  --color-danger-muted: color-mix(in oklch, var(--color-danger) 12%, transparent);
+  --color-attention: light-dark(oklch(0.62 0.15 65), oklch(0.82 0.14 80));
+
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
+
+  --shadow-card: 0 1px 2px oklch(0.2 0.02 270 / 0.06), 0 8px 24px -12px oklch(0.2 0.02 270 / 0.18);
+  --shadow-raised: 0 2px 4px oklch(0.2 0.02 270 / 0.08), 0 24px 48px -16px oklch(0.2 0.02 270 / 0.35);
+
+  --ease-spring: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 :root {
-  color-scheme: dark;
+  color-scheme: light dark;
+  font-feature-settings: 'cv11', 'ss01', 'ss03';
+  accent-color: var(--color-accent);
 }
 
 body {
   @apply bg-canvas text-fg font-sans antialiased;
+  min-height: 100dvh;
+  /* A soft accent glow behind the top of every page. */
+  background-image:
+    radial-gradient(60rem 30rem at 15% -10%, color-mix(in oklch, var(--color-accent) 14%, transparent), transparent 70%),
+    radial-gradient(50rem 26rem at 95% -15%, color-mix(in oklch, var(--color-accent-2) 10%, transparent), transparent 70%);
+  background-attachment: fixed;
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+::selection {
+  background: color-mix(in oklch, var(--color-accent) 30%, transparent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Frosted surfaces: the sidebar, the mobile top bar, modals and toasts. */
+@utility glass {
+  background-color: color-mix(in oklch, var(--color-canvas-subtle) 72%, transparent);
+  backdrop-filter: blur(18px) saturate(1.6);
+}
+
+/* Cards share one surface, border and shadow. */
+@utility card {
+  background-color: var(--color-canvas-subtle);
+  border: 1px solid color-mix(in oklch, var(--color-line) 80%, transparent);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-card);
+}
+
+/* Elements fade and rise in when they first render, with no JavaScript (@starting-style). */
+@utility enter {
+  transition:
+    opacity 0.25s var(--ease-spring),
+    translate 0.35s var(--ease-spring),
+    scale 0.35s var(--ease-spring);
+  @starting-style {
+    opacity: 0;
+    translate: 0 8px;
+    scale: 0.98;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }
