@@ -1,7 +1,7 @@
 ---
 name: models-and-tokens
 description: Task record for the dashboard's Models and Repositories pages, the model picker and repository keys (1.5.0).
-status: in-progress
+status: done
 ---
 
 # Models and tokens per user, org and repo
