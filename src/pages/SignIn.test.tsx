@@ -1,10 +1,10 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { AxiosError, AxiosHeaders } from 'axios'
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { AuthProvider } from '../auth/AuthContext'
 import { ToastProvider } from '../components/Toast'
-import { adminApi, userApi } from '../services/api'
+import { adminApi, authApi, userApi } from '../services/api'
 import { SignIn } from './SignIn'
 
 function httpError(status: number) {
@@ -22,10 +22,49 @@ const renderSignIn = () =>
   )
 
 describe('SignIn', () => {
+  beforeEach(() => {
+    vi.spyOn(authApi, 'providers').mockResolvedValue({ github: false, gitlab: false })
+  })
+
+  it('offers Continue with GitHub and GitLab when the server has client IDs, and keeps the token form behind a toggle', async () => {
+    vi.spyOn(authApi, 'providers').mockResolvedValue({ github: true, gitlab: true })
+    renderSignIn()
+    const github = await screen.findByRole('link', { name: 'Continue with GitHub' })
+    expect(github).toHaveAttribute('href', `http://localhost:3000/api/auth/github/start?redirect=${encodeURIComponent('http://localhost:3000/')}`)
+    expect(screen.getByRole('link', { name: 'Continue with GitLab' })).toBeInTheDocument()
+    expect(screen.queryByLabelText('Personal access token')).toBeNull()
+    await userEvent.click(screen.getByRole('button', { name: /personal access token instead/ }))
+    expect(screen.getByLabelText('Personal access token')).toBeInTheDocument()
+  })
+
+  it('shows only the platforms that are configured', async () => {
+    vi.spyOn(authApi, 'providers').mockResolvedValue({ github: false, gitlab: true })
+    renderSignIn()
+    expect(await screen.findByRole('link', { name: 'Continue with GitLab' })).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'Continue with GitHub' })).toBeNull()
+  })
+
+  it('signs in with the token the server returns after OAuth', async () => {
+    const me = vi.spyOn(userApi, 'me').mockResolvedValue({ platform: 'github', id: '1', login: 'owen', username: 'owen', isAdmin: true })
+    window.history.replaceState(null, '', '/#platform=github&token=gho_abc')
+    renderSignIn()
+    await vi.waitFor(() => expect(me).toHaveBeenCalled())
+    await vi.waitFor(() =>
+      expect(JSON.parse(sessionStorage.getItem('git-client-agents.session')!)).toEqual({ mode: 'user', platform: 'github', token: 'gho_abc' }),
+    )
+    expect(window.location.hash).toBe('')
+  })
+
+  it('shows why an OAuth sign-in failed', async () => {
+    window.history.replaceState(null, '', '/#error=Sign-in%20was%20started%20in%20another%20browser.')
+    renderSignIn()
+    expect(await screen.findByRole('alert')).toHaveTextContent('started in another browser')
+  })
+
   it('signs a user in with their platform token and keeps it for the tab', async () => {
     const me = vi.spyOn(userApi, 'me').mockResolvedValue({ platform: 'gitlab', id: '7', login: 'carol', username: 'carol' })
     renderSignIn()
-    await userEvent.selectOptions(screen.getByLabelText('Platform'), 'gitlab')
+    await userEvent.selectOptions(await screen.findByLabelText('Platform'), 'gitlab')
     await userEvent.type(screen.getByLabelText('Personal access token'), 'glpat-x')
     await userEvent.click(screen.getByRole('button', { name: 'Sign in' }))
     expect(me).toHaveBeenCalled()
@@ -35,7 +74,7 @@ describe('SignIn', () => {
   it('explains a user who is not whitelisted', async () => {
     vi.spyOn(userApi, 'me').mockRejectedValue(httpError(403))
     renderSignIn()
-    await userEvent.type(screen.getByLabelText('Personal access token'), 'ghp')
+    await userEvent.type(await screen.findByLabelText('Personal access token'), 'ghp')
     await userEvent.click(screen.getByRole('button', { name: 'Sign in' }))
     expect(await screen.findByRole('alert')).toHaveTextContent('not whitelisted')
     expect(sessionStorage.getItem('git-client-agents.session')).toBeNull()

@@ -61,3 +61,16 @@ describe('Organizations as the operator', () => {
     expect(await screen.findByText('No organizations have been imported yet.')).toBeInTheDocument()
   })
 })
+
+describe('Organizations as an admin user', () => {
+  it('lists every org through the admin API and can still import their own', async () => {
+    vi.spyOn(userApi, 'me').mockResolvedValue({ platform: 'github', id: '9', login: 'owen', username: 'owen', isAdmin: true })
+    vi.spyOn(userApi, 'orgs').mockResolvedValue([])
+    const adminOrgs = vi.spyOn(adminApi, 'orgs').mockResolvedValue([acme])
+
+    renderAs({ mode: 'user', platform: 'github', token: 'gho' }, <Organizations />)
+    expect(await screen.findByRole('cell', { name: 'acme' })).toBeInTheDocument()
+    expect(adminOrgs).toHaveBeenCalled()
+    expect(screen.getByRole('button', { name: /Import organization/ })).toBeInTheDocument()
+  })
+})
