@@ -1,7 +1,7 @@
 ---
 name: memory-session
 description: Task record for keeping the dashboard session in memory instead of sessionStorage (1.4.0).
-status: in-progress
+status: done
 ---
 
 # Memory-only session
