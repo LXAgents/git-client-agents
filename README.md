@@ -24,6 +24,9 @@ the tab closes.
 
 ## Run it
 
+Needs Node.js 22.22.2+, 24.15+ or 26 (`.nvmrc` pins 26 LTS, which CI uses: `nvm use`). Older
+Node prints `EBADENGINE` warnings on install.
+
 ```bash
 cp .env.example .env    # set VITE_API_URL to where git-server-agents runs
 npm install
