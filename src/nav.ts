@@ -1,4 +1,4 @@
-import { LayoutDashboard, type LucideIcon } from 'lucide-react'
+import { Building2, KeyRound, LayoutDashboard, Users, type LucideIcon } from 'lucide-react'
 
 export interface NavItem {
   to: string
@@ -7,4 +7,9 @@ export interface NavItem {
   adminOnly?: boolean
 }
 
-export const NAV: NavItem[] = [{ to: '/', label: 'Dashboard', icon: LayoutDashboard }]
+export const NAV: NavItem[] = [
+  { to: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/users', label: 'Users', icon: Users, adminOnly: true },
+  { to: '/orgs', label: 'Organizations', icon: Building2 },
+  { to: '/keys', label: 'API keys', icon: KeyRound },
+]

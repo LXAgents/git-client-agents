@@ -1,10 +1,16 @@
-import { NavLink, Outlet } from 'react-router'
+import { NavLink, Outlet, useNavigate } from 'react-router'
 import { Bot, LogOut } from 'lucide-react'
 import { useAuth } from '../auth/AuthContext'
 import { NAV, type NavItem } from '../nav'
 
 export function Layout({ nav = NAV }: { nav?: NavItem[] }) {
-  const { session, me, signOut } = useAuth()
+  const { session, me, signOut: endSession } = useAuth()
+  const navigate = useNavigate()
+  // The next person to sign in starts on the dashboard, not on the last page visited.
+  const signOut = () => {
+    navigate('/')
+    endSession()
+  }
   const isAdmin = session?.mode === 'admin'
   const items = nav.filter((item) => isAdmin || !item.adminOnly)
   const who = isAdmin ? 'Operator' : me ? `${me.login} · ${me.platform === 'github' ? 'GitHub' : 'GitLab'}` : ''
@@ -29,7 +35,7 @@ export function Layout({ nav = NAV }: { nav?: NavItem[] }) {
                 className={({ isActive }) =>
                   `relative flex shrink-0 items-center gap-2 rounded-md px-3 py-1.5 text-sm ${
                     isActive
-                      ? 'bg-overlay font-semibold text-fg before:absolute before:inset-y-1.5 before:-left-2 before:w-1 before:rounded before:bg-accent md:before:block'
+                      ? 'bg-overlay font-semibold text-fg md:before:absolute md:before:inset-y-1.5 md:before:-left-2 md:before:w-1 md:before:rounded md:before:bg-accent'
                       : 'text-fg-muted hover:bg-overlay hover:text-fg'
                   }`
                 }
