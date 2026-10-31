@@ -1,7 +1,7 @@
 ---
 name: free-role-open-login
 description: Task record for the light green Free role badge and open login wording (dashboard 1.10.0).
-status: in-progress
+status: done
 ---
 
 # Free role and open login
@@ -21,6 +21,6 @@ status: in-progress
 
 | # | Title | Scope | Repository | Branch | Files / areas | PR |
 |---|---|---|---|---|---|---|
-| 1 | Task record | This record | git-client-agents | `plan/free-role-open-login` | `.agents/` | |
-| 2 | Free role and open login | Role badge, Users page, Home, sign-in text, tests, docs | git-client-agents | `feat/free-role-open-login` | `src/`, `README.md` | |
-| 3 | Release | 1.10.0 changelog and version | git-client-agents | `release/1.10.0` | `wiki/logs/`, `package.json` | |
+| 1 | Task record | This record | git-client-agents | `plan/free-role-open-login` | `.agents/` | #51 |
+| 2 | Free role and open login | Role badge, Users page, Home, sign-in text, tests, docs | git-client-agents | `feat/free-role-open-login` | `src/`, `README.md` | #52 |
+| 3 | Release | 1.10.0 changelog and version | git-client-agents | `release/1.10.0` | `wiki/logs/`, `package.json` | #53 |
