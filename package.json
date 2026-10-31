@@ -1,5 +1,5 @@
 {
-  "name": "git-client-agents",
+  "name": "@lxagents/git-client-agents",
   "private": true,
   "version": "1.8.0",
   "type": "module",

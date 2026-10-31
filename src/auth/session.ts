@@ -1,7 +1,7 @@
 import type { Platform } from '../types'
 
-// Who the dashboard is calling the server as: a user signed in with GitHub or GitLab (OAuth) or
-// with a pasted personal access token. Every session works on one platform: it sees only that
+// Who the dashboard is calling the server as: a user signed in with Continue with GitHub or
+// GitLab (OAuth). Personal access tokens are refused. Every session works on one platform: it sees only that
 // platform's users, orgs, repos and keys. The platform's owner gets the owner pages.
 export type Session = { platform: Platform; token: string }
 
@@ -21,7 +21,7 @@ export function isSession(value: unknown): value is Session {
 
 // The token lives only in this page's memory. Nothing is written to browser storage, so no
 // other script or tab can plant a session. A reload after an OAuth sign-in signs back in
-// through OAuth (see rememberOAuth); a pasted token has to be entered again.
+// through OAuth (see rememberOAuth).
 let current: Session | null = null
 
 function forgetLegacy() {

@@ -8,15 +8,12 @@ import { browser } from './browser'
 import { oauthToResume, rememberOAuth } from './session'
 
 function Probe() {
-  const { session, checking, signOut, signIn } = useAuth()
+  const { session, checking, signOut } = useAuth()
   return (
     <div>
       <p>{checking ? 'checking' : session ? `signed in with ${session.platform}` : 'signed out'}</p>
       <button type="button" onClick={signOut}>
         sign out
-      </button>
-      <button type="button" onClick={() => void signIn({ platform: 'gitlab', token: 'glpat' })}>
-        paste token
       </button>
     </div>
   )
@@ -78,18 +75,14 @@ describe('staying signed in across a reload', () => {
     expect(oauthToResume()).toBeNull()
   })
 
-  it('forgets it on sign-out and when a token is pasted instead', async () => {
+  it('forgets it on sign-out', async () => {
     vi.spyOn(userApi, 'me').mockResolvedValue(me)
     vi.spyOn(authApi, 'exchange').mockResolvedValue({ platform: 'github', token: 'gho' })
     sessionStorage.setItem('git-client-agents.oauth-nonce', 'n3')
     window.history.replaceState(null, '', '/?signin=n3#code=sealed')
     renderApp()
     await screen.findByText('signed in with github')
-    await userEvent.click(screen.getByRole('button', { name: 'paste token' }))
-    expect(await screen.findByText('signed in with gitlab')).toBeInTheDocument()
-    expect(oauthToResume()).toBeNull()
-
-    rememberOAuth('github')
+    expect(oauthToResume()).toBe('github')
     await userEvent.click(screen.getByRole('button', { name: 'sign out' }))
     expect(oauthToResume()).toBeNull()
   })
