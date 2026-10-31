@@ -33,7 +33,7 @@ function ProviderButton({ platform }: { platform: Platform }) {
       }}
       className={`flex h-11 items-center justify-center gap-2.5 rounded-xl text-sm font-medium shadow-xs transition-[background-color,scale] duration-200 active:scale-[0.98] ${look}`}
     >
-      <BrandIcon platform={platform} />
+      <BrandIcon platform={platform} onDark={platform === 'github'} />
       Continue with {PLATFORM_NAMES[platform]}
     </a>
   )

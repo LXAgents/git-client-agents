@@ -1,4 +1,6 @@
 import type { ReactNode } from 'react'
+import type { Platform } from '../types'
+import { BrandIcon } from './BrandIcon'
 
 export function PageHeader({ title, description, actions }: { title: string; description?: ReactNode; actions?: ReactNode }) {
   return (
@@ -34,6 +36,7 @@ export function Badge({ children, tone = 'default' }: { children: ReactNode; ton
   )
 }
 
-export function PlatformBadge({ platform }: { platform: string }) {
-  return <Badge tone={platform === 'github' ? 'default' : 'attention'}>{platform === 'github' ? 'GitHub' : 'GitLab'}</Badge>
+// The platform's logo in place of its name; the name stays as alt text and tooltip.
+export function PlatformBadge({ platform }: { platform: Platform }) {
+  return <BrandIcon platform={platform} label className="size-5" />
 }
