@@ -2,6 +2,7 @@
 
 | Version | Summary | Files |
 |---|---|---|
+| [1.3.0](1/3/0/CHANGELOG.md) | OAuth code exchange: no token in the URL (needs server 1.5.0) | `CHANGELOG.md` |
 | [1.2.2](1/2/2/CHANGELOG.md) | OAuth return bound to its tab by a one-time nonce | `CHANGELOG.md` |
 | [1.2.1](1/2/1/CHANGELOG.md) | SonarCloud fixes: session check, modal backdrop button, no install scripts | `CHANGELOG.md` |
 | [1.2.0](1/2/0/CHANGELOG.md) | Continue with GitHub/GitLab, admin users, modern look | `CHANGELOG.md` |
