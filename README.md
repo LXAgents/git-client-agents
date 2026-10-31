@@ -31,8 +31,14 @@ managing the OpenRouter keys the agent spends.
   (for org members), then the commenter's own.
 - Keys are shown by their last four characters only.
 
-The token is kept in memory only, never in browser storage. Reloading the page or opening a
-new tab asks you to sign in again.
+The token is kept in memory only, never in browser storage.
+
+- **Reloading after Continue with GitHub/GitLab keeps you signed in.** The tab remembers only
+  which platform you used, as a fixed marker in `sessionStorage`. A reload goes back through
+  that platform's OAuth, which returns at once for an app you already authorized. Signing out
+  or an OAuth error clears the marker.
+- **A pasted token or the operator token** is not kept, so a reload asks for it again.
+- **A new tab** always asks you to sign in.
 
 ## Run it
 

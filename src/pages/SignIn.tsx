@@ -155,7 +155,7 @@ export function SignIn() {
             </form>
           )}
         </div>
-        <p className="mt-6 text-center text-xs text-fg-muted">Your sign-in stays in this page only. Reloading or closing it signs you out.</p>
+        <p className="mt-6 text-center text-xs text-fg-muted">After Continue with GitHub or GitLab, a reload signs you straight back in. A pasted token is kept for this page only. Closing the tab signs you out.</p>
       </div>
     </div>
   )
