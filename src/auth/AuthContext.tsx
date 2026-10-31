@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { adminApi, errorStatus, setApiSession, userApi } from '../services/api'
+import { adminApi, authApi, errorStatus, setApiSession, userApi } from '../services/api'
 import type { Me } from '../types'
 import { loadSession, saveSession, takeOAuthReturn, type OAuthReturn, type Session } from './session'
 
@@ -31,9 +31,9 @@ async function verify(session: Session): Promise<Me | null> {
 export function AuthProvider({ children }: { children: ReactNode }) {
   // Read once, before the first render, so the token leaves the address bar straight away.
   const [oauthReturn] = useState<OAuthReturn | null>(() => takeOAuthReturn())
-  const [session, setSession] = useState<Session | null>(() => (oauthReturn && 'session' in oauthReturn ? null : loadSession()))
+  const [session, setSession] = useState<Session | null>(() => (oauthReturn && 'code' in oauthReturn ? null : loadSession()))
   const [me, setMe] = useState<Me | null>(null)
-  const [checking, setChecking] = useState(() => session !== null || (oauthReturn !== null && 'session' in oauthReturn))
+  const [checking, setChecking] = useState(() => session !== null || (oauthReturn !== null && 'code' in oauthReturn))
   const [oauthError, setOauthError] = useState<unknown>(() => (oauthReturn && 'error' in oauthReturn ? new Error(oauthReturn.error) : null))
 
   const signOut = useCallback(() => {
@@ -44,9 +44,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   useEffect(() => {
-    if (oauthReturn && 'session' in oauthReturn) {
-      const next = oauthReturn.session
-      verify(next)
+    if (oauthReturn && 'code' in oauthReturn) {
+      let next: Session
+      authApi
+        .exchange(oauthReturn.code)
+        .then(({ platform, token }) => {
+          next = { mode: 'user', platform, token }
+          return verify(next)
+        })
         .then((who) => {
           saveSession(next)
           setSession(next)
