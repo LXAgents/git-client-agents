@@ -1,7 +1,7 @@
 ---
 name: oauth-code-exchange
 description: Task record for exchanging the sealed OAuth code for the token instead of reading it from the URL (1.3.0).
-status: in-progress
+status: done
 ---
 
 # OAuth code exchange
