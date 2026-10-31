@@ -1,7 +1,7 @@
 ---
 name: agent-error-replies
 description: Task record for removing the personal access token sign-in and the scoped package name (dashboard 1.9.0).
-status: in-progress
+status: done
 ---
 
 # Remove the personal access token sign-in
@@ -19,6 +19,6 @@ status: in-progress
 
 | # | Title | Scope | Repository | Branch | Files / areas | PR |
 |---|---|---|---|---|---|---|
-| 1 | Task record | This record | git-client-agents | `plan/agent-error-replies` | `.agents/` | |
-| 2 | Remove PAT sign-in | Sign-in page, auth context, tests, docs, package name | git-client-agents | `feat/agent-error-replies` | `src/`, `README.md`, `package.json` | |
-| 3 | Release | 1.9.0 changelog and version | git-client-agents | `release/1.9.0` | `wiki/logs/`, `package.json` | |
+| 1 | Task record | This record | git-client-agents | `plan/agent-error-replies` | `.agents/` | #48 |
+| 2 | Remove PAT sign-in | Sign-in page, auth context, tests, docs, package name | git-client-agents | `feat/agent-error-replies` | `src/`, `README.md`, `package.json` | #49 |
+| 3 | Release | 1.9.0 changelog and version | git-client-agents | `release/1.9.0` | `wiki/logs/`, `package.json` | #50 |
