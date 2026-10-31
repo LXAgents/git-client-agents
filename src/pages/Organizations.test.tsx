@@ -44,6 +44,14 @@ describe('Organizations as a user', () => {
     expect(orgs).toHaveBeenCalledTimes(2)
   })
 
+  it('centers the platform logo in its column', async () => {
+    vi.spyOn(userApi, 'orgs').mockResolvedValue([acme])
+    renderAs({ mode: 'user', platform: 'github', token: 'ghp' }, <Organizations />)
+    const logo = await screen.findByRole('img', { name: 'GitHub' })
+    expect(logo.closest('td')).toHaveClass('text-center')
+    expect(screen.getByRole('columnheader', { name: 'Platform' })).toHaveClass('text-center')
+  })
+
   it('filters the import list as you type', async () => {
     vi.spyOn(userApi, 'orgs').mockResolvedValue([])
     vi.spyOn(userApi, 'importable').mockResolvedValue([

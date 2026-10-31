@@ -195,7 +195,7 @@ export function ApiKeys() {
         </span>
       ),
     },
-    { header: 'Platform', cell: (k) => <PlatformBadge platform={k.owner.platform} /> },
+    { header: 'Platform', className: 'text-center', cell: (k) => <PlatformBadge platform={k.owner.platform} /> },
     { header: 'Key', cell: (k) => <code className="font-mono text-xs text-fg-muted">{k.last4 ? `••••${k.last4}` : 'unreadable'}</code> },
     { header: 'Provider', cell: (k) => k.provider },
     { header: 'Priority', cell: (k) => k.priority, className: 'tabular-nums' },

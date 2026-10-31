@@ -94,7 +94,7 @@ export function Organizations() {
 
   const columns: Column<Org>[] = [
     { header: 'Organization', cell: (o) => <span className="font-semibold">{o.orgName}</span> },
-    { header: 'Platform', cell: (o) => <PlatformBadge platform={o.platform} /> },
+    { header: 'Platform', className: 'text-center', cell: (o) => <PlatformBadge platform={o.platform} /> },
     {
       header: 'Installation',
       cell: (o) => (o.installationId ? <code className="font-mono text-xs text-fg-muted">{o.installationId}</code> : <span className="text-fg-muted">—</span>),
