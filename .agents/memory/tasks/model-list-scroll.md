@@ -1,7 +1,7 @@
 ---
 name: model-list-scroll
 description: Task record for loading more models as you scroll the model picker (1.6.2).
-status: in-progress
+status: done
 ---
 
 # Load more models on scroll
@@ -17,6 +17,6 @@ status: in-progress
 
 | # | Title | Scope | Repository | Branch | Files / areas | PR |
 |---|---|---|---|---|---|---|
-| 1 | Task record | This record | git-client-agents | `plan/model-list-scroll` | `.agents/` | |
-| 2 | Load on scroll | Model picker paging, test | git-client-agents | `feat/model-list-scroll` | `src/` | |
-| 3 | Release | 1.6.2 changelog and version | git-client-agents | `release/1.6.2` | `wiki/logs/`, `package.json` | |
+| 1 | Task record | This record | git-client-agents | `plan/model-list-scroll` | `.agents/` | #39 |
+| 2 | Load on scroll | Model picker paging, test | git-client-agents | `feat/model-list-scroll` | `src/` | #40 |
+| 3 | Release | 1.6.2 changelog and version | git-client-agents | `release/1.6.2` | `wiki/logs/`, `package.json` | #41 |
