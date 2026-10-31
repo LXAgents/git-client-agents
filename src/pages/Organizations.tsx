@@ -76,9 +76,8 @@ function ImportModal({ onClose, onImported }: { onClose: () => void; onImported:
 
 export function Organizations() {
   const toast = useToast()
-  const { session, isOwner } = useAuth()
+  const { isOwner } = useAuth()
   // An admin user is still a platform user, so they can import orgs they own.
-  const canImport = session?.mode === 'user'
   const { data, loading, reload } = useLoad(useCallback(() => (isOwner ? adminApi.orgs() : userApi.orgs()), [isOwner]))
   const [importing, setImporting] = useState(false)
 
@@ -125,11 +124,9 @@ export function Organizations() {
             : 'Imported organizations you own. Ownership is checked with the platform on every change.'
         }
         actions={
-          canImport && (
-            <Button variant="primary" onClick={() => setImporting(true)}>
-              <Download aria-hidden className="size-4" /> Import organization
-            </Button>
-          )
+          <Button variant="primary" onClick={() => setImporting(true)}>
+            <Download aria-hidden className="size-4" /> Import organization
+          </Button>
         }
       />
       <DataTable

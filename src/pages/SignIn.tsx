@@ -4,18 +4,16 @@ import { useAuth } from '../auth/AuthContext'
 import { beginOAuth } from '../auth/session'
 import { BrandIcon } from '../components/BrandIcon'
 import { Button } from '../components/Button'
-import { Segmented, SelectField, TextField } from '../components/Field'
+import { SelectField, TextField } from '../components/Field'
 import { authApi, errorMessage, errorStatus } from '../services/api'
 import type { Platform, Providers } from '../types'
 
-type Mode = 'user' | 'admin'
-
 const PLATFORM_NAMES: Record<Platform, string> = { github: 'GitHub', gitlab: 'GitLab' }
 
-function explain(err: unknown, mode: Mode): string {
+function explain(err: unknown): string {
   const status = errorStatus(err)
-  if (status === 401) return mode === 'admin' ? 'That admin token was rejected.' : 'The platform rejected that token.'
-  if (status === 403) return 'You are not whitelisted on this server yet. Ask the operator to add your account.'
+  if (status === 401) return 'The platform rejected that token.'
+  if (status === 403) return 'You are not whitelisted on this server yet. Ask the owner to add your account.'
   return errorMessage(err)
 }
 
@@ -41,11 +39,10 @@ function ProviderButton({ platform }: { platform: Platform }) {
 
 export function SignIn() {
   const { signIn, oauthError } = useAuth()
-  const [mode, setMode] = useState<Mode>('user')
   const [platform, setPlatform] = useState<Platform>('github')
   const [token, setToken] = useState('')
   const [busy, setBusy] = useState(false)
-  const [error, setError] = useState<string | null>(() => (oauthError ? explain(oauthError, 'user') : null))
+  const [error, setError] = useState<string | null>(() => (oauthError ? explain(oauthError) : null))
   const [providers, setProviders] = useState<Providers | null>(null)
   const [showToken, setShowToken] = useState(false)
 
@@ -58,16 +55,16 @@ export function SignIn() {
 
   const enabled = providers ? (Object.keys(PLATFORM_NAMES) as Platform[]).filter((p) => providers[p]) : []
   // With no sign-in buttons configured, the token form is the only way in, so show it.
-  const tokenFormOpen = mode === 'admin' || showToken || (providers !== null && enabled.length === 0)
+  const tokenFormOpen = showToken || (providers !== null && enabled.length === 0)
 
   const submit = async (e: FormEvent) => {
     e.preventDefault()
     setBusy(true)
     setError(null)
     try {
-      await signIn({ mode, platform, token: token.trim() })
+      await signIn({ platform, token: token.trim() })
     } catch (err) {
-      setError(explain(err, mode))
+      setError(explain(err))
     } finally {
       setBusy(false)
     }
@@ -85,20 +82,7 @@ export function SignIn() {
         </div>
 
         <div className="card mt-8 space-y-5 p-6">
-          <Segmented
-            label="Sign in as"
-            value={mode}
-            onChange={(m) => {
-              setMode(m)
-              setError(null)
-            }}
-            options={[
-              { value: 'user', label: 'User' },
-              { value: 'admin', label: 'Operator' },
-            ]}
-          />
-
-          {mode === 'user' && enabled.length > 0 && (
+          {enabled.length > 0 && (
             <div className="space-y-2.5">
               {enabled.map((p) => (
                 <ProviderButton key={p} platform={p} />
@@ -112,7 +96,7 @@ export function SignIn() {
             </p>
           )}
 
-          {mode === 'user' && enabled.length > 0 && (
+          {enabled.length > 0 && (
             <button
               type="button"
               aria-expanded={showToken}
@@ -128,24 +112,21 @@ export function SignIn() {
 
           {tokenFormOpen && (
             <form onSubmit={submit} className="enter space-y-4">
-              {/* The operator works on one platform at a time too, and sees only its content. */}
               <SelectField label="Platform" value={platform} onChange={(e) => setPlatform(e.target.value as Platform)}>
                 <option value="github">GitHub</option>
                 <option value="gitlab">GitLab</option>
               </SelectField>
               <TextField
-                label={mode === 'admin' ? 'Admin token' : 'Personal access token'}
+                label="Personal access token"
                 type="password"
                 autoComplete="off"
                 required
                 value={token}
                 onChange={(e) => setToken(e.target.value)}
                 hint={
-                  mode === 'admin'
-                    ? 'The ADMIN_TOKEN configured on git-server-agents.'
-                    : platform === 'github'
-                      ? 'Needs the read:org scope. Used to check who you are and which orgs you own; never stored by the server.'
-                      : 'Needs the read_api scope. Used to check who you are and which groups you own; never stored by the server.'
+                  platform === 'github'
+                    ? 'Needs the read:org scope. Used to check who you are and which orgs you own; never stored by the server.'
+                    : 'Needs the read_api scope. Used to check who you are and which groups you own; never stored by the server.'
                 }
               />
               <Button type="submit" variant="primary" busy={busy} className="w-full">

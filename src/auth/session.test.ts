@@ -2,20 +2,16 @@ import { describe, expect, it } from 'vitest'
 import { authHeaders, beginOAuth, FOREIGN_SIGNIN, loadSession, readOAuthReturn, saveSession, takeOAuthReturn } from './session'
 
 describe('session', () => {
-  it('sends only a bearer token for the operator', () => {
-    expect(authHeaders({ mode: 'admin', platform: 'github', token: 't' })).toEqual({ Authorization: 'Bearer t', 'X-Platform': 'github' })
-  })
-
   it('adds the platform for a user', () => {
-    expect(authHeaders({ mode: 'user', platform: 'gitlab', token: 'glpat' })).toEqual({
+    expect(authHeaders({ platform: 'gitlab', token: 'glpat' })).toEqual({
       Authorization: 'Bearer glpat',
       'X-Platform': 'gitlab',
     })
   })
 
   it('keeps the session in memory only and clears it on sign-out', () => {
-    saveSession({ mode: 'user', platform: 'github', token: 'ghp' })
-    expect(loadSession()).toEqual({ mode: 'user', platform: 'github', token: 'ghp' })
+    saveSession({ platform: 'github', token: 'ghp' })
+    expect(loadSession()).toEqual({ platform: 'github', token: 'ghp' })
     expect(sessionStorage.length).toBe(0)
     expect(localStorage.length).toBe(0)
     saveSession(null)
@@ -56,11 +52,14 @@ describe('session', () => {
   })
 
   it('never keeps a malformed session', () => {
-    saveSession({ mode: 'user', platform: 'github', token: 'has space' } as never)
+    saveSession({ platform: 'github', token: 'has space' } as never)
     expect(loadSession()).toBeNull()
-    saveSession({ mode: 'admin', platform: 'github', token: 't', extra: 'x' } as never)
+    saveSession({ platform: 'github', token: 't', extra: 'x' } as never)
     expect(loadSession()).toBeNull()
-    saveSession({ mode: 'admin', platform: 'github', token: 't' })
-    expect(loadSession()).toEqual({ mode: 'admin', platform: 'github', token: 't' })
+    // The old operator shape is not a session any more.
+    saveSession({ mode: 'admin', token: 't' } as never)
+    expect(loadSession()).toBeNull()
+    saveSession({ platform: 'github', token: 't' })
+    expect(loadSession()).toEqual({ platform: 'github', token: 't' })
   })
 })

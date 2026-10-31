@@ -22,7 +22,7 @@ const ghost: Account = { ...owen, id: '404', login: '404', name: null, avatarUrl
 describe('Users', () => {
   it('lists users with their platform profile and role, and no Platform column', async () => {
     vi.spyOn(adminApi, 'accounts').mockResolvedValue([owen, ghost])
-    renderAs({ mode: 'user', platform: 'github', token: 'gho' }, <Users />)
+    renderAs({ platform: 'github', token: 'gho' }, <Users />)
     const table = await screen.findByRole('table', { name: 'Whitelisted users' })
     const [, first, second] = within(table).getAllByRole('row')
     expect(first).toHaveTextContent('Owen')
@@ -36,7 +36,7 @@ describe('Users', () => {
   it('whitelists a user of the session platform by ID alone', async () => {
     vi.spyOn(adminApi, 'accounts').mockResolvedValue([])
     const create = vi.spyOn(adminApi, 'createAccount').mockResolvedValue({ ...ghost, platform: 'gitlab', id: '7', login: 'carol' })
-    renderAs({ mode: 'admin', platform: 'gitlab', token: 'admin' }, <Users />)
+    renderAs({ platform: 'gitlab', token: 'glpat' }, <Users />)
     await userEvent.click(await screen.findByRole('button', { name: 'Whitelist user' }))
     const dialog = screen.getByRole('dialog')
     expect(within(dialog).queryByLabelText('Platform')).toBeNull()

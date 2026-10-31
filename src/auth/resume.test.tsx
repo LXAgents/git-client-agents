@@ -11,11 +11,11 @@ function Probe() {
   const { session, checking, signOut, signIn } = useAuth()
   return (
     <div>
-      <p>{checking ? 'checking' : session ? `signed in with ${session.mode === 'user' ? session.platform : 'admin'}` : 'signed out'}</p>
+      <p>{checking ? 'checking' : session ? `signed in with ${session.platform}` : 'signed out'}</p>
       <button type="button" onClick={signOut}>
         sign out
       </button>
-      <button type="button" onClick={() => void signIn({ mode: 'user', platform: 'gitlab', token: 'glpat' })}>
+      <button type="button" onClick={() => void signIn({ platform: 'gitlab', token: 'glpat' })}>
         paste token
       </button>
     </div>

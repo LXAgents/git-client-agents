@@ -28,7 +28,7 @@ function Routed() {
         {isOwner && <Route path="users" element={<Users />} />}
         <Route path="orgs" element={<Organizations />} />
         <Route path="repos" element={<Repositories />} />
-        {session.mode === 'user' && <Route path="models" element={<Models />} />}
+        <Route path="models" element={<Models />} />
         <Route path="keys" element={<ApiKeys />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
