@@ -1,9 +1,19 @@
 export type Platform = 'github' | 'gitlab'
 
-export interface Account {
+/** Lower case, as stored on the server. Only "owner" carries rights today. */
+export type Role = 'owner' | 'member'
+
+/** Read from GitHub or GitLab by the server, never stored. `login` is the numeric id when the platform gave no answer. */
+export interface Profile {
+  login: string
+  name: string | null
+  avatarUrl: string | null
+}
+
+export interface Account extends Profile {
   platform: Platform
   id: string
-  username: string | null
+  role: Role
   keyCount: number
   orgCount: number
   createdAt: string
@@ -14,7 +24,7 @@ export interface Org {
   platform: Platform
   orgName: string
   installationId: string | null
-  owner: { platform: Platform; id: string; username: string | null }
+  owner: { platform: Platform; id: string } & Profile
   keyCount?: number
   /** Model per modality, e.g. { text: 'openai/gpt-5' }. */
   models?: ModelSettings
@@ -76,13 +86,10 @@ export interface ImportableOrg {
   appInstallationId: string | null
 }
 
-export interface Me {
+export interface Me extends Profile {
   platform: Platform
   id: string
-  login: string
-  username: string | null
-  /** True when the user's ID is in GITHUB_ADMIN_ID or GITLAB_ADMIN_ID on the server. */
-  isAdmin?: boolean
+  role: Role
 }
 
 export type Providers = Record<Platform, boolean>

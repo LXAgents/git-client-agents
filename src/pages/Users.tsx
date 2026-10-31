@@ -3,28 +3,51 @@ import { Plus } from 'lucide-react'
 import { Button } from '../components/Button'
 import { ConfirmDelete } from '../components/ConfirmDelete'
 import { DataTable, type Column } from '../components/DataTable'
-import { SelectField, TextField } from '../components/Field'
+import { TextField } from '../components/Field'
 import { Modal } from '../components/Modal'
-import { PageHeader, PlatformBadge } from '../components/PageHeader'
+import { Badge, PageHeader } from '../components/PageHeader'
+import { useAuth } from '../auth/AuthContext'
+import { BrandIcon } from '../components/BrandIcon'
 import { useToast } from '../components/Toast'
 import { formatDate } from '../format'
 import { useLoad } from '../hooks/useLoad'
 import { adminApi, errorMessage } from '../services/api'
-import type { Account, Platform } from '../types'
+import type { Account } from '../types'
+
+const PLATFORM_NAMES = { github: 'GitHub', gitlab: 'GitLab' } as const
+
+// The user's avatar, name and login, as GitHub or GitLab reports them. Nothing here is stored.
+function UserCell({ account }: { account: Account }) {
+  return (
+    <span className="flex items-center gap-3">
+      {account.avatarUrl ? (
+        <img src={account.avatarUrl} alt="" className="size-8 shrink-0 rounded-full object-cover" referrerPolicy="no-referrer" />
+      ) : (
+        <span className="grid size-8 shrink-0 place-items-center rounded-full bg-overlay">
+          <BrandIcon platform={account.platform} className="size-4" />
+        </span>
+      )}
+      <span className="min-w-0">
+        <span className="block truncate font-semibold">{account.name ?? account.login}</span>
+        {account.name && <span className="block truncate text-xs text-fg-muted">@{account.login}</span>}
+      </span>
+    </span>
+  )
+}
 
 function AddUserModal({ onClose, onAdded }: { onClose: () => void; onAdded: () => void }) {
   const toast = useToast()
-  const [platform, setPlatform] = useState<Platform>('github')
+  const { session } = useAuth()
   const [userId, setUserId] = useState('')
-  const [username, setUsername] = useState('')
   const [busy, setBusy] = useState(false)
+  const platformName = PLATFORM_NAMES[session?.platform ?? 'github']
 
   const submit = async (e: FormEvent) => {
     e.preventDefault()
     setBusy(true)
     try {
-      await adminApi.createAccount({ platform, userId: userId.trim(), username: username.trim() })
-      toast.success(`Whitelisted ${username || userId}`)
+      const added = await adminApi.createAccount({ userId: userId.trim() })
+      toast.success(`Whitelisted ${added.login}`)
       onAdded()
       onClose()
     } catch (err) {
@@ -37,19 +60,14 @@ function AddUserModal({ onClose, onAdded }: { onClose: () => void; onAdded: () =
   return (
     <Modal title="Whitelist a user" onClose={onClose}>
       <form onSubmit={submit} className="space-y-4">
-        <SelectField label="Platform" value={platform} onChange={(e) => setPlatform(e.target.value as Platform)}>
-          <option value="github">GitHub</option>
-          <option value="gitlab">GitLab</option>
-        </SelectField>
         <TextField
-          label="User ID"
+          label={`${platformName} user ID`}
           required
           inputMode="numeric"
           value={userId}
           onChange={(e) => setUserId(e.target.value)}
-          hint="The numeric account id, not the login: logins can be renamed and claimed by someone else."
+          hint={`The numeric account id, not the login: logins can be renamed and claimed by someone else. Their name and avatar are read from ${platformName}.`}
         />
-        <TextField label="Username" required value={username} onChange={(e) => setUsername(e.target.value)} />
         <div className="flex justify-end gap-2 pt-2">
           <Button onClick={onClose}>Cancel</Button>
           <Button type="submit" variant="primary" busy={busy}>
@@ -69,7 +87,7 @@ export function Users() {
   const remove = async (a: Account) => {
     try {
       await adminApi.deleteAccount(a.platform, a.id)
-      toast.success(`Removed ${a.username || a.id}`)
+      toast.success(`Removed ${a.login}`)
       await reload()
     } catch (err) {
       toast.error(errorMessage(err))
@@ -77,8 +95,8 @@ export function Users() {
   }
 
   const columns: Column<Account>[] = [
-    { header: 'User', cell: (a) => <span className="font-semibold">{a.username || '—'}</span> },
-    { header: 'Platform', className: 'text-center', cell: (a) => <PlatformBadge platform={a.platform} /> },
+    { header: 'User', cell: (a) => <UserCell account={a} /> },
+    { header: 'Role', cell: (a) => (a.role === 'owner' ? <Badge tone="accent">Owner</Badge> : <Badge>Member</Badge>) },
     { header: 'User ID', cell: (a) => <code className="font-mono text-xs text-fg-muted">{a.id}</code> },
     { header: 'Keys', cell: (a) => a.keyCount, className: 'tabular-nums' },
     { header: 'Orgs', cell: (a) => a.orgCount, className: 'tabular-nums' },
@@ -88,9 +106,9 @@ export function Users() {
       className: 'text-right',
       cell: (a) => (
         <ConfirmDelete
-          label={`Remove ${a.username || a.id}`}
+          label={`Remove ${a.login}`}
           title="Remove user"
-          message={`Remove ${a.username || a.id} from the whitelist? Orgs they imported and all of their keys are deleted too.`}
+          message={`Remove ${a.login} from the whitelist? Orgs they imported and all of their keys are deleted too.`}
           onConfirm={() => remove(a)}
         />
       ),

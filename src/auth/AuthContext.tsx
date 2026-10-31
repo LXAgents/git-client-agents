@@ -8,7 +8,7 @@ interface AuthState {
   session: Session | null
   me: Me | null
   /** The operator token, or a user whose ID the server lists in GITHUB_ADMIN_ID / GITLAB_ADMIN_ID. */
-  isAdmin: boolean
+  isOwner: boolean
   checking: boolean
   /** Why the last "Continue with GitHub/GitLab" failed, for the sign-in page. */
   oauthError: unknown
@@ -103,10 +103,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [session],
   )
 
-  const isAdmin = session?.mode === 'admin' || Boolean(me?.isAdmin)
+  const isOwner = session?.mode === 'admin' || me?.role === 'owner'
   const value = useMemo(
-    () => ({ session, me, isAdmin, checking, oauthError, signIn, signOut }),
-    [session, me, isAdmin, checking, oauthError, signIn, signOut],
+    () => ({ session, me, isOwner, checking, oauthError, signIn, signOut }),
+    [session, me, isOwner, checking, oauthError, signIn, signOut],
   )
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

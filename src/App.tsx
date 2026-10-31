@@ -12,7 +12,7 @@ import { SignIn } from './pages/SignIn'
 import { Users } from './pages/Users'
 
 function Routed() {
-  const { session, isAdmin, checking } = useAuth()
+  const { session, isOwner, checking } = useAuth()
   if (checking) {
     return (
       <div className="flex min-h-dvh items-center justify-center text-sm text-fg-muted">
@@ -25,7 +25,7 @@ function Routed() {
     <Routes>
       <Route element={<Layout />}>
         <Route index element={<Home />} />
-        {isAdmin && <Route path="users" element={<Users />} />}
+        {isOwner && <Route path="users" element={<Users />} />}
         <Route path="orgs" element={<Organizations />} />
         <Route path="repos" element={<Repositories />} />
         {session.mode === 'user' && <Route path="models" element={<Models />} />}

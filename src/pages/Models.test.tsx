@@ -23,7 +23,7 @@ const acme: Org = {
   platform: 'github',
   orgName: 'acme',
   installationId: '555',
-  owner: { platform: 'github', id: '1001', username: 'alice' },
+  owner: { platform: 'github', id: '1001', login: 'alice', name: null, avatarUrl: null },
   models: { text: 'openai/gpt-5' },
   createdAt: '2026-10-31T00:00:00Z',
 }
@@ -39,7 +39,7 @@ const web: Repo = {
 
 describe('Models', () => {
   beforeEach(() => {
-    vi.spyOn(userApi, 'me').mockResolvedValue({ platform: 'github', id: '1001', login: 'alice', username: 'alice' })
+    vi.spyOn(userApi, 'me').mockResolvedValue({ platform: 'github', id: '1001', login: 'alice', name: null, avatarUrl: null, role: 'member' as const })
     vi.spyOn(userApi, 'ownModels').mockResolvedValue({})
     vi.spyOn(userApi, 'orgs').mockResolvedValue([acme])
     vi.spyOn(userApi, 'repos').mockResolvedValue([web])
