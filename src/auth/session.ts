@@ -42,9 +42,14 @@ export function loadSession(): Session | null {
   return devToken ? { mode: 'admin', token: devToken } : null
 }
 
+// Only a checked session is written, rebuilt field by field so nothing else rides along.
+function storable(session: Session): Session {
+  return session.mode === 'admin' ? { mode: 'admin', token: session.token } : { mode: 'user', platform: session.platform, token: session.token }
+}
+
 export function saveSession(session: Session | null) {
   try {
-    if (session) sessionStorage.setItem(STORAGE_KEY, JSON.stringify(session))
+    if (session && isSession(session)) sessionStorage.setItem(STORAGE_KEY, JSON.stringify(storable(session)))
     else sessionStorage.removeItem(STORAGE_KEY)
   } catch {
     // The session still lives in memory for this page load.
@@ -65,10 +70,45 @@ export function readOAuthReturn(hash: string): OAuthReturn | null {
   return null
 }
 
-// Takes the OAuth result out of the address bar, so the token is not left in history or bookmarks.
+const NONCE_KEY = 'git-client-agents.oauth-nonce'
+export const SIGNIN_PARAM = 'signin'
+export const FOREIGN_SIGNIN = "Sign-in wasn't started from this tab. Try again."
+
+// "Continue with GitHub/GitLab" stores a one-time nonce and sends it out in the redirect
+// (?signin=…). Only a return that brings the same nonce back is accepted, so a link someone
+// else made (#platform=…&token=<their token>) can't sign this tab in as their account.
+export function beginOAuth(): string {
+  const nonce = crypto.randomUUID()
+  try {
+    sessionStorage.setItem(NONCE_KEY, nonce)
+  } catch {
+    // Without storage the return can't be matched and is refused.
+  }
+  return nonce
+}
+
+function takeNonce(): string | null {
+  try {
+    const nonce = sessionStorage.getItem(NONCE_KEY)
+    sessionStorage.removeItem(NONCE_KEY)
+    return nonce
+  } catch {
+    return null
+  }
+}
+
+// Takes the OAuth result (and the nonce) out of the address bar, so the token is not left in
+// history or bookmarks.
 export function takeOAuthReturn(): OAuthReturn | null {
   const result = readOAuthReturn(window.location.hash)
-  if (result) window.history.replaceState(window.history.state, '', window.location.pathname + window.location.search)
+  if (!result) return null
+  const query = new URLSearchParams(window.location.search)
+  const given = query.get(SIGNIN_PARAM)
+  query.delete(SIGNIN_PARAM)
+  const search = query.size ? `?${query}` : ''
+  window.history.replaceState(window.history.state, '', window.location.pathname + search)
+  const expected = takeNonce()
+  if (!given || !expected || given !== expected) return { error: FOREIGN_SIGNIN }
   return result
 }
 

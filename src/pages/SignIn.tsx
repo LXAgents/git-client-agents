@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Bot, ChevronDown } from 'lucide-react'
 import { useAuth } from '../auth/AuthContext'
+import { beginOAuth } from '../auth/session'
 import { BrandIcon } from '../components/BrandIcon'
 import { Button } from '../components/Button'
 import { Segmented, SelectField, TextField } from '../components/Field'
@@ -26,6 +27,10 @@ function ProviderButton({ platform }: { platform: Platform }) {
   return (
     <a
       href={authApi.startUrl(platform)}
+      onClick={(e) => {
+        e.preventDefault()
+        window.location.assign(authApi.startUrl(platform, beginOAuth()))
+      }}
       className={`flex h-11 items-center justify-center gap-2.5 rounded-xl text-sm font-medium shadow-xs transition-[background-color,scale] duration-200 active:scale-[0.98] ${look}`}
     >
       <BrandIcon platform={platform} />
