@@ -45,6 +45,9 @@ describe('API keys as a user', () => {
     vi.spyOn(userApi, 'repos').mockResolvedValue([web])
     vi.spyOn(userApi, 'repoKeys').mockResolvedValue([])
     vi.spyOn(userApi, 'providers').mockResolvedValue(PROVIDERS)
+    vi.spyOn(userApi, 'workspaceKeys').mockResolvedValue([])
+    vi.spyOn(userApi, 'orgWorkspaceKeys').mockResolvedValue([])
+    vi.spyOn(userApi, 'repoWorkspaceKeys').mockResolvedValue([])
   })
 
   it('attaches a key to a repository the user administers, and deletes it through the repo route', async () => {

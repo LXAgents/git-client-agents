@@ -5,6 +5,7 @@ import { Button } from '../components/Button'
 import { ConfirmDelete } from '../components/ConfirmDelete'
 import { DataTable, type Column } from '../components/DataTable'
 import { AddKeyModal } from '../components/AddKeyModal'
+import { WorkspaceKeys } from '../components/WorkspaceKeys'
 import { Badge, PageHeader } from '../components/PageHeader'
 import { useToast } from '../components/Toast'
 import { formatDate } from '../format'
@@ -22,7 +23,7 @@ function OwnerIcon({ type }: { type: ApiKey['owner']['type'] }) {
 
 export function ApiKeys() {
   const toast = useToast()
-  const { isOwner } = useAuth()
+  const { isOwner, session } = useAuth()
   const { data, loading, reload } = useLoad(useCallback(() => loadKeys(isOwner), [isOwner]))
   const [adding, setAdding] = useState(false)
 
@@ -83,6 +84,7 @@ export function ApiKeys() {
       />
       <DataTable label="API keys" columns={columns} rows={data?.keys ?? null} rowKey={(k) => k.id} loading={loading} empty="No API keys yet." />
       {adding && data && <AddKeyModal data={data} onClose={() => setAdding(false)} onAdded={reload} />}
+      {session?.platform === 'github' && <WorkspaceKeys />}
     </>
   )
 }
