@@ -1,7 +1,7 @@
 ---
 name: wiki-refactor
 description: Task record for moving the dashboard's human documentation from README.md into wiki/ pages and routing them from .agents/index (docs only, no release).
-status: in progress
+status: done
 ---
 
 # Wiki refactor (dashboard)
@@ -18,9 +18,16 @@ status: in progress
 
 | # | Title | Scope | Repository | Branch | Files / areas | PR |
 |---|---|---|---|---|---|---|
-| 1 | Plan | This record | git-client-agents | `plan/wiki-refactor` | `.agents/memory/` | |
-| 2 | Wiki | Pages, indexes, README | git-client-agents | `docs/wiki-refactor` | `wiki/`, `.agents/index/`, `README.md` | |
+| 1 | Plan | This record | git-client-agents | `plan/wiki-refactor` | `.agents/memory/` | #66 |
+| 2 | Wiki | Pages, indexes, README | git-client-agents | `docs/wiki-refactor` | `wiki/`, `.agents/index/`, `README.md` | #67 |
 
 ### Task 1 — plan/wiki-refactor
 
 This record was written before the work. Nothing else changed.
+
+### Task 2 — docs/wiki-refactor
+
+- README went from 116 to 24 lines: an overview, a quick start, and a table of wiki links.
+- New pages: `wiki/reference/pages.md`, `wiki/reference/configuration.md`, `wiki/guides/development.md` and `wiki/guides/docker.md`.
+- Corrected while moving: keys and model lists are per provider, and the server needs 1.14.0 or later.
+- `.agents/index/`: `root-index.md`, `project-wiki-index.md`, a rebuilt `memory-index.md`, and a `memory-tasks-index.md` child, since tasks/ holds more than 10 files. Every link resolves.
