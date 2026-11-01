@@ -18,8 +18,8 @@ status: done
 
 | # | Title | Scope | Repository | Branch | Files / areas | PR |
 |---|---|---|---|---|---|---|
-| 1 | Plan | This record | git-client-agents | `plan/wiki-refactor` | `.agents/memory/` | |
-| 2 | Wiki | Pages, indexes, README | git-client-agents | `docs/wiki-refactor` | `wiki/`, `.agents/index/`, `README.md` | |
+| 1 | Plan | This record | git-client-agents | `plan/wiki-refactor` | `.agents/memory/` | #66 |
+| 2 | Wiki | Pages, indexes, README | git-client-agents | `docs/wiki-refactor` | `wiki/`, `.agents/index/`, `README.md` | #67 |
 
 ### Task 1 — plan/wiki-refactor
 
