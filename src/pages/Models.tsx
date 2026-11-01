@@ -97,7 +97,7 @@ export function Models() {
 
   const picker = (() => {
     if (!editing || !data) return null
-    const common = { onClose: () => setEditing(null), onSave: (m: Modality, choice: ModelChoice | null) => save(editing, m, choice) }
+    const common = { providers, onClose: () => setEditing(null), onSave: (m: Modality, choice: ModelChoice | null) => save(editing, m, choice) }
     if (editing.kind === 'user') return <ModelPicker title="Your model" current={data.own.text} fallback={ownFallback} {...common} />
     if (editing.kind === 'org')
       return <ModelPicker title={`Model for ${editing.org.orgName}`} current={editing.org.models?.text} fallback={orgFallback} scope={{ orgId: editing.org.id }} {...common} />

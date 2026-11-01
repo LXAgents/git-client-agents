@@ -1,183 +1,17 @@
-import { useCallback, useState, type FormEvent } from 'react'
+import { useCallback, useState } from 'react'
 import { Building2, FolderGit2, Plus, User } from 'lucide-react'
 import { useAuth } from '../auth/AuthContext'
 import { Button } from '../components/Button'
 import { ConfirmDelete } from '../components/ConfirmDelete'
 import { DataTable, type Column } from '../components/DataTable'
-import { Segmented, SelectField, TextField } from '../components/Field'
-import { Modal } from '../components/Modal'
+import { AddKeyModal } from '../components/AddKeyModal'
 import { Badge, PageHeader } from '../components/PageHeader'
 import { useToast } from '../components/Toast'
 import { formatDate } from '../format'
 import { useLoad } from '../hooks/useLoad'
-import { adminApi, errorMessage, userApi } from '../services/api'
-import { DEFAULT_PROVIDER } from '../modalities'
-import type { Account, AiProvider, ApiKey, Org, Repo } from '../types'
-
-type Target = 'user' | 'org' | 'repo'
-
-interface KeysData {
-  keys: ApiKey[]
-  orgs: Org[]
-  repos: Repo[]
-  accounts: Account[]
-  providers: AiProvider[]
-}
-
-async function loadAdmin(): Promise<KeysData> {
-  const [keys, orgs, accounts, providers] = await Promise.all([adminApi.keys(), adminApi.orgs(), adminApi.accounts(), adminApi.providers()])
-  return { keys, orgs, repos: [], accounts, providers }
-}
-
-// A user sees their own keys and the keys of each org they own and each repository they
-// administer; the server checks ownership again for every org and repository request.
-async function loadUser(): Promise<KeysData> {
-  const [own, orgs, repos, providers] = await Promise.all([userApi.keys(), userApi.orgs(), userApi.repos(), userApi.providers()])
-  const [orgKeys, repoKeys] = await Promise.all([
-    Promise.all(orgs.map((o) => userApi.orgKeys(o.id))),
-    Promise.all(repos.map((r) => userApi.repoKeys(r.id))),
-  ])
-  const keys = [...own, ...orgKeys.flat(), ...repoKeys.flat()].sort((a, b) => b.priority - a.priority)
-  return { keys, orgs, repos, accounts: [], providers }
-}
-
-// What each provider's keys start with, as a hint only.
-const KEY_PLACEHOLDER: Record<string, string> = { openrouter: 'sk-or-…', openai: 'sk-…', anthropic: 'sk-ant-…', deepseek: 'sk-…' }
-
-function AddKeyModal({ data, onClose, onAdded }: { data: KeysData; onClose: () => void; onAdded: () => void }) {
-  const toast = useToast()
-  const { me, isOwner } = useAuth()
-  const [target, setTarget] = useState<Target>('user')
-  const [accountId, setAccountId] = useState(data.accounts[0]?.id ?? '')
-  const [orgId, setOrgId] = useState(data.orgs[0]?.id ?? '')
-  const [repoId, setRepoId] = useState(data.repos[0]?.id ?? '')
-  const [provider, setProvider] = useState(data.providers[0]?.id ?? DEFAULT_PROVIDER)
-  const [apiKey, setApiKey] = useState('')
-  const [priority, setPriority] = useState('0')
-  const [busy, setBusy] = useState(false)
-
-  const providerName = data.providers.find((p) => p.id === provider)?.name ?? provider
-  const noOrgs = target === 'org' && data.orgs.length === 0
-  const noRepos = target === 'repo' && data.repos.length === 0
-  const noUsers = isOwner && target === 'user' && data.accounts.length === 0
-
-  const submit = async (e: FormEvent) => {
-    e.preventDefault()
-    const key = { apiKey: apiKey.trim(), priority: Number(priority) || 0, provider }
-    setBusy(true)
-    try {
-      if (isOwner && target === 'user') {
-        await adminApi.createUserKey(accountId, key)
-      } else if (isOwner) {
-        await adminApi.createOrgKey(orgId, key)
-      } else if (target === 'user') {
-        await userApi.createKey(key)
-      } else if (target === 'org') {
-        await userApi.createOrgKey(orgId, key)
-      } else {
-        await userApi.createRepoKey(repoId, key)
-      }
-      toast.success('API key added')
-      onAdded()
-      onClose()
-    } catch (err) {
-      toast.error(errorMessage(err))
-    } finally {
-      setBusy(false)
-    }
-  }
-
-  return (
-    <Modal title="Add an API key" onClose={onClose}>
-      <form onSubmit={submit} className="space-y-4">
-        <Segmented
-          label="Attach to"
-          value={target}
-          onChange={setTarget}
-          options={[
-            { value: 'user', label: 'User' },
-            { value: 'org', label: 'Organization' },
-            ...(isOwner ? [] : [{ value: 'repo' as const, label: 'Repository' }]),
-          ]}
-        />
-        {target === 'user' &&
-          (isOwner ? (
-            <SelectField label="User" required value={accountId} onChange={(e) => setAccountId(e.target.value)} hint={noUsers ? 'Nobody has logged in yet.' : undefined}>
-              {data.accounts.map((a) => (
-                <option key={a.id} value={a.id}>
-                  {a.login} ({a.id})
-                </option>
-              ))}
-            </SelectField>
-          ) : (
-            <p className="rounded-xl bg-overlay px-3.5 py-2.5 text-sm">
-              Your key{me ? <> as <span className="font-semibold">{me.login}</span></> : null}. Used after any repository and organization keys you may use.
-            </p>
-          ))}
-        {target === 'org' && (
-          <SelectField
-            label="Organization"
-            required
-            value={orgId}
-            onChange={(e) => setOrgId(e.target.value)}
-            hint={noOrgs ? (isOwner ? 'No organizations have been imported yet.' : 'Import an organization you own first.') : 'Used for members of the organization, after repository keys.'}
-          >
-            {data.orgs.map((o) => (
-              <option key={o.id} value={o.id}>
-                {o.orgName}
-              </option>
-            ))}
-          </SelectField>
-        )}
-        {target === 'repo' && (
-          <SelectField
-            label="Repository"
-            required
-            value={repoId}
-            onChange={(e) => setRepoId(e.target.value)}
-            hint={noRepos ? 'Import a repository you administer first.' : 'Used first, for collaborators on the repository and members of its organization.'}
-          >
-            {data.repos.map((r) => (
-              <option key={r.id} value={r.id}>
-                {r.fullName}
-              </option>
-            ))}
-          </SelectField>
-        )}
-        <SelectField label="Provider" required value={provider} onChange={(e) => setProvider(e.target.value)} hint="The agent uses this key only for models of this provider.">
-          {data.providers.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.name}
-            </option>
-          ))}
-        </SelectField>
-        <TextField
-          label={`${providerName} API key`}
-          type="password"
-          autoComplete="off"
-          required
-          value={apiKey}
-          onChange={(e) => setApiKey(e.target.value)}
-          placeholder={KEY_PLACEHOLDER[provider] ?? 'Your key'}
-        />
-        <TextField
-          label="Priority"
-          type="number"
-          step={1}
-          value={priority}
-          onChange={(e) => setPriority(e.target.value)}
-          hint="Higher is tried first. If a key fails (quota, rate limit, revoked), the next one is used."
-        />
-        <div className="flex justify-end gap-2 pt-2">
-          <Button onClick={onClose}>Cancel</Button>
-          <Button type="submit" variant="primary" busy={busy} disabled={noOrgs || noRepos || noUsers}>
-            Add key
-          </Button>
-        </div>
-      </form>
-    </Modal>
-  )
-}
+import { errorMessage } from '../services/api'
+import { deleteKeyOf, loadKeys } from '../services/keys'
+import type { ApiKey } from '../types'
 
 const OWNER_LABEL: Record<ApiKey['owner']['type'], string> = { user: 'User', org: 'Organization', repo: 'Repository' }
 
@@ -189,15 +23,12 @@ function OwnerIcon({ type }: { type: ApiKey['owner']['type'] }) {
 export function ApiKeys() {
   const toast = useToast()
   const { isOwner } = useAuth()
-  const { data, loading, reload } = useLoad(useCallback(() => (isOwner ? loadAdmin() : loadUser()), [isOwner]))
+  const { data, loading, reload } = useLoad(useCallback(() => loadKeys(isOwner), [isOwner]))
   const [adding, setAdding] = useState(false)
 
   const remove = async (key: ApiKey) => {
     try {
-      if (isOwner) await adminApi.deleteKey(key.id)
-      else if (key.owner.type === 'org') await userApi.deleteOrgKey(key.owner.id, key.id)
-      else if (key.owner.type === 'repo') await userApi.deleteRepoKey(key.owner.id, key.id)
-      else await userApi.deleteKey(key.id)
+      await deleteKeyOf(isOwner, key)
       toast.success('API key deleted')
       await reload()
     } catch (err) {

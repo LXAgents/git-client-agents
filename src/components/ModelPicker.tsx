@@ -1,13 +1,15 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type UIEvent } from 'react'
-import { Check, KeyRound, Loader2, PenLine } from 'lucide-react'
-import { DEFAULT_PROVIDER, describeChoice, formatContext, matchesQuery, MODALITIES, perMillion } from '../modalities'
+import { useCallback, useMemo, useRef, useState, type UIEvent } from 'react'
+import { KeyRound, Loader2, PenLine } from 'lucide-react'
+import { DEFAULT_PROVIDER, describeChoice, matchesQuery } from '../modalities'
 import { useLoad } from '../hooks/useLoad'
-import { errorMessage, userApi } from '../services/api'
-import type { Modality, ModelChoice, ModelInfo, ModelScope, ProviderId } from '../types'
+import { useProviderModels } from '../hooks/useProviderModels'
+import { userApi } from '../services/api'
+import type { AiProvider, Modality, ModelChoice, ModelScope, ProviderId } from '../types'
 import { Button } from './Button'
 import { SearchField, SelectField } from './Field'
 import { Modal } from './Modal'
-import { Badge } from './PageHeader'
+import { ModalityTabs } from './model-picker/ModalityTabs'
+import { ModelRow } from './model-picker/ModelRow'
 
 // Rows rendered at a time. Scrolling near the bottom of the list adds the next batch.
 const PAGE = 100
@@ -22,70 +24,16 @@ interface Props {
   fallback: string
   /** Whose key lists the models of providers that need one: the org's or repository's, else the user's own. */
   scope?: ModelScope
+  /** The provider list, when the page has it already; otherwise the picker loads it. */
+  providers?: AiProvider[] | null
   onSave: (modality: Modality, choice: ModelChoice | null) => Promise<void>
   onClose: () => void
 }
 
-type ModelList = { provider: ProviderId; models: ModelInfo[] | null; error: string | null }
-
-// One provider's live list. A failure (most often: no key for that provider yet) is shown in
-// the picker instead of a toast, because it tells the user what to do next.
-function useProviderModels(modality: Modality, provider: ProviderId, scope: ModelScope) {
-  const [state, setState] = useState<ModelList | null>(null)
-  const { orgId, repoId } = scope
-  useEffect(() => {
-    let current = true
-    userApi
-      .models(modality, provider, { ...(orgId ? { orgId } : {}), ...(repoId ? { repoId } : {}) })
-      .then((models) => current && setState({ provider, models, error: null }))
-      .catch((err) => current && setState({ provider, models: null, error: errorMessage(err) }))
-    return () => {
-      current = false
-    }
-  }, [modality, provider, orgId, repoId])
-  // A list for another provider is stale while the new one loads.
-  return state?.provider === provider ? state : null
-}
-
-function ModelRow({ model, selected, onSelect }: { model: ModelInfo; selected: boolean; onSelect: () => void }) {
-  const context = formatContext(model.contextLength)
-  const input = perMillion(model.pricing.prompt)
-  const output = perMillion(model.pricing.completion)
-  return (
-    <li>
-      <button
-        type="button"
-        aria-pressed={selected}
-        onClick={onSelect}
-        className={`flex w-full items-start gap-3 px-3 py-2.5 text-left transition-colors ${selected ? 'bg-accent/10' : 'hover:bg-overlay'}`}
-      >
-        <span className={`mt-0.5 grid size-4 shrink-0 place-items-center rounded-full border ${selected ? 'border-accent bg-accent text-white' : 'border-line'}`}>
-          {selected && <Check aria-hidden className="size-3" />}
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="flex flex-wrap items-center gap-2">
-            <span className="truncate text-sm font-semibold">{model.name}</span>
-            {model.free && <Badge tone="success">Free</Badge>}
-          </span>
-          <code className="block truncate font-mono text-xs text-fg-muted">{model.id}</code>
-        </span>
-        <span className="shrink-0 text-right text-xs text-fg-muted tabular-nums">
-          {context && <span className="block">{context} context</span>}
-          {!model.free && input && output && (
-            <span className="block">
-              {input} / {output} per 1M
-            </span>
-          )}
-        </span>
-      </button>
-    </li>
-  )
-}
-
 // Picks a provider and one of its models for one owner. The provider's list is loaded live
 // when the picker opens or the provider changes, and filtered as you type; a model id that is
-// not listed can be typed in. Only the Text tab works today; the others are shown faded.
-export function ModelPicker({ title, current, fallback, scope = {}, onSave, onClose }: Props) {
+// not listed can be typed in.
+export function ModelPicker({ title, current, fallback, scope = {}, providers: given, onSave, onClose }: Props) {
   const [modality, setModality] = useState<Modality>('text')
   const [provider, setProvider] = useState<ProviderId>(current?.provider ?? DEFAULT_PROVIDER)
   const [query, setQuery] = useState('')
@@ -93,7 +41,9 @@ export function ModelPicker({ title, current, fallback, scope = {}, onSave, onCl
   const [busy, setBusy] = useState(false)
   const [limit, setLimit] = useState(PAGE)
   const listRef = useRef<HTMLUListElement>(null)
-  const { data: providers } = useLoad(useCallback(() => userApi.providers(), []))
+  // Loads the list only when the page did not pass one.
+  const { data: loaded } = useLoad(useCallback(() => (given ? Promise.resolve(given) : userApi.providers()), [given]))
+  const providers = given ?? loaded
   const list = useProviderModels(modality, provider, scope)
   const data = list?.models ?? null
   const providerName = providers?.find((p) => p.id === provider)?.name ?? provider
@@ -152,26 +102,7 @@ export function ModelPicker({ title, current, fallback, scope = {}, onSave, onCl
         </>
       }
     >
-      <div role="tablist" aria-label="Modality" className="-mx-1 flex gap-1 overflow-x-auto pb-1">
-        {MODALITIES.map(({ value, label, icon: Icon, available }) => (
-          <button
-            key={value}
-            type="button"
-            role="tab"
-            aria-selected={modality === value}
-            aria-disabled={!available}
-            disabled={!available}
-            title={available ? undefined : 'Coming soon'}
-            onClick={() => setModality(value)}
-            className={`flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium transition-colors ${
-              modality === value ? 'bg-accent/12 text-accent' : 'text-fg-muted hover:bg-overlay hover:text-fg'
-            } disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:bg-transparent disabled:hover:text-fg-muted`}
-          >
-            <Icon aria-hidden className="size-4" />
-            {label}
-          </button>
-        ))}
-      </div>
+      <ModalityTabs modality={modality} setModality={setModality} />
 
       <p className="text-sm text-fg-muted">
         {current ? (
