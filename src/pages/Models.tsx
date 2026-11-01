@@ -69,7 +69,7 @@ function Section({ title, empty, children }: { title: string; empty: string; chi
   )
 }
 
-// One place to pick the provider and model "@agents" uses: the repository's, then the
+// One place to pick the provider and model "@lxagents" uses: the repository's, then the
 // organization's, then the commenter's own, then openrouter/free on OpenRouter.
 export function Models() {
   const toast = useToast()
@@ -110,7 +110,7 @@ export function Models() {
         title="Models"
         description={
           <>
-            A comment that starts with <code className="font-mono text-fg">@agents</code> uses the repository’s provider and model, then the
+            A comment that starts with <code className="font-mono text-fg">@lxagents</code> uses the repository’s provider and model, then the
             organization’s, then the commenter’s own, then <code className="font-mono text-fg">{DEFAULT_MODEL}</code> on OpenRouter. Each answer
             is paid with a key for that provider, brought by the repository, organization or commenter. Start with{' '}
             <code className="font-mono text-fg">@vendor/model</code> to pick one OpenRouter model for a single comment.

@@ -19,7 +19,7 @@ const ACCESS_RULES = [
   'Organizations are only ever imported by one of their owners, and only when the app is installed.',
   'Org keys can be changed by org owners only. The server asks GitHub or GitLab every time.',
   'Repositories are imported by their admins, inside an imported organization.',
-  'A comment that starts with @agents uses the repository’s model, then the org’s, then your own, then openrouter/free.',
+  'A comment that starts with @lxagents uses the repository’s model, then the org’s, then your own, then openrouter/free.',
   'Keys are tried repository first, then the org’s, then your own, each highest priority first.',
 ]
 
