@@ -32,3 +32,15 @@ status: in progress
 ### Task 1 — plan/multi-provider-byok
 
 Record written before the work. Nothing else changed.
+
+### Task 2 — feat/multi-provider-byok
+
+- Types: `AiProvider`, `ModelChoice` (`{ provider, model }`), `ModelSettings` of choices,
+  `ModelScope` (`orgId` / `repoId`); keys carry `providerSlug`.
+- API client: `userApi.providers`, `adminApi.providers`; `models(modality, provider, scope)`;
+  model PUTs send `{ modality, provider, model }`; new keys send `provider`.
+- API keys page: Provider dropdown and a key label named after the provider.
+- Models page and picker: rows read "model on Provider"; the picker has a Provider dropdown,
+  lists that provider's live models with the row's org or repository key, shows the server's
+  "add a key first" message inline, and offers "Use … as the model id" for any typed id.
+- 52 tests, typecheck, lint and build pass.

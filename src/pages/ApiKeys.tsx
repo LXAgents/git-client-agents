@@ -11,7 +11,8 @@ import { useToast } from '../components/Toast'
 import { formatDate } from '../format'
 import { useLoad } from '../hooks/useLoad'
 import { adminApi, errorMessage, userApi } from '../services/api'
-import type { Account, ApiKey, Org, Repo } from '../types'
+import { DEFAULT_PROVIDER } from '../modalities'
+import type { Account, AiProvider, ApiKey, Org, Repo } from '../types'
 
 type Target = 'user' | 'org' | 'repo'
 
@@ -20,24 +21,28 @@ interface KeysData {
   orgs: Org[]
   repos: Repo[]
   accounts: Account[]
+  providers: AiProvider[]
 }
 
 async function loadAdmin(): Promise<KeysData> {
-  const [keys, orgs, accounts] = await Promise.all([adminApi.keys(), adminApi.orgs(), adminApi.accounts()])
-  return { keys, orgs, repos: [], accounts }
+  const [keys, orgs, accounts, providers] = await Promise.all([adminApi.keys(), adminApi.orgs(), adminApi.accounts(), adminApi.providers()])
+  return { keys, orgs, repos: [], accounts, providers }
 }
 
 // A user sees their own keys and the keys of each org they own and each repository they
 // administer; the server checks ownership again for every org and repository request.
 async function loadUser(): Promise<KeysData> {
-  const [own, orgs, repos] = await Promise.all([userApi.keys(), userApi.orgs(), userApi.repos()])
+  const [own, orgs, repos, providers] = await Promise.all([userApi.keys(), userApi.orgs(), userApi.repos(), userApi.providers()])
   const [orgKeys, repoKeys] = await Promise.all([
     Promise.all(orgs.map((o) => userApi.orgKeys(o.id))),
     Promise.all(repos.map((r) => userApi.repoKeys(r.id))),
   ])
   const keys = [...own, ...orgKeys.flat(), ...repoKeys.flat()].sort((a, b) => b.priority - a.priority)
-  return { keys, orgs, repos, accounts: [] }
+  return { keys, orgs, repos, accounts: [], providers }
 }
+
+// What each provider's keys start with, as a hint only.
+const KEY_PLACEHOLDER: Record<string, string> = { openrouter: 'sk-or-…', openai: 'sk-…', anthropic: 'sk-ant-…', deepseek: 'sk-…' }
 
 function AddKeyModal({ data, onClose, onAdded }: { data: KeysData; onClose: () => void; onAdded: () => void }) {
   const toast = useToast()
@@ -46,17 +51,19 @@ function AddKeyModal({ data, onClose, onAdded }: { data: KeysData; onClose: () =
   const [accountId, setAccountId] = useState(data.accounts[0]?.id ?? '')
   const [orgId, setOrgId] = useState(data.orgs[0]?.id ?? '')
   const [repoId, setRepoId] = useState(data.repos[0]?.id ?? '')
+  const [provider, setProvider] = useState(data.providers[0]?.id ?? DEFAULT_PROVIDER)
   const [apiKey, setApiKey] = useState('')
   const [priority, setPriority] = useState('0')
   const [busy, setBusy] = useState(false)
 
+  const providerName = data.providers.find((p) => p.id === provider)?.name ?? provider
   const noOrgs = target === 'org' && data.orgs.length === 0
   const noRepos = target === 'repo' && data.repos.length === 0
   const noUsers = isOwner && target === 'user' && data.accounts.length === 0
 
   const submit = async (e: FormEvent) => {
     e.preventDefault()
-    const key = { apiKey: apiKey.trim(), priority: Number(priority) || 0 }
+    const key = { apiKey: apiKey.trim(), priority: Number(priority) || 0, provider }
     setBusy(true)
     try {
       if (isOwner && target === 'user') {
@@ -137,7 +144,22 @@ function AddKeyModal({ data, onClose, onAdded }: { data: KeysData; onClose: () =
             ))}
           </SelectField>
         )}
-        <TextField label="OpenRouter API key" type="password" autoComplete="off" required value={apiKey} onChange={(e) => setApiKey(e.target.value)} placeholder="sk-or-…" />
+        <SelectField label="Provider" required value={provider} onChange={(e) => setProvider(e.target.value)} hint="The agent uses this key only for models of this provider.">
+          {data.providers.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.name}
+            </option>
+          ))}
+        </SelectField>
+        <TextField
+          label={`${providerName} API key`}
+          type="password"
+          autoComplete="off"
+          required
+          value={apiKey}
+          onChange={(e) => setApiKey(e.target.value)}
+          placeholder={KEY_PLACEHOLDER[provider] ?? 'Your key'}
+        />
         <TextField
           label="Priority"
           type="number"
@@ -219,8 +241,8 @@ export function ApiKeys() {
         title="API keys"
         description={
           isOwner
-            ? 'Every OpenRouter key on the server. Keys are shown by their last four characters only.'
-            : 'Your own keys, and the keys of organizations you own and repositories you administer. The agent tries repository keys, then organization keys, then the commenter’s own.'
+            ? 'Every AI provider key on the server, each brought by a user, organization or repository. Keys are shown by their last four characters only.'
+            : 'Bring your own key for each AI provider you use: yours, and those of organizations you own and repositories you administer. For the chosen provider the agent tries repository keys, then organization keys, then the commenter’s own.'
         }
         actions={
           <Button variant="primary" onClick={() => setAdding(true)} disabled={!data}>

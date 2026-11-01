@@ -2,7 +2,7 @@ import axios, { isAxiosError } from 'axios'
 import { authHeaders, type Session } from '../auth/session'
 import { apiBaseUrl } from '../config'
 import { trimTrailingSlashes } from '../utils/strings'
-import type { Account, ApiKey, ImportableOrg, ImportableRepo, LogLevel, LogPage, Me, Modality, ModelInfo, ModelSettings, Org, Platform, Providers, Repo } from '../types'
+import type { AiProvider, Account, ApiKey, ImportableOrg, ImportableRepo, LogLevel, LogPage, Me, Modality, ModelChoice, ModelInfo, ModelScope, ModelSettings, Org, Platform, ProviderId, Providers, Repo } from '../types'
 
 export const api = axios.create({
   baseURL: apiBaseUrl(),
@@ -37,7 +37,12 @@ export function errorStatus(err: unknown): number | undefined {
 export interface NewKey {
   apiKey: string
   priority: number
+  /** The AI provider the key is for, e.g. "openai". */
+  provider: ProviderId
 }
+
+// The body of a model PUT: null clears the choice so the owner falls back.
+const modelBody = (modality: Modality, choice: ModelChoice | null) => ({ modality, provider: choice?.provider ?? null, model: choice?.model ?? null })
 
 const data = <T>(p: Promise<{ data: T }>) => p.then((r) => r.data)
 
@@ -70,6 +75,7 @@ export const adminApi = {
   createOrgKey: (appInstallationId: string, key: NewKey) =>
     data(api.post<ApiKey>('/api/admin/keys', { target: 'org', appInstallationId, ...key })),
   deleteKey: (id: string) => api.delete(`/api/admin/keys/${id}`),
+  providers: () => data(api.get<AiProvider[]>('/api/admin/providers')),
   repos: () => data(api.get<Repo[]>('/api/admin/repos')),
   deleteRepo: (id: string) => api.delete(`/api/admin/repos/${id}`),
   // Newest first. `level` is the lowest level shown; pass the previous page's `next` as `before`.
@@ -90,13 +96,17 @@ export const userApi = {
   orgKeys: (orgId: string) => data(api.get<ApiKey[]>(`/api/user/orgs/${orgId}/keys`)),
   createOrgKey: (orgId: string, key: NewKey) => data(api.post<ApiKey>(`/api/user/orgs/${orgId}/keys`, key)),
   deleteOrgKey: (orgId: string, keyId: string) => api.delete(`/api/user/orgs/${orgId}/keys/${keyId}`),
-  setOrgModel: (orgId: string, modality: Modality, model: string | null) =>
-    data(api.put<ModelSettings>(`/api/user/orgs/${orgId}/models`, { modality, model })),
+  setOrgModel: (orgId: string, modality: Modality, choice: ModelChoice | null) =>
+    data(api.put<ModelSettings>(`/api/user/orgs/${orgId}/models`, modelBody(modality, choice))),
 
-  // OpenRouter's live model list (the server keeps it for a few minutes).
-  models: (modality: Modality) => data(api.get<ModelInfo[]>('/api/user/models', { params: { modality } })),
+  // The AI providers, for the provider dropdowns.
+  providers: () => data(api.get<AiProvider[]>('/api/user/providers')),
+  // One provider's live model list (the server keeps it for a few minutes). Providers other than
+  // OpenRouter list with a key: the user's own, or the org's or repository's in `scope`.
+  models: (modality: Modality, provider: ProviderId, scope: ModelScope = {}) =>
+    data(api.get<ModelInfo[]>('/api/user/models', { params: { modality, provider, ...scope } })),
   ownModels: () => data(api.get<ModelSettings>('/api/user/models/settings')),
-  setOwnModel: (modality: Modality, model: string | null) => data(api.put<ModelSettings>('/api/user/models/settings', { modality, model })),
+  setOwnModel: (modality: Modality, choice: ModelChoice | null) => data(api.put<ModelSettings>('/api/user/models/settings', modelBody(modality, choice))),
 
   // Repositories the user administers. The server asks the platform again on every call.
   repos: () => data(api.get<Repo[]>('/api/user/repos')),
@@ -106,6 +116,6 @@ export const userApi = {
   repoKeys: (repoId: string) => data(api.get<ApiKey[]>(`/api/user/repos/${repoId}/keys`)),
   createRepoKey: (repoId: string, key: NewKey) => data(api.post<ApiKey>(`/api/user/repos/${repoId}/keys`, key)),
   deleteRepoKey: (repoId: string, keyId: string) => api.delete(`/api/user/repos/${repoId}/keys/${keyId}`),
-  setRepoModel: (repoId: string, modality: Modality, model: string | null) =>
-    data(api.put<ModelSettings>(`/api/user/repos/${repoId}/models`, { modality, model })),
+  setRepoModel: (repoId: string, modality: Modality, choice: ModelChoice | null) =>
+    data(api.put<ModelSettings>(`/api/user/repos/${repoId}/models`, modelBody(modality, choice))),
 }

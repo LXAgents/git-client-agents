@@ -26,7 +26,7 @@ export interface Org {
   installationId: string | null
   owner: { platform: Platform; id: string } & Profile
   keyCount?: number
-  /** Model per modality, e.g. { text: 'openai/gpt-5' }. */
+  /** Provider and model per modality, e.g. { text: { provider: 'openai', model: 'gpt-5' } }. */
   models?: ModelSettings
   createdAt: string
 }
@@ -53,9 +53,36 @@ export interface ImportableRepo {
 
 export type Modality = 'text' | 'image' | 'video' | 'speech' | 'decisions' | 'embeddings' | 'rerank' | 'transcription' | 'audio'
 
-export type ModelSettings = Partial<Record<Modality, string>>
+/** An AI provider slug, as the server names it: openrouter, openai, anthropic, deepseek, zai. */
+export type ProviderId = string
 
-/** One model from OpenRouter's live list, as the server passes it on. */
+/** One AI provider, from GET /api/user/providers. */
+export interface AiProvider {
+  id: ProviderId
+  name: string
+  /** A model id to show as an example, e.g. "gpt-5". */
+  example: string
+  /** True when the provider lists its models only to a key holder (all but OpenRouter). */
+  keyForModels: boolean
+  /** True when the provider reports what an answer cost (OpenRouter only). */
+  reportsCost: boolean
+}
+
+/** What one owner picked for one modality. */
+export interface ModelChoice {
+  provider: ProviderId
+  model: string
+}
+
+export type ModelSettings = Partial<Record<Modality, ModelChoice>>
+
+/** Whose key lists a provider's models: the user's own (no ids), or an org's or repository's. */
+export interface ModelScope {
+  orgId?: string
+  repoId?: string
+}
+
+/** One model from a provider's live list, as the server passes it on. Only OpenRouter has prices. */
 export interface ModelInfo {
   id: string
   name: string
@@ -66,12 +93,15 @@ export interface ModelInfo {
   free: boolean
   inputModalities: string[]
   outputModalities: string[]
+  provider?: ProviderId
 }
 
 export interface ApiKey {
   id: string
   owner: { type: 'user' | 'org' | 'repo'; id: string; platform: Platform; name: string }
+  /** The provider's display name, e.g. "OpenAI". */
   provider: string
+  providerSlug?: ProviderId | null
   priority: number
   isActive: boolean
   last4: string | null
