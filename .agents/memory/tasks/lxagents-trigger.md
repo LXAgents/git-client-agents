@@ -23,3 +23,7 @@ status: in progress
 ### Task 1 — plan/lxagents-trigger
 
 This record was written before the work. Nothing else changed.
+
+### Task 2 — feat/lxagents-trigger
+
+Home, the Models page header and comment, and the README say `@lxagents`. The 52 tests, typecheck and lint pass.
