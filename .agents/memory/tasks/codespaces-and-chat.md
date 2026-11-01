@@ -24,3 +24,10 @@ status: in-progress
 ### Task 1 — plan/codespaces-and-chat
 
 This record was written before the work. Nothing else changed.
+
+### Task 2 — feat/workspace-keys
+
+- `services/api.ts`: workspace key calls for user, org and repo (`/api/user/.../workspace-keys`), and `sessionHeaders()` for fetch callers.
+- `services/workspaceKeys.ts`: load (sorted repo → org → user, then priority), create and delete by owner.
+- `components/WorkspaceKeys.tsx` + `AddWorkspaceKeyModal.tsx`: a Workspace keys section under the AI keys, GitHub sessions only.
+- Tests: `components/WorkspaceKeys.test.tsx`; 55 pass. Docs: `wiki/reference/pages.md`.

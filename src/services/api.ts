@@ -34,6 +34,17 @@ export function errorStatus(err: unknown): number | undefined {
   return isAxiosError(err) ? err.response?.status : undefined
 }
 
+// The headers of the current session, for calls made with fetch (the chat stream).
+export function sessionHeaders(): Record<string, string> {
+  return authHeaders(current)
+}
+
+export interface NewWorkspaceKey {
+  /** A GitHub personal access token with the codespace scope. */
+  token: string
+  priority: number
+}
+
 export interface NewKey {
   apiKey: string
   priority: number
@@ -118,4 +129,15 @@ export const userApi = {
   deleteRepoKey: (repoId: string, keyId: string) => api.delete(`/api/user/repos/${repoId}/keys/${keyId}`),
   setRepoModel: (repoId: string, modality: Modality, choice: ModelChoice | null) =>
     data(api.put<ModelSettings>(`/api/user/repos/${repoId}/models`, modelBody(modality, choice))),
+
+  // Workspace keys (GitHub Codespaces tokens) for the agent's workspace tools. GitHub only.
+  workspaceKeys: () => data(api.get<ApiKey[]>('/api/user/workspace-keys')),
+  createWorkspaceKey: (key: NewWorkspaceKey) => data(api.post<ApiKey>('/api/user/workspace-keys', key)),
+  deleteWorkspaceKey: (id: string) => api.delete(`/api/user/workspace-keys/${id}`),
+  orgWorkspaceKeys: (orgId: string) => data(api.get<ApiKey[]>(`/api/user/orgs/${orgId}/workspace-keys`)),
+  createOrgWorkspaceKey: (orgId: string, key: NewWorkspaceKey) => data(api.post<ApiKey>(`/api/user/orgs/${orgId}/workspace-keys`, key)),
+  deleteOrgWorkspaceKey: (orgId: string, keyId: string) => api.delete(`/api/user/orgs/${orgId}/workspace-keys/${keyId}`),
+  repoWorkspaceKeys: (repoId: string) => data(api.get<ApiKey[]>(`/api/user/repos/${repoId}/workspace-keys`)),
+  createRepoWorkspaceKey: (repoId: string, key: NewWorkspaceKey) => data(api.post<ApiKey>(`/api/user/repos/${repoId}/workspace-keys`, key)),
+  deleteRepoWorkspaceKey: (repoId: string, keyId: string) => api.delete(`/api/user/repos/${repoId}/workspace-keys/${keyId}`),
 }

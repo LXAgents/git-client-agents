@@ -49,6 +49,15 @@ log in again as Free.
 - Organization keys can be added or deleted by org owners only.
 - Keys are shown by their last four characters only.
 
+### Workspace keys (GitHub sessions)
+
+- Below the AI keys: GitHub personal access tokens with the `codespace` scope (and `repo` to
+  push), for yourself, an organization you own or a repository you administer.
+- With one, the agent can start a GitHub Codespace, run commands and push a branch for
+  commenters with write access. Keys are listed in the order the agent tries them: repository,
+  organization, yours, each highest priority first.
+- Codespaces run and bill on the token owner's account. GitLab sessions don't show the section.
+
 ## Models
 
 A comment that starts with `@lxagents` uses the repository's provider and model, then the
