@@ -1,7 +1,7 @@
 ---
 name: codespaces-and-chat
 description: Task record for the dashboard's workspace keys and 3-pane chat page (client 1.14.0), on top of server 1.18.0.
-status: in-progress
+status: done
 ---
 
 # Workspace keys and the 3-pane chat
@@ -16,10 +16,10 @@ status: in-progress
 
 | # | Title | Scope | Repository | Branch | Files / areas | PR |
 |---|---|---|---|---|---|---|
-| 1 | Plan | This record | git-client-agents | `plan/codespaces-and-chat` | `.agents/` | |
-| 2 | Workspace keys | API calls, keys section, add modal | git-client-agents | `feat/workspace-keys` | `src/services/`, `src/pages/ApiKeys.tsx`, `src/components/` | |
-| 3 | Chat | Chat API, stream reader, 3-pane page | git-client-agents | `feat/chat` | `src/services/chat.ts`, `src/hooks/`, `src/pages/Chat.tsx`, `src/nav.ts` | |
-| 4 | Release | 1.14.0 changelog and version | git-client-agents | `release/1.14.0` | `package.json`, `wiki/logs/` | |
+| 1 | Plan | This record | git-client-agents | `plan/codespaces-and-chat` | `.agents/` || #68 |
+| 2 | Workspace keys | API calls, keys section, add modal | git-client-agents | `feat/workspace-keys` | `src/services/`, `src/pages/ApiKeys.tsx`, `src/components/` || #69 |
+| 3 | Chat | Chat API, stream reader, 3-pane page | git-client-agents | `feat/chat` | `src/services/chat.ts`, `src/hooks/`, `src/pages/Chat.tsx`, `src/nav.ts` || #70 |
+| 4 | Release | 1.14.0 changelog and version | git-client-agents | `release/1.14.0` | `package.json`, `wiki/logs/` || #71 |
 
 ### Task 1 — plan/codespaces-and-chat
 
@@ -38,3 +38,7 @@ This record was written before the work. Nothing else changed.
 - `hooks/useChatRoom.ts`: sessions, the selected session's messages (merged by id with stream events), live activity per session, and room-wide activity for comment answers (no session) until their report.
 - `components/chat/ChatPane.tsx` + `ChatMessage.tsx`, `pages/Chat.tsx`: three panes (My chat, Repository, Organization) with room and session pickers, plain-text messages, streamed text with a caret, progress, and a send box (Enter sends). The room view is keyed by room so a new room starts empty (oxlint forbids resetting state in effects).
 - Chat in the nav and routes. Tests: `services/chat.test.ts`, `pages/Chat.test.tsx`; 62 pass, lint and build clean. Docs: `wiki/reference/pages.md`.
+
+### Task 4 — release/1.14.0
+
+Version 1.14.0, the changelog at `wiki/logs/1/14/0/CHANGELOG.md` and its index row, and the PR column above. Merges after server 1.18.0 (git-server-agents #84-#90).
