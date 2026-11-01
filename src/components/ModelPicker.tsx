@@ -1,11 +1,11 @@
-import { useCallback, useMemo, useRef, useState, type UIEvent } from 'react'
-import { Check, Loader2 } from 'lucide-react'
-import { formatContext, matchesQuery, MODALITIES, perMillion } from '../modalities'
+import { useCallback, useEffect, useMemo, useRef, useState, type UIEvent } from 'react'
+import { Check, KeyRound, Loader2, PenLine } from 'lucide-react'
+import { DEFAULT_PROVIDER, describeChoice, formatContext, matchesQuery, MODALITIES, perMillion } from '../modalities'
 import { useLoad } from '../hooks/useLoad'
-import { userApi } from '../services/api'
-import type { Modality, ModelInfo } from '../types'
+import { errorMessage, userApi } from '../services/api'
+import type { Modality, ModelChoice, ModelInfo, ModelScope, ProviderId } from '../types'
 import { Button } from './Button'
-import { SearchField } from './Field'
+import { SearchField, SelectField } from './Field'
 import { Modal } from './Modal'
 import { Badge } from './PageHeader'
 
@@ -16,12 +16,35 @@ const NEAR_BOTTOM = 160
 
 interface Props {
   title: string
-  /** The stored text model, or undefined when the owner falls back. */
-  current?: string
+  /** The stored text provider and model, or undefined when the owner falls back. */
+  current?: ModelChoice
   /** What is used when nothing is stored, e.g. "the organization's model". */
   fallback: string
-  onSave: (modality: Modality, model: string | null) => Promise<void>
+  /** Whose key lists the models of providers that need one: the org's or repository's, else the user's own. */
+  scope?: ModelScope
+  onSave: (modality: Modality, choice: ModelChoice | null) => Promise<void>
   onClose: () => void
+}
+
+type ModelList = { provider: ProviderId; models: ModelInfo[] | null; error: string | null }
+
+// One provider's live list. A failure (most often: no key for that provider yet) is shown in
+// the picker instead of a toast, because it tells the user what to do next.
+function useProviderModels(modality: Modality, provider: ProviderId, scope: ModelScope) {
+  const [state, setState] = useState<ModelList | null>(null)
+  const { orgId, repoId } = scope
+  useEffect(() => {
+    let current = true
+    userApi
+      .models(modality, provider, { ...(orgId ? { orgId } : {}), ...(repoId ? { repoId } : {}) })
+      .then((models) => current && setState({ provider, models, error: null }))
+      .catch((err) => current && setState({ provider, models: null, error: errorMessage(err) }))
+    return () => {
+      current = false
+    }
+  }, [modality, provider, orgId, repoId])
+  // A list for another provider is stale while the new one loads.
+  return state?.provider === provider ? state : null
 }
 
 function ModelRow({ model, selected, onSelect }: { model: ModelInfo; selected: boolean; onSelect: () => void }) {
@@ -59,19 +82,34 @@ function ModelRow({ model, selected, onSelect }: { model: ModelInfo; selected: b
   )
 }
 
-// Picks an OpenRouter model for one owner. The list is loaded live when the picker opens and
-// filtered as you type. Only the Text tab works today; the others are shown faded.
-export function ModelPicker({ title, current, fallback, onSave, onClose }: Props) {
+// Picks a provider and one of its models for one owner. The provider's list is loaded live
+// when the picker opens or the provider changes, and filtered as you type; a model id that is
+// not listed can be typed in. Only the Text tab works today; the others are shown faded.
+export function ModelPicker({ title, current, fallback, scope = {}, onSave, onClose }: Props) {
   const [modality, setModality] = useState<Modality>('text')
+  const [provider, setProvider] = useState<ProviderId>(current?.provider ?? DEFAULT_PROVIDER)
   const [query, setQuery] = useState('')
-  const [selected, setSelected] = useState<string | undefined>(current)
+  const [selected, setSelected] = useState<ModelChoice | undefined>(current)
   const [busy, setBusy] = useState(false)
   const [limit, setLimit] = useState(PAGE)
   const listRef = useRef<HTMLUListElement>(null)
-  const { data, loading } = useLoad(useCallback(() => userApi.models(modality), [modality]))
+  const { data: providers } = useLoad(useCallback(() => userApi.providers(), []))
+  const list = useProviderModels(modality, provider, scope)
+  const data = list?.models ?? null
+  const providerName = providers?.find((p) => p.id === provider)?.name ?? provider
 
   const matches = useMemo(() => (data ?? []).filter((m) => matchesQuery(m, query)), [data, query])
   const shown = matches.slice(0, limit)
+  const typed = query.trim()
+  const canUseTyped = typed.length > 0 && !/\s/.test(typed) && !(data ?? []).some((m) => m.id === typed)
+  const isSelected = (id: string) => selected?.provider === provider && selected.model === id
+  const unchanged = Boolean(selected && current && selected.provider === current.provider && selected.model === current.model)
+
+  const changeProvider = (value: ProviderId) => {
+    setProvider(value)
+    setLimit(PAGE)
+    listRef.current?.scrollTo?.({ top: 0 })
+  }
 
   // A new search starts again from the first batch, at the top of the list.
   const search = (value: string) => {
@@ -87,10 +125,10 @@ export function ModelPicker({ title, current, fallback, onSave, onClose }: Props
     }
   }
 
-  const save = async (model: string | null) => {
+  const save = async (choice: ModelChoice | null) => {
     setBusy(true)
     try {
-      await onSave(modality, model)
+      await onSave(modality, choice)
       onClose()
     } finally {
       setBusy(false)
@@ -108,7 +146,7 @@ export function ModelPicker({ title, current, fallback, onSave, onClose }: Props
             Use fallback
           </Button>
           <Button onClick={onClose}>Cancel</Button>
-          <Button variant="primary" busy={busy} disabled={!selected || selected === current} onClick={() => selected && save(selected)}>
+          <Button variant="primary" busy={busy} disabled={!selected || unchanged} onClick={() => selected && save(selected)}>
             Save
           </Button>
         </>
@@ -138,25 +176,58 @@ export function ModelPicker({ title, current, fallback, onSave, onClose }: Props
       <p className="text-sm text-fg-muted">
         {current ? (
           <>
-            Now using <code className="font-mono text-fg">{current}</code>.
+            Now using <code className="font-mono text-fg">{describeChoice(current, providers)}</code>.
           </>
         ) : (
           <>Nothing set, so {fallback} is used.</>
         )}
       </p>
 
-      <SearchField label="Search models" placeholder="Search by name or id, e.g. claude or :free" value={query} onChange={search} />
+      <SelectField label="Provider" value={provider} onChange={(e) => changeProvider(e.target.value)} hint="Answers are paid with a key for this provider: yours, or the organization’s or repository’s.">
+        {(providers ?? [{ id: provider, name: providerName }]).map((p) => (
+          <option key={p.id} value={p.id}>
+            {p.name}
+          </option>
+        ))}
+      </SelectField>
 
-      {loading && !data ? (
+      <SearchField label="Search models" placeholder="Search by name or id, or type a model id" value={query} onChange={search} />
+
+      {list?.error ? (
+        <div role="alert" className="flex items-start gap-3 rounded-xl border border-line bg-overlay px-3.5 py-3 text-sm">
+          <KeyRound aria-hidden className="mt-0.5 size-4 shrink-0 text-fg-muted" />
+          <div>
+            <p>{list.error}</p>
+            <p className="mt-1 text-fg-muted">Add a {providerName} key on the API keys page to see its models, or type a model id above.</p>
+          </div>
+        </div>
+      ) : null}
+
+      {!list ? (
         <p className="py-8 text-center text-sm text-fg-muted">
           <Loader2 aria-hidden className="mr-2 inline size-4 animate-spin" />
-          Loading models from OpenRouter…
+          Loading models from {providerName}…
         </p>
       ) : (
         <>
           <ul ref={listRef} onScroll={loadMoreNearBottom} aria-label="Models" className="max-h-80 divide-y divide-line-muted overflow-y-auto rounded-xl border border-line">
+            {canUseTyped && (
+              <li>
+                <button
+                  type="button"
+                  aria-pressed={isSelected(typed)}
+                  onClick={() => setSelected({ provider, model: typed })}
+                  className={`flex w-full items-center gap-3 px-3 py-2.5 text-left text-sm transition-colors ${isSelected(typed) ? 'bg-accent/10' : 'hover:bg-overlay'}`}
+                >
+                  <PenLine aria-hidden className="size-4 shrink-0 text-fg-muted" />
+                  <span>
+                    Use <code className="font-mono">{typed}</code> as the {providerName} model id
+                  </span>
+                </button>
+              </li>
+            )}
             {shown.map((m) => (
-              <ModelRow key={m.id} model={m} selected={selected === m.id} onSelect={() => setSelected(m.id)} />
+              <ModelRow key={m.id} model={m} selected={isSelected(m.id)} onSelect={() => setSelected({ provider, model: m.id })} />
             ))}
             {data && matches.length === 0 && <li className="px-3 py-6 text-center text-sm text-fg-muted">No model matches “{query}”.</li>}
           </ul>

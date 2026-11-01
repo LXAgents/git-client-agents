@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useCallback, useState, type ReactNode } from 'react'
 import { Building2, FolderGit2, User } from 'lucide-react'
 import { useAuth } from '../auth/AuthContext'
 import { Button } from '../components/Button'
@@ -6,9 +6,9 @@ import { ModelPicker } from '../components/ModelPicker'
 import { PageHeader, PlatformBadge } from '../components/PageHeader'
 import { useToast } from '../components/Toast'
 import { useLoad } from '../hooks/useLoad'
-import { DEFAULT_MODEL } from '../modalities'
+import { DEFAULT_MODEL, describeChoice } from '../modalities'
 import { errorMessage, userApi } from '../services/api'
-import type { Modality, ModelSettings, Org, Repo } from '../types'
+import type { AiProvider, Modality, ModelChoice, ModelSettings, Org, Repo } from '../types'
 
 interface ModelsData {
   own: ModelSettings
@@ -23,7 +23,23 @@ async function load(): Promise<ModelsData> {
 
 type Target = { kind: 'user' } | { kind: 'org'; org: Org } | { kind: 'repo'; repo: Repo }
 
-function Row({ icon, name, badge, model, fallback, onChange }: { icon: ReactNode; name: string; badge?: ReactNode; model?: string; fallback: string; onChange: () => void }) {
+function Row({
+  icon,
+  name,
+  badge,
+  choice,
+  providers,
+  fallback,
+  onChange,
+}: {
+  icon: ReactNode
+  name: string
+  badge?: ReactNode
+  choice?: ModelChoice
+  providers: AiProvider[] | null
+  fallback: string
+  onChange: () => void
+}) {
   return (
     <li className="flex flex-wrap items-center gap-3 px-4 py-3">
       <span className="text-fg-muted">{icon}</span>
@@ -32,7 +48,7 @@ function Row({ icon, name, badge, model, fallback, onChange }: { icon: ReactNode
           {name} {badge}
         </p>
         <p className="truncate text-xs text-fg-muted">
-          {model ? <code className="font-mono text-fg">{model}</code> : <>Not set, so {fallback} is used</>}
+          {choice ? <code className="font-mono text-fg">{describeChoice(choice, providers)}</code> : <>Not set, so {fallback} is used</>}
         </p>
       </div>
       <Button size="sm" onClick={onChange} aria-label={`Change model for ${name}`}>
@@ -53,20 +69,21 @@ function Section({ title, empty, children }: { title: string; empty: string; chi
   )
 }
 
-// One place to pick the model "@agents" uses: the repository's, then the organization's, then
-// the commenter's own, then openrouter/free.
+// One place to pick the provider and model "@agents" uses: the repository's, then the
+// organization's, then the commenter's own, then openrouter/free on OpenRouter.
 export function Models() {
   const toast = useToast()
   const { me } = useAuth()
   const { data, reload } = useLoad(load)
+  const { data: providers } = useLoad(useCallback(() => userApi.providers(), []))
   const [editing, setEditing] = useState<Target | null>(null)
 
-  const save = async (target: Target, modality: Modality, model: string | null) => {
+  const save = async (target: Target, modality: Modality, choice: ModelChoice | null) => {
     try {
-      if (target.kind === 'user') await userApi.setOwnModel(modality, model)
-      else if (target.kind === 'org') await userApi.setOrgModel(target.org.id, modality, model)
-      else await userApi.setRepoModel(target.repo.id, modality, model)
-      toast.success(model ? `Model set to ${model}` : 'Model cleared')
+      if (target.kind === 'user') await userApi.setOwnModel(modality, choice)
+      else if (target.kind === 'org') await userApi.setOrgModel(target.org.id, modality, choice)
+      else await userApi.setRepoModel(target.repo.id, modality, choice)
+      toast.success(choice ? `Model set to ${describeChoice(choice, providers)}` : 'Model cleared')
       await reload()
     } catch (err) {
       toast.error(errorMessage(err))
@@ -74,16 +91,17 @@ export function Models() {
     }
   }
 
-  const ownFallback = `the default (${DEFAULT_MODEL})`
+  const ownFallback = `the default (${DEFAULT_MODEL} on OpenRouter)`
   const orgFallback = "the commenter's own model"
   const repoFallback = "the organization's model"
 
   const picker = (() => {
     if (!editing || !data) return null
-    const common = { onClose: () => setEditing(null), onSave: (m: Modality, model: string | null) => save(editing, m, model) }
+    const common = { onClose: () => setEditing(null), onSave: (m: Modality, choice: ModelChoice | null) => save(editing, m, choice) }
     if (editing.kind === 'user') return <ModelPicker title="Your model" current={data.own.text} fallback={ownFallback} {...common} />
-    if (editing.kind === 'org') return <ModelPicker title={`Model for ${editing.org.orgName}`} current={editing.org.models?.text} fallback={orgFallback} {...common} />
-    return <ModelPicker title={`Model for ${editing.repo.fullName}`} current={editing.repo.models?.text} fallback={repoFallback} {...common} />
+    if (editing.kind === 'org')
+      return <ModelPicker title={`Model for ${editing.org.orgName}`} current={editing.org.models?.text} fallback={orgFallback} scope={{ orgId: editing.org.id }} {...common} />
+    return <ModelPicker title={`Model for ${editing.repo.fullName}`} current={editing.repo.models?.text} fallback={repoFallback} scope={{ repoId: editing.repo.id }} {...common} />
   })()
 
   return (
@@ -92,9 +110,10 @@ export function Models() {
         title="Models"
         description={
           <>
-            A comment that starts with <code className="font-mono text-fg">@agents</code> uses the repository’s model, then the organization’s,
-            then the commenter’s own, then <code className="font-mono text-fg">{DEFAULT_MODEL}</code>. Start with{' '}
-            <code className="font-mono text-fg">@vendor/model</code> to pick one model for a single comment.
+            A comment that starts with <code className="font-mono text-fg">@agents</code> uses the repository’s provider and model, then the
+            organization’s, then the commenter’s own, then <code className="font-mono text-fg">{DEFAULT_MODEL}</code> on OpenRouter. Each answer
+            is paid with a key for that provider, brought by the repository, organization or commenter. Start with{' '}
+            <code className="font-mono text-fg">@vendor/model</code> to pick one OpenRouter model for a single comment.
           </>
         }
       />
@@ -109,7 +128,8 @@ export function Models() {
                 icon={<User aria-hidden className="size-4" />}
                 name={me?.login ?? 'You'}
                 badge={me && <PlatformBadge platform={me.platform} />}
-                model={data.own.text}
+                choice={data.own.text}
+                providers={providers}
                 fallback={ownFallback}
                 onChange={() => setEditing({ kind: 'user' })}
               />,
@@ -121,7 +141,8 @@ export function Models() {
                 key={org.id}
                 icon={<Building2 aria-hidden className="size-4" />}
                 name={org.orgName}
-                model={org.models?.text}
+                choice={org.models?.text}
+                providers={providers}
                 fallback={orgFallback}
                 onChange={() => setEditing({ kind: 'org', org })}
               />
@@ -133,7 +154,8 @@ export function Models() {
                 key={repo.id}
                 icon={<FolderGit2 aria-hidden className="size-4" />}
                 name={repo.fullName}
-                model={repo.models?.text}
+                choice={repo.models?.text}
+                providers={providers}
                 fallback={repoFallback}
                 onChange={() => setEditing({ kind: 'repo', repo })}
               />

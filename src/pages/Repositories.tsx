@@ -12,6 +12,7 @@ import { formatDate, platformName } from '../format'
 import { useLoad } from '../hooks/useLoad'
 import { adminApi, errorMessage, userApi } from '../services/api'
 import type { ImportableRepo, Repo } from '../types'
+import { describeChoice } from '../modalities'
 
 // Like orgs, repositories are never typed in: the list is what the platform says you administer.
 function ImportModal({ onClose, onImported }: { onClose: () => void; onImported: () => void }) {
@@ -93,7 +94,7 @@ export function Repositories() {
     { header: 'Organization', cell: (r) => r.org.name ?? '—' },
     {
       header: 'Text model',
-      cell: (r) => (r.models?.text ? <code className="font-mono text-xs">{r.models.text}</code> : <span className="text-fg-muted">Org’s model</span>),
+      cell: (r) => (r.models?.text ? <code className="font-mono text-xs">{describeChoice(r.models.text)}</code> : <span className="text-fg-muted">Org’s model</span>),
     },
     { header: 'Keys', cell: (r) => r.keyCount ?? 0, className: 'tabular-nums' },
     { header: 'Imported', cell: (r) => <span className="text-fg-muted">{formatDate(r.createdAt)}</span> },
