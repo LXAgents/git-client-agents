@@ -31,3 +31,10 @@ This record was written before the work. Nothing else changed.
 - `services/workspaceKeys.ts`: load (sorted repo → org → user, then priority), create and delete by owner.
 - `components/WorkspaceKeys.tsx` + `AddWorkspaceKeyModal.tsx`: a Workspace keys section under the AI keys, GitHub sessions only.
 - Tests: `components/WorkspaceKeys.test.tsx`; 55 pass. Docs: `wiki/reference/pages.md`.
+
+### Task 3 — feat/chat
+
+- `types.ts`: chat rooms, sessions and the event shape. `services/chat.ts`: `chatApi`, `parseSse`, and `openChatStream` (fetch with the session headers, reconnects with backoff up to 30 s, stops on 4xx).
+- `hooks/useChatRoom.ts`: sessions, the selected session's messages (merged by id with stream events), live activity per session, and room-wide activity for comment answers (no session) until their report.
+- `components/chat/ChatPane.tsx` + `ChatMessage.tsx`, `pages/Chat.tsx`: three panes (My chat, Repository, Organization) with room and session pickers, plain-text messages, streamed text with a caret, progress, and a send box (Enter sends). The room view is keyed by room so a new room starts empty (oxlint forbids resetting state in effects).
+- Chat in the nav and routes. Tests: `services/chat.test.ts`, `pages/Chat.test.tsx`; 62 pass, lint and build clean. Docs: `wiki/reference/pages.md`.
