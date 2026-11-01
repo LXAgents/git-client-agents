@@ -23,6 +23,16 @@ export const MODALITIES: ModalityInfo[] = [
 ]
 
 export const DEFAULT_MODEL = 'openrouter/free'
+export const DEFAULT_PROVIDER = 'openrouter'
+
+// Display names until the server's provider list has loaded.
+const PROVIDER_NAMES: Record<string, string> = { openrouter: 'OpenRouter', openai: 'OpenAI', anthropic: 'Anthropic', deepseek: 'DeepSeek', zai: 'z.ai' }
+
+// "claude-opus-5-5 on Anthropic".
+export function describeChoice(choice: { provider: string; model: string }, providers?: { id: string; name: string }[] | null): string {
+  const name = providers?.find((p) => p.id === choice.provider)?.name ?? PROVIDER_NAMES[choice.provider] ?? choice.provider
+  return `${choice.model} on ${name}`
+}
 
 // "0.00000125" USD per token -> "$1.25" per million tokens.
 export function perMillion(price: string | null): string | null {
