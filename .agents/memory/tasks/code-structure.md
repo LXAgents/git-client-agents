@@ -32,3 +32,13 @@ status: in progress
 ### Task 1 — plan/code-structure
 
 This record was written before the work. Nothing else changed.
+
+### Task 2 — refactor/code-structure
+
+- `services/keys.ts`: `loadKeys`, `createKeyFor` and `deleteKeyOf` are the one place that
+  picks the admin or user endpoint for a key's owner. `components/AddKeyModal.tsx` is the
+  dialog, and `pages/ApiKeys.tsx` dropped from 257 to 88 lines.
+- `hooks/useProviderModels.ts`, `components/model-picker/ModalityTabs.tsx` and
+  `ModelRow.tsx`: `ModelPicker.tsx` dropped from 243 to 174 lines. It takes an optional
+  `providers` prop, which the Models page passes.
+- The 52 tests, typecheck, lint and build pass, with no test changed.
