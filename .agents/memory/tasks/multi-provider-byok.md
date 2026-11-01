@@ -1,7 +1,7 @@
 ---
 name: multi-provider-byok
 description: Task record for the dashboard side of multi-provider BYOK: provider dropdowns and a provider + model per user, org and repository (client 1.12.0).
-status: in progress
+status: done
 ---
 
 # Multi-provider BYOK (dashboard)
@@ -25,9 +25,9 @@ status: in progress
 
 | # | Title | Scope | Repository | Branch | Files / areas | PR |
 |---|---|---|---|---|---|---|
-| 1 | Plan | This record | git-client-agents | `plan/multi-provider-byok` | `.agents/` | |
-| 2 | Provider choice | Types, API client, keys page, models page, picker, tests | git-client-agents | `feat/multi-provider-byok` | `src/` | |
-| 3 | Release | 1.12.0 changelog and version | git-client-agents | `release/1.12.0` | `package.json`, `wiki/logs/` | |
+| 1 | Plan | This record | git-client-agents | `plan/multi-provider-byok` | `.agents/` | #57 |
+| 2 | Provider choice | Types, API client, keys page, models page, picker, tests | git-client-agents | `feat/multi-provider-byok` | `src/` | #58 |
+| 3 | Release | 1.12.0 changelog and version | git-client-agents | `release/1.12.0` | `package.json`, `wiki/logs/` | #59 |
 
 ### Task 1 — plan/multi-provider-byok
 
@@ -44,3 +44,7 @@ Record written before the work. Nothing else changed.
   lists that provider's live models with the row's org or repository key, shows the server's
   "add a key first" message inline, and offers "Use … as the model id" for any typed id.
 - 52 tests, typecheck, lint and build pass.
+
+### Task 3 — release/1.12.0
+
+Version 1.12.0, changelog and index row, PR column filled.
