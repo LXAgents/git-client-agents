@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { userApi } from '../services/api'
 import { renderAs } from '../test/render'
-import type { ApiKey, Org, Repo } from '../types'
+import type { AiProvider, ApiKey, Org, Repo } from '../types'
 import { ApiKeys } from './ApiKeys'
 
 const acme: Org = {
@@ -22,6 +22,11 @@ const web: Repo = {
   org: { id: 'org1', name: 'acme' },
   createdAt: '2026-10-31T00:00:00Z',
 }
+const PROVIDERS: AiProvider[] = [
+  { id: 'openrouter', name: 'OpenRouter', example: 'openai/gpt-5', keyForModels: false, reportsCost: true },
+  { id: 'openai', name: 'OpenAI', example: 'gpt-5', keyForModels: true, reportsCost: false },
+  { id: 'anthropic', name: 'Anthropic', example: 'claude-opus-5-5', keyForModels: true, reportsCost: false },
+]
 const OWNER_ID = { user: '1001', org: 'org1', repo: 'repo1' }
 const key = (id: string, type: 'user' | 'org' | 'repo', name: string, last4: string, priority: number): ApiKey => ({
   id,
@@ -39,6 +44,7 @@ describe('API keys as a user', () => {
     vi.spyOn(userApi, 'orgs').mockResolvedValue([acme])
     vi.spyOn(userApi, 'repos').mockResolvedValue([web])
     vi.spyOn(userApi, 'repoKeys').mockResolvedValue([])
+    vi.spyOn(userApi, 'providers').mockResolvedValue(PROVIDERS)
   })
 
   it('attaches a key to a repository the user administers, and deletes it through the repo route', async () => {
@@ -55,7 +61,7 @@ describe('API keys as a user', () => {
     await userEvent.type(within(dialog).getByLabelText('OpenRouter API key'), 'sk-or-4444')
     vi.spyOn(userApi, 'repoKeys').mockResolvedValue([key('k4', 'repo', 'acme/web', '4444', 0)])
     await userEvent.click(within(dialog).getByRole('button', { name: 'Add key' }))
-    expect(create).toHaveBeenCalledWith('repo1', { apiKey: 'sk-or-4444', priority: 0 })
+    expect(create).toHaveBeenCalledWith('repo1', { apiKey: 'sk-or-4444', priority: 0, provider: 'openrouter' })
 
     const row = (await screen.findByText('••••4444')).closest('tr')!
     expect(row).toHaveTextContent('Repository')
@@ -88,12 +94,13 @@ describe('API keys as a user', () => {
     const dialog = screen.getByRole('dialog')
     await userEvent.click(within(dialog).getByRole('button', { name: 'Organization' }))
     expect(within(dialog).getByLabelText('Organization')).toHaveDisplayValue('acme')
-    await userEvent.type(within(dialog).getByLabelText('OpenRouter API key'), 'sk-or-9999')
+    await userEvent.selectOptions(within(dialog).getByLabelText('Provider'), 'Anthropic')
+    await userEvent.type(within(dialog).getByLabelText('Anthropic API key'), 'sk-ant-9999')
     await userEvent.clear(within(dialog).getByLabelText('Priority'))
     await userEvent.type(within(dialog).getByLabelText('Priority'), '3')
     await userEvent.click(within(dialog).getByRole('button', { name: 'Add key' }))
 
-    expect(create).toHaveBeenCalledWith('org1', { apiKey: 'sk-or-9999', priority: 3 })
+    expect(create).toHaveBeenCalledWith('org1', { apiKey: 'sk-ant-9999', priority: 3, provider: 'anthropic' })
   })
 
   it('deletes an org key through the org route', async () => {
