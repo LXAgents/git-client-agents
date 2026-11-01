@@ -1,4 +1,4 @@
-import { Building2, FolderGit2, KeyRound, LayoutDashboard, ScrollText, Sparkles, Users, type LucideIcon } from 'lucide-react'
+import { Building2, FolderGit2, KeyRound, LayoutDashboard, MessagesSquare, ScrollText, Sparkles, Users, type LucideIcon } from 'lucide-react'
 
 export interface NavItem {
   to: string
@@ -9,6 +9,7 @@ export interface NavItem {
 
 export const NAV: NavItem[] = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/chat', label: 'Chat', icon: MessagesSquare },
   { to: '/users', label: 'Users', icon: Users, adminOnly: true },
   { to: '/orgs', label: 'Organizations', icon: Building2 },
   { to: '/repos', label: 'Repositories', icon: FolderGit2 },

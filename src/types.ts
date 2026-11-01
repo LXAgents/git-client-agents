@@ -141,3 +141,47 @@ export interface LogPage {
   logs: LogLine[]
   next: string | null
 }
+
+/** A chat room as the server names it: user:{accountId}, repo:{repoId} or org:{orgId}. */
+export type ChatRoomKind = 'user' | 'repo' | 'org'
+
+export interface ChatRoom {
+  room: string
+  name: string
+}
+
+export interface ChatRooms {
+  user: ChatRoom
+  orgs: ChatRoom[]
+  repos: ChatRoom[]
+}
+
+export interface ChatSession {
+  id: string
+  room: string
+  title: string
+  /** "{platform}:{account id}" of who started it; null for the agent's activity session. */
+  createdBy: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export type ChatEventType = 'message' | 'progress' | 'report' | 'token'
+
+export interface ChatEvent {
+  /** Set on stored events (messages and reports). */
+  id?: string
+  type: ChatEventType
+  room: string
+  sessionId: string | null
+  sender: { id: string | null; login: string | null; type: 'user' | 'agent' }
+  content: string
+  data?: { status?: string; tool?: string; reset?: boolean; error?: boolean; model?: string; provider?: string; cost?: string; where?: string; [key: string]: unknown }
+  timestamp: string
+}
+
+export interface PostedChatMessage {
+  message: ChatEvent
+  sessionId: string
+  agent: 'answering' | 'busy' | 'idle'
+}

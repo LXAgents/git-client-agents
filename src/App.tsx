@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './auth/AuthContext'
 import { Layout } from './components/Layout'
 import { ToastProvider } from './components/Toast'
 import { ApiKeys } from './pages/ApiKeys'
+import { Chat } from './pages/Chat'
 import { Home } from './pages/Home'
 import { Logs } from './pages/Logs'
 import { Models } from './pages/Models'
@@ -26,6 +27,7 @@ function Routed() {
     <Routes>
       <Route element={<Layout />}>
         <Route index element={<Home />} />
+        <Route path="chat" element={<Chat />} />
         {isOwner && <Route path="users" element={<Users />} />}
         <Route path="orgs" element={<Organizations />} />
         <Route path="repos" element={<Repositories />} />

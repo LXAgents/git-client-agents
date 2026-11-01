@@ -7,8 +7,8 @@ action again with GitHub or GitLab, so the dashboard only shows what the server 
 
 | Sign in as | With | Pages |
 |---|---|---|
-| **Owner** | Continue with GitHub or GitLab, as the one user in the server's `GITHUB_ADMIN_ID` or `GITLAB_ADMIN_ID` | Dashboard, Users, every Organization and Repository of that platform (list, import your own, remove any), API keys (all), Models, Logs |
-| **Free** (anyone) | Continue with GitHub or GitLab. There is no sign-up: the first login creates the account | Dashboard, Organizations you own and Repositories you administer (import and remove), Models, API keys (yours, your orgs' and your repositories') |
+| **Owner** | Continue with GitHub or GitLab, as the one user in the server's `GITHUB_ADMIN_ID` or `GITLAB_ADMIN_ID` | Dashboard, Chat, Users, every Organization and Repository of that platform (list, import your own, remove any), API keys (all), Models, Logs |
+| **Free** (anyone) | Continue with GitHub or GitLab. There is no sign-up: the first login creates the account | Dashboard, Chat, Organizations you own and Repositories you administer (import and remove), Models, API keys (yours, your orgs' and your repositories') |
 
 - **Continue with GitHub / GitLab** appears for each platform whose client ID and secret are set
   on the server. With no client IDs set, the page says sign-in isn't set up yet. Personal
@@ -57,6 +57,21 @@ log in again as Free.
   commenters with write access. Keys are listed in the order the agent tries them: repository,
   organization, yours, each highest priority first.
 - Codespaces run and bill on the token owner's account. GitLab sessions don't show the section.
+
+## Chat
+
+- Three panes side by side (stacked on narrow screens): **My chat** (`user:{id}`, every message
+  goes to the agent), **Repository** (imported repositories you can read) and **Organization**
+  (imported organizations you are in). In those two, start a message with `@lxagents` to ask
+  the agent.
+- Each room has sessions: pick one or start a **New** one; posting without one starts a session
+  titled from the message.
+- The agent's progress (tool calls such as "Creating GitHub Codespace...") and its text as it
+  is written appear under the messages. Answers to comments show live in your chat and the
+  repository's, and their reports land in the room's "Agent activity" session.
+- The live stream is read with `fetch`, so the token stays in the `Authorization` header and is
+  never put in a URL. Messages are shown as plain text. "Live" in the pane header means the
+  stream is connected; it reconnects by itself after a drop.
 
 ## Models
 
