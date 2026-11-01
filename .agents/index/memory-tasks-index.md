@@ -16,6 +16,7 @@ description: Index of .agents/memory/tasks — one row per task record.
 | [`tasks/agent-error-replies.md`](../memory/tasks/agent-error-replies.md) | Task record for removing the personal access token sign-in and the scoped package name (dashboard 1.9.0). |
 | [`tasks/center-platform-logo.md`](../memory/tasks/center-platform-logo.md) | Task record for centering the platform logo in the dashboard tables (1.6.1). |
 | [`tasks/code-structure.md`](../memory/tasks/code-structure.md) | Task record for the behaviour-neutral refactor of git-client-agents (ApiKeys and ModelPicker split into components, a hook and a key service) in 1.12.1. |
+| [`tasks/codespaces-and-chat.md`](../memory/tasks/codespaces-and-chat.md) | Task record for the workspace keys section and the 3-pane chat page (client 1.14.0). |
 | [`tasks/docker.md`](../memory/tasks/docker.md) | Task record for the git-client-agents Docker image (1.1.0). |
 | [`tasks/free-role-open-login.md`](../memory/tasks/free-role-open-login.md) | Task record for the light green Free role badge and open login wording (dashboard 1.10.0). |
 | [`tasks/install-warnings.md`](../memory/tasks/install-warnings.md) | Task record for the EBADENGINE warnings on npm install in git-client-agents (1.0.2). |
