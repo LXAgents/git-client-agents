@@ -2,6 +2,7 @@
 
 | Version | Summary | Files |
 |---|---|---|
+| [1.12.0](1/12/0/CHANGELOG.md) | Provider dropdowns; provider and model per user, organization and repository | `CHANGELOG.md` |
 | [1.11.0](1/11/0/CHANGELOG.md) | Owner-only Logs page | `CHANGELOG.md` |
 | [1.10.0](1/10/0/CHANGELOG.md) | Light green Free badge, open login wording | `CHANGELOG.md` |
 | [1.9.0](1/9/0/CHANGELOG.md) | Personal access token sign-in removed; scoped package name | `CHANGELOG.md` |
