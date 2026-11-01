@@ -1,7 +1,7 @@
 ---
 name: code-structure
 description: Task record for the behaviour-neutral refactor of git-client-agents (ApiKeys and ModelPicker split into components, a hook and a key service) in 1.12.1.
-status: in progress
+status: done
 ---
 
 # Code structure refactor (dashboard)
@@ -25,9 +25,9 @@ status: in progress
 
 | # | Title | Scope | Repository | Branch | Files / areas | PR |
 |---|---|---|---|---|---|---|
-| 1 | Plan | This record | git-client-agents | `plan/code-structure` | `.agents/` | |
-| 2 | Refactor | ApiKeys and ModelPicker split | git-client-agents | `refactor/code-structure` | `src/` | |
-| 3 | Release | 1.12.1 changelog and version | git-client-agents | `release/1.12.1` | `package.json`, `wiki/logs/` | |
+| 1 | Plan | This record | git-client-agents | `plan/code-structure` | `.agents/` | #60 |
+| 2 | Refactor | ApiKeys and ModelPicker split | git-client-agents | `refactor/code-structure` | `src/` | #61 |
+| 3 | Release | 1.12.1 changelog and version | git-client-agents | `release/1.12.1` | `package.json`, `wiki/logs/` | #62 |
 
 ### Task 1 — plan/code-structure
 
@@ -42,3 +42,7 @@ This record was written before the work. Nothing else changed.
   `ModelRow.tsx`: `ModelPicker.tsx` dropped from 243 to 174 lines. It takes an optional
   `providers` prop, which the Models page passes.
 - The 52 tests, typecheck, lint and build pass, with no test changed.
+
+### Task 3 — release/1.12.1
+
+The version is 1.12.1, with the changelog in `wiki/logs/1/12/1/CHANGELOG.md` and its index row. The PR column is filled in.
