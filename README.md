@@ -29,7 +29,7 @@ managing the OpenRouter keys the agent spends.
   you own, and the server checks with the platform again on every request.
 - Repositories are imported the same way, from the ones you administer (GitHub admin, GitLab
   Maintainer or Owner) inside an imported organization.
-- **Models:** a comment that starts with `@agents` uses the repository's model, then the
+- **Models:** a comment that starts with `@lxagents` uses the repository's model, then the
   organization's, then the commenter's own, then `openrouter/free`. The Models page sets each
   one. Its picker loads OpenRouter's model list live and filters it as you type. All nine
   modalities are shown, and only Text can be picked for now.
