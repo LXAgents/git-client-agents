@@ -7,8 +7,8 @@ import { RoomPicker } from '../components/chat/RoomPicker'
 import { TeamChatPane } from '../components/chat/TeamChatPane'
 import { PageHeader } from '../components/PageHeader'
 
-// One room at a time, picked at the top: its details on the left (20%), the agent's work in the
-// middle (40%) and the people's chat on the right (40%), using the page's full width (stacked on
+// One room at a time, picked at the top: its details on the left (10%), the agent's work in the
+// middle (45%) and the people's chat on the right (45%), using the page's full width (stacked on
 // narrow screens). One stream serves all three.
 export function Chat() {
   return (
@@ -36,7 +36,7 @@ function Room() {
   return (
     <>
       <RoomPicker />
-      <div className="grid gap-4 lg:grid-cols-[1fr_2fr_2fr]">
+      <div className="grid gap-4 lg:grid-cols-[1fr_4.5fr_4.5fr]">
         <RoomDetailsPane key={`details-${currentRoom.room}`} room={currentRoom} />
         <AgentWorkPane key={`work-${currentRoom.room}`} room={currentRoom} me={myId} />
         <TeamChatPane key={`team-${currentRoom.room}`} room={currentRoom} me={myId} />
