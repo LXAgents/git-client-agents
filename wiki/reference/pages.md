@@ -81,7 +81,8 @@ log in again as Free.
   messages only. Yours sit on the right, other people's on the left with their avatar, and the
   agent's are tinted and rendered as Markdown. In repository and organization rooms, start a
   message with `@lxagents` to ask the agent.
-- Layout: 20 / 50 / 30 on wide screens (`lg`), stacked below that.
+- Layout: the Chat page uses the full width of the window (other pages keep a 64rem column),
+  with the panes at 20 / 40 / 40 on wide screens (`lg`), stacked below that.
 - Both message boxes span their pane, start four lines tall and grow with the text (then
   scroll), with the hint and **Send** under them. Enter sends; Shift+Enter adds a line.
 - Markdown never renders raw HTML, and links open in a new tab. People's messages are plain

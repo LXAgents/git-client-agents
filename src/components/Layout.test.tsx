@@ -39,4 +39,15 @@ describe('Layout', () => {
     const free = screen.getByText('Free')
     expect(free.className).toContain('--color-free')
   })
+
+  it('gives the Chat page the full width and keeps other pages in a column', async () => {
+    vi.spyOn(userApi, 'me').mockResolvedValue({ platform: 'github', id: '1', login: 'alice', name: null, avatarUrl: null, role: 'free' })
+    const chat = renderAs({ platform: 'github', token: 'ghp' }, <Layout />, '/chat')
+    expect(await screen.findByText('alice')).toBeInTheDocument()
+    expect(chat.container.querySelector('main > div')).toHaveAttribute('data-width', 'full')
+    chat.unmount()
+    const keys = renderAs({ platform: 'github', token: 'ghp' }, <Layout />, '/keys')
+    expect(await screen.findByText('alice')).toBeInTheDocument()
+    expect(keys.container.querySelector('main > div')).toHaveAttribute('data-width', 'column')
+  })
 })

@@ -79,6 +79,14 @@ describe('Chat', () => {
     await vi.waitFor(() => expect(opened).toEqual(['repo:r1']))
   })
 
+  it('splits the panes 20/40/40: details, agent work, team chat', async () => {
+    renderAs({ platform: 'github', token: 'gho' }, <Chat />)
+    const details = await pane(/Room details/)
+    const grid = details.parentElement!
+    expect(grid.className).toContain('lg:grid-cols-[1fr_2fr_2fr]')
+    expect([...grid.children].map((c) => c.getAttribute('aria-labelledby'))).toEqual(['chat-details', 'chat-agent-work', 'chat-team'])
+  })
+
   it('opens one stream per room and a new one when the room changes', async () => {
     renderAs({ platform: 'github', token: 'gho' }, <Chat />)
     await vi.waitFor(() => expect(opened).toEqual(['repo:r1']))
