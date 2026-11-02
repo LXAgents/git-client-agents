@@ -1,18 +1,20 @@
 import { api, sessionHeaders } from './api'
 import { apiBaseUrl } from '../config'
 import { trimTrailingSlashes } from '../utils/strings'
-import type { ChatEvent, ChatRooms, ChatSession, PostedChatMessage } from '../types'
+import type { ChatEvent, ChatRooms, ChatSession, ChatSummary, PostedChatMessage } from '../types'
 
 const data = <T>(p: Promise<{ data: T }>) => p.then((r) => r.data)
 
 // The chat API (/api/chat). The server checks the room on the platform for every call.
 export const chatApi = {
   rooms: () => data(api.get<ChatRooms>('/api/chat/rooms')),
+  summary: (room: string) => data(api.get<ChatSummary>('/api/chat/summary', { params: { room } })),
   sessions: (room: string) => data(api.get<ChatSession[]>('/api/chat/sessions', { params: { room } })),
   createSession: (room: string, title?: string) => data(api.post<ChatSession>('/api/chat/sessions', { room, title })),
   renameSession: (room: string, id: string, title: string) => data(api.patch<ChatSession>(`/api/chat/sessions/${id}`, { room, title })),
   deleteSession: (room: string, id: string) => api.delete(`/api/chat/sessions/${id}`, { params: { room } }),
   messages: (room: string, sessionId: string) => data(api.get<ChatEvent[]>('/api/chat/messages', { params: { room, sessionId } })),
+  /** sessionId "activity" posts to the room's Agent activity session, always for the agent. */
   post: (room: string, content: string, sessionId?: string | null) => data(api.post<PostedChatMessage>('/api/chat/messages', { room, content, sessionId: sessionId ?? undefined })),
 }
 

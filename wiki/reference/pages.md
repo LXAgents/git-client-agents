@@ -63,18 +63,29 @@ log in again as Free.
 
 ## Chat
 
-- Three panes side by side (stacked on narrow screens): **My chat** (`user:{id}`, every message
-  goes to the agent), **Repository** (imported repositories you can read) and **Organization**
-  (imported organizations you are in). In those two, start a message with `@lxagents` to ask
-  the agent.
-- Each room has sessions: pick one or start a **New** one; posting without one starts a session
-  titled from the message.
-- The agent's progress (tool calls such as "Creating GitHub Codespace...") and its text as it
-  is written appear under the messages. Answers to comments show live in your chat and the
-  repository's, and their reports land in the room's "Agent activity" session.
-- The live stream is read with `fetch`, so the token stays in the `Authorization` header and is
-  never put in a URL. Messages are shown as plain text. "Live" in the pane header means the
-  stream is connected; it reconnects by itself after a drop.
+- **One room at a time.** The picker at the top lists **My chat** (`user:{id}`), the imported
+  repositories you can read and the imported organizations you are in. The first repository is
+  picked by default. One live stream serves the room; picking another closes it and opens the
+  new room's.
+- **Room details** (left, read only, from `GET /api/chat/summary`): the room's name and platform,
+  the model and provider the agent would use for you here and which setting it comes from, how
+  many AI keys and GitHub Codespaces keys it could use (repository, organization, yours; never
+  the keys), and the room's total tokens, estimated cost and number of agent answers. "at least"
+  means some answers did not report a cost; answers from before server 1.19.0 count as answers
+  without usage data. It refreshes when an answer or report arrives.
+- **Agent work** (middle): the room's "Agent activity" session, with the reports of answers to
+  comments and the agent's replies rendered as Markdown, plus live progress (tool calls such as
+  "Creating GitHub Codespace...") and the text as it is written, for every answer in the room.
+  Its box asks the agent in the activity session, so no `@lxagents` is needed.
+- **Team chat** (right): the room's other sessions (pick one or start a **New** one) with
+  messages only. Yours sit on the right, other people's on the left with their avatar, and the
+  agent's are tinted and rendered as Markdown. In repository and organization rooms, start a
+  message with `@lxagents` to ask the agent.
+- Layout: 20 / 50 / 30 on wide screens (`lg`), stacked below that.
+- Markdown never renders raw HTML, and links open in a new tab. People's messages are plain
+  text. The stream is read with `fetch`, so the token stays in the `Authorization` header (with
+  `X-Platform`) and is never put in a URL. "Live" next to the picker means it is connected; it
+  reconnects by itself after a drop.
 
 ## Models
 

@@ -1,31 +1,45 @@
-import { useCallback } from 'react'
-import { Building2, FolderGit2, Loader2, User } from 'lucide-react'
-import { ChatPane } from '../components/chat/ChatPane'
+import { Loader2 } from 'lucide-react'
+import { useAuth } from '../auth/AuthContext'
+import { AgentWorkPane } from '../components/chat/AgentWorkPane'
+import { ChatRoomProvider, useChatRoom } from '../components/chat/ChatRoomContext'
+import { RoomDetailsPane } from '../components/chat/RoomDetailsPane'
+import { RoomPicker } from '../components/chat/RoomPicker'
+import { TeamChatPane } from '../components/chat/TeamChatPane'
 import { PageHeader } from '../components/PageHeader'
-import { useLoad } from '../hooks/useLoad'
-import { chatApi } from '../services/chat'
 
-// Three chat rooms side by side: your own with the agent, a repository's and an organization's.
-// Repository and organization rooms list only those you are in right now.
+// One room at a time, picked at the top: its details on the left, the agent's work in the middle
+// and the people's chat on the right (stacked on narrow screens). One stream serves all three.
 export function Chat() {
-  const { data: rooms, loading } = useLoad(useCallback(() => chatApi.rooms(), []))
   return (
-    <>
+    <ChatRoomProvider>
       <PageHeader
         title="Chat"
-        description="Talk to the agent and your team. Your own chat answers every message; in repository and organization rooms, start with @lxagents to ask the agent. Answers to comments show up live in your chat and the repository’s."
+        description="Pick a repository or organization. Watch the agent work and ask it things in the middle; talk with your team on the right, starting with @lxagents to ask the agent."
       />
-      {loading && !rooms ? (
-        <p className="flex items-center text-sm text-fg-muted">
-          <Loader2 aria-hidden className="mr-2 size-4 animate-spin text-accent" /> Loading rooms…
-        </p>
-      ) : rooms ? (
-        <div className="grid gap-4 xl:grid-cols-3">
-          <ChatPane title="My chat" icon={User} rooms={[rooms.user]} empty="" hint="Every message here goes to the agent." />
-          <ChatPane title="Repository" icon={FolderGit2} rooms={rooms.repos} empty="No imported repository you can read yet." hint="Start with @lxagents to ask the agent." />
-          <ChatPane title="Organization" icon={Building2} rooms={rooms.orgs} empty="No imported organization you are in yet." hint="Start with @lxagents to ask the agent." />
-        </div>
-      ) : null}
+      <Room />
+    </ChatRoomProvider>
+  )
+}
+
+function Room() {
+  const { me } = useAuth()
+  const { currentRoom, loading } = useChatRoom()
+  if (!currentRoom) {
+    return loading ? (
+      <p className="flex items-center text-sm text-fg-muted">
+        <Loader2 aria-hidden className="mr-2 size-4 animate-spin text-accent" /> Loading rooms…
+      </p>
+    ) : null
+  }
+  const myId = me?.id ?? null
+  return (
+    <>
+      <RoomPicker />
+      <div className="grid gap-4 lg:grid-cols-[1fr_2.5fr_1.5fr]">
+        <RoomDetailsPane key={`details-${currentRoom.room}`} room={currentRoom} />
+        <AgentWorkPane key={`work-${currentRoom.room}`} room={currentRoom} me={myId} />
+        <TeamChatPane key={`team-${currentRoom.room}`} room={currentRoom} me={myId} />
+      </div>
     </>
   )
 }

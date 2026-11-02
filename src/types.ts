@@ -162,6 +162,8 @@ export interface ChatSession {
   title: string
   /** "{platform}:{account id}" of who started it; null for the agent's activity session. */
   createdBy: string | null
+  /** The room's Agent activity session: reports of comment answers, and questions for the agent. */
+  activity?: boolean
   createdAt: string
   updatedAt: string
 }
@@ -174,10 +176,48 @@ export interface ChatEvent {
   type: ChatEventType
   room: string
   sessionId: string | null
-  sender: { id: string | null; login: string | null; type: 'user' | 'agent' }
+  sender: { id: string | null; login: string | null; type: 'user' | 'agent'; avatarUrl?: string | null }
   content: string
-  data?: { status?: string; tool?: string; reset?: boolean; error?: boolean; model?: string; provider?: string; cost?: string; where?: string; [key: string]: unknown }
+  data?: { status?: string; tool?: string; reset?: boolean; error?: boolean; model?: string; provider?: string; cost?: string; where?: string; usage?: ChatUsage; [key: string]: unknown }
   timestamp: string
+}
+
+/** Usage stored with an agent answer or report (server 1.19.0 and later). */
+export interface ChatUsage {
+  costUsd: number | null
+  costComplete: boolean
+  inputTokens: number
+  outputTokens: number
+  tokensComplete: boolean
+}
+
+/** Key counts per owner the agent would try: the repository's, the org's and your own. */
+export interface ChatKeyCounts {
+  repo: number
+  org: number
+  user: number
+  total: number
+}
+
+/** GET /api/chat/summary: what the Chat page's details pane shows. */
+export interface ChatSummary {
+  room: { room: string; kind: ChatRoomKind; name: string; platform: Platform }
+  model: { provider: string; providerName: string; model: string; source?: 'repo' | 'org' | 'user' | 'default' }
+  keys: {
+    ai: ChatKeyCounts
+    /** Null on platforms without workspaces (GitLab). */
+    workspace: (ChatKeyCounts & { provider: string; providerName: string }) | null
+  }
+  stats: {
+    answers: number
+    inputTokens: number
+    outputTokens: number
+    costUsd: number
+    costComplete: boolean
+    tokensComplete: boolean
+    answersWithoutUsage: number
+    capped: boolean
+  }
 }
 
 export interface PostedChatMessage {
