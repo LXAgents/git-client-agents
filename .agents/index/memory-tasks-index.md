@@ -20,6 +20,7 @@ description: Index of .agents/memory/tasks — one row per task record.
 | [`tasks/docker.md`](../memory/tasks/docker.md) | Task record for the git-client-agents Docker image (1.1.0). |
 | [`tasks/free-role-open-login.md`](../memory/tasks/free-role-open-login.md) | Task record for the light green Free role badge and open login wording (dashboard 1.10.0). |
 | [`tasks/install-warnings.md`](../memory/tasks/install-warnings.md) | Task record for the EBADENGINE warnings on npm install in git-client-agents (1.0.2). |
+| [`tasks/key-types.md`](../memory/tasks/key-types.md) | Task record for the platform choice on workspace keys and the AI keys / Workspace keys switch on the API keys page (client 1.15.0). |
 | [`tasks/latest-dependencies.md`](../memory/tasks/latest-dependencies.md) | Task record for moving git-client-agents to the latest dependencies (1.0.1). |
 | [`tasks/logos-search-resume.md`](../memory/tasks/logos-search-resume.md) | Task record for platform logos, search in the import popups and staying signed in on reload (1.6.0). |
 | [`tasks/logs-page.md`](../memory/tasks/logs-page.md) | Task record for the owner-only Logs page that reads the server's stored log lines. |
