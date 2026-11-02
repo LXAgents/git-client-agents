@@ -1,7 +1,7 @@
 ---
 name: chat-single-room
 description: Task record for the single-room, three-pane Chat page (client 1.16.0): room picker, details, agent work and team chat panes, Markdown.
-status: in progress
+status: done
 ---
 
 # Single-room Chat page
@@ -18,12 +18,12 @@ status: in progress
   - A `ChatRoomProvider` context holds the rooms, the current room and one stream per room; both panes subscribe to it.
   - Layout `lg:grid-cols-[1fr_2.5fr_1.5fr]` (20/50/30); stacked below `lg`.
   - `react-markdown` without raw HTML; links open in a new tab with `rel="noreferrer"`.
-  - The old `ChatPane` and `useChatRoom` are deleted.
+  - The old `ChatPane` and `hooks/useChatRoom.ts` are deleted; `useChatRoom` is now the context's hook.
 
 ## Tasks
 
 | # | Title | Scope | Repository | Branch | Files / areas | PR |
 |---|---|---|---|---|---|---|
-| 1 | Task record | This record | git-client-agents | `plan/chat-single-room` | `.agents/` | |
-| 2 | Single-room chat | Provider, picker, three panes, Markdown, tests, docs | git-client-agents | `feat/chat-single-room` | `src/`, `wiki/` | |
-| 3 | Release | 1.16.0 changelog and version | git-client-agents | `release/1.16.0` | `wiki/logs/`, `package.json` | |
+| 1 | Task record | This record | git-client-agents | `plan/chat-single-room` | `.agents/` | #75 |
+| 2 | Single-room chat | Provider, picker, three panes, Markdown, tests, docs | git-client-agents | `feat/chat-single-room` | `src/`, `wiki/` | #76 |
+| 3 | Release | 1.16.0 changelog and version | git-client-agents | `release/1.16.0` | `wiki/logs/`, `package.json` | #77 |
