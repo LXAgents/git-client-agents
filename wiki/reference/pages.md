@@ -82,6 +82,8 @@ log in again as Free.
   agent's are tinted and rendered as Markdown. In repository and organization rooms, start a
   message with `@lxagents` to ask the agent.
 - Layout: 20 / 50 / 30 on wide screens (`lg`), stacked below that.
+- Both message boxes span their pane, start four lines tall and grow with the text (then
+  scroll), with the hint and **Send** under them. Enter sends; Shift+Enter adds a line.
 - Markdown never renders raw HTML, and links open in a new tab. People's messages are plain
   text. The stream is read with `fetch`, so the token stays in the `Authorization` header (with
   `X-Platform`) and is never put in a URL. "Live" next to the picker means it is connected; it

@@ -1,4 +1,4 @@
-import { useState, type FormEvent, type KeyboardEvent } from 'react'
+import { useRef, useState, type ChangeEvent, type FormEvent, type KeyboardEvent } from 'react'
 import { Send } from 'lucide-react'
 import { errorMessage } from '../../services/api'
 import { Button } from '../Button'
@@ -13,11 +13,28 @@ interface Props {
   onSend: (content: string) => Promise<void>
 }
 
-// A message box: Enter sends, Shift+Enter adds a line. The draft is kept when sending fails.
+// The box grows with its text up to this height, then scrolls.
+const MAX_HEIGHT_PX = 320
+
+// Fits the box's height to its text, between its CSS minimum and MAX_HEIGHT_PX.
+function fit(el: HTMLTextAreaElement | null) {
+  if (!el) return
+  el.style.height = 'auto'
+  el.style.height = `${Math.min(el.scrollHeight, MAX_HEIGHT_PX)}px`
+}
+
+// A message box across the pane, four lines tall and growing with the text, with the hint and the
+// send button under it. Enter sends, Shift+Enter adds a line. The draft is kept when sending fails.
 export function Composer({ label, placeholder, hint, disabled = false, onSend }: Props) {
   const toast = useToast()
   const [draft, setDraft] = useState('')
   const [sending, setSending] = useState(false)
+  const box = useRef<HTMLTextAreaElement>(null)
+
+  const onChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    setDraft(e.target.value)
+    fit(e.target)
+  }
 
   const submit = async (e?: FormEvent) => {
     e?.preventDefault()
@@ -27,6 +44,7 @@ export function Composer({ label, placeholder, hint, disabled = false, onSend }:
     try {
       await onSend(content)
       setDraft('')
+      if (box.current) box.current.style.height = ''
     } catch (err) {
       toast.error(errorMessage(err))
     } finally {
@@ -43,22 +61,24 @@ export function Composer({ label, placeholder, hint, disabled = false, onSend }:
 
   return (
     <form onSubmit={submit} className="border-t border-line p-3">
-      <div className="flex items-end gap-2">
-        <textarea
-          aria-label={label}
-          rows={2}
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={onKey}
-          disabled={disabled}
-          placeholder={placeholder}
-          className="block max-h-40 min-h-10 flex-1 resize-y rounded-xl border border-line bg-canvas px-3 py-2 text-[15px] text-fg placeholder:text-fg-muted/70 focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/20 disabled:opacity-60"
-        />
+      <textarea
+        ref={box}
+        aria-label={label}
+        rows={4}
+        value={draft}
+        onChange={onChange}
+        onKeyDown={onKey}
+        disabled={disabled}
+        placeholder={placeholder}
+        style={{ maxHeight: MAX_HEIGHT_PX }}
+        className="block min-h-28 w-full resize-y rounded-xl border border-line bg-canvas px-3.5 py-3 text-[15px] leading-relaxed text-fg placeholder:text-fg-muted/70 focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/20 disabled:opacity-60"
+      />
+      <div className="mt-2 flex items-center justify-between gap-3">
+        <p className="min-w-0 text-xs text-fg-muted">{hint}</p>
         <Button type="submit" variant="primary" aria-label={`Send: ${label}`} busy={sending} disabled={disabled || !draft.trim()}>
-          <Send aria-hidden className="size-4" />
+          <Send aria-hidden className="size-4" /> Send
         </Button>
       </div>
-      {hint && <p className="mt-1.5 text-xs text-fg-muted">{hint}</p>}
     </form>
   )
 }
