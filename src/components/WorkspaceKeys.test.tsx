@@ -51,11 +51,12 @@ describe('Workspace keys', () => {
     await screen.findByText('No workspace keys yet.')
     await userEvent.click(screen.getByRole('button', { name: 'Add workspace key' }))
     const dialog = screen.getByRole('dialog')
+    expect(within(dialog).getByLabelText('Platform')).toHaveValue('github_codespaces')
     await userEvent.click(within(dialog).getByRole('button', { name: 'Repository' }))
     await userEvent.type(within(dialog).getByLabelText('GitHub personal access token'), 'ghp_abcd')
     list.mockResolvedValue([wsKey('w4', 'repo', 'acme/web', 'abcd')])
     await userEvent.click(within(dialog).getByRole('button', { name: 'Add workspace key' }))
-    expect(create).toHaveBeenCalledWith('repo1', { token: 'ghp_abcd', priority: 0 })
+    expect(create).toHaveBeenCalledWith('repo1', { provider: 'github_codespaces', token: 'ghp_abcd', priority: 0 })
 
     const row = (await screen.findByText('••••abcd')).closest('tr')!
     const remove = vi.spyOn(userApi, 'deleteRepoWorkspaceKey').mockResolvedValue({} as never)

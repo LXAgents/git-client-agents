@@ -40,6 +40,7 @@ export function WorkspaceKeys() {
         </span>
       ),
     },
+    { header: 'Platform', cell: (k) => k.provider },
     { header: 'Token', cell: (k) => <code className="font-mono text-xs text-fg-muted">{k.last4 ? `••••${k.last4}` : 'unreadable'}</code> },
     { header: 'Priority', cell: (k) => k.priority, className: 'tabular-nums' },
     { header: 'Status', cell: (k) => (k.isActive ? <Badge tone="success">Active</Badge> : <Badge>Disabled</Badge>) },

@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { errorMessage } from '../services/api'
+import { errorMessage, WORKSPACE_PROVIDERS, type WorkspaceProviderId } from '../services/api'
 import type { KeyTarget } from '../services/keys'
 import { createWorkspaceKeyFor, type WorkspaceKeysData } from '../services/workspaceKeys'
 import { Button } from './Button'
@@ -7,10 +7,11 @@ import { Segmented, SelectField, TextField } from './Field'
 import { Modal } from './Modal'
 import { useToast } from './Toast'
 
-// Adds a GitHub Codespaces token for yourself, an org you own or a repository you administer.
+// Adds a workspace key (for now a GitHub Codespaces token) for yourself, an org you own or a repository you administer.
 export function AddWorkspaceKeyModal({ data, onClose, onAdded }: { data: WorkspaceKeysData; onClose: () => void; onAdded: () => void }) {
   const toast = useToast()
   const [target, setTarget] = useState<KeyTarget>('user')
+  const [provider, setProvider] = useState<WorkspaceProviderId>(WORKSPACE_PROVIDERS[0].id)
   const [orgId, setOrgId] = useState(data.orgs[0]?.id ?? '')
   const [repoId, setRepoId] = useState(data.repos[0]?.id ?? '')
   const [token, setToken] = useState('')
@@ -23,7 +24,7 @@ export function AddWorkspaceKeyModal({ data, onClose, onAdded }: { data: Workspa
     e.preventDefault()
     setBusy(true)
     try {
-      await createWorkspaceKeyFor(target, { orgId, repoId }, { token: token.trim(), priority: Number(priority) || 0 })
+      await createWorkspaceKeyFor(target, { orgId, repoId }, { provider, token: token.trim(), priority: Number(priority) || 0 })
       toast.success('Workspace key added')
       onAdded()
       onClose()
@@ -37,6 +38,13 @@ export function AddWorkspaceKeyModal({ data, onClose, onAdded }: { data: Workspa
   return (
     <Modal title="Add a workspace key" onClose={onClose}>
       <form onSubmit={submit} className="space-y-4">
+        <SelectField label="Platform" required value={provider} onChange={(e) => setProvider(e.target.value as WorkspaceProviderId)} hint="Where the agent starts its workspace.">
+          {WORKSPACE_PROVIDERS.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.name}
+            </option>
+          ))}
+        </SelectField>
         <Segmented
           label="Attach to"
           value={target}

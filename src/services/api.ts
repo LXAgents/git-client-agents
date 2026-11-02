@@ -40,10 +40,16 @@ export function sessionHeaders(): Record<string, string> {
 }
 
 export interface NewWorkspaceKey {
+  /** The workspace platform, e.g. "github_codespaces". */
+  provider: WorkspaceProviderId
   /** A GitHub personal access token with the codespace scope. */
   token: string
   priority: number
 }
+
+/** Workspace platforms the server supports. More are added here as the server gains them. */
+export const WORKSPACE_PROVIDERS = [{ id: 'github_codespaces', name: 'GitHub Codespaces' }] as const
+export type WorkspaceProviderId = (typeof WORKSPACE_PROVIDERS)[number]['id']
 
 export interface NewKey {
   apiKey: string
