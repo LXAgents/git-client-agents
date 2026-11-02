@@ -1,7 +1,7 @@
 ---
 name: key-types
 description: Task record for the platform choice on workspace keys and the AI keys / Workspace keys switch on the API keys page (client 1.15.0).
-status: in progress
+status: done
 ---
 
 # Workspace key platforms and the key type switch
@@ -18,6 +18,6 @@ status: in progress
 
 | # | Title | Scope | Repository | Branch | Files / areas | PR |
 |---|---|---|---|---|---|---|
-| 1 | Plan | This record | git-client-agents | `plan/key-types` | `.agents/` | |
-| 2 | Key types | Platform field, key type switch, tests | git-client-agents | `feat/key-types` | `src/components/`, `src/pages/ApiKeys.tsx`, `src/services/`, `wiki/` | |
-| 3 | Release | 1.15.0 changelog and version | git-client-agents | `release/1.15.0` | `package.json`, `wiki/logs/` | |
+| 1 | Plan | This record | git-client-agents | `plan/key-types` | `.agents/` | #72 |
+| 2 | Key types | Platform field, key type switch, tests | git-client-agents | `feat/key-types` | `src/components/`, `src/pages/ApiKeys.tsx`, `src/services/`, `wiki/` | #73 |
+| 3 | Release | 1.15.0 changelog and version | git-client-agents | `release/1.15.0` | `package.json`, `wiki/logs/` | #74 |
