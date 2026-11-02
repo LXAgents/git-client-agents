@@ -2,6 +2,7 @@
 
 | Version | Summary | Files |
 |---|---|---|
+| [1.16.2](1/16/2/CHANGELOG.md) | Full-width Chat page with a 20/40/40 pane split | `CHANGELOG.md` |
 | [1.16.1](1/16/1/CHANGELOG.md) | Bigger, self-growing chat message boxes | `CHANGELOG.md` |
 | [1.16.0](1/16/0/CHANGELOG.md) | Single-room Chat page: room picker, details, agent work and team chat panes | `CHANGELOG.md` |
 | [1.15.0](1/15/0/CHANGELOG.md) | AI keys / Workspace keys switch; workspace keys name their platform | `CHANGELOG.md` |

@@ -16,6 +16,6 @@ status: done
 
 | # | Title | Scope | Repository | Branch | Files / areas | PR |
 |---|---|---|---|---|---|---|
-| 1 | Task record | This record | git-client-agents | `plan/chat-full-width` | `.agents/` | |
-| 2 | Full-width panes | Layout width on `/chat`, 20/40/40 grid, tests, docs | git-client-agents | `fix/chat-full-width` | `src/components/Layout.tsx`, `src/pages/Chat.tsx`, `wiki/` | |
-| 3 | Release | 1.16.2 changelog and version | git-client-agents | `release/1.16.2` | `wiki/logs/`, `package.json` | |
+| 1 | Task record | This record | git-client-agents | `plan/chat-full-width` | `.agents/` | #81 |
+| 2 | Full-width panes | Layout width on `/chat`, 20/40/40 grid, tests, docs | git-client-agents | `fix/chat-full-width` | `src/components/Layout.tsx`, `src/pages/Chat.tsx`, `wiki/` | #82 |
+| 3 | Release | 1.16.2 changelog and version | git-client-agents | `release/1.16.2` | `wiki/logs/`, `package.json` | #83 |
