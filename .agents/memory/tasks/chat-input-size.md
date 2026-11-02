@@ -1,7 +1,7 @@
 ---
 name: chat-input-size
 description: Task record for the bigger, self-growing message boxes on the Chat page (client 1.16.1).
-status: in progress
+status: done
 ---
 
 # Bigger chat message boxes
@@ -16,6 +16,6 @@ status: in progress
 
 | # | Title | Scope | Repository | Branch | Files / areas | PR |
 |---|---|---|---|---|---|---|
-| 1 | Task record | This record | git-client-agents | `plan/chat-input-size` | `.agents/` | |
-| 2 | Bigger message boxes | Composer layout and auto height, tests, docs | git-client-agents | `fix/chat-input-size` | `src/components/chat/`, `wiki/` | |
-| 3 | Release | 1.16.1 changelog and version | git-client-agents | `release/1.16.1` | `wiki/logs/`, `package.json` | |
+| 1 | Task record | This record | git-client-agents | `plan/chat-input-size` | `.agents/` | #78 |
+| 2 | Bigger message boxes | Composer layout and auto height, tests, docs | git-client-agents | `fix/chat-input-size` | `src/components/chat/`, `wiki/` | #79 |
+| 3 | Release | 1.16.1 changelog and version | git-client-agents | `release/1.16.1` | `wiki/logs/`, `package.json` | #80 |
