@@ -1,4 +1,4 @@
-import { NavLink, Outlet, useNavigate } from 'react-router'
+import { NavLink, Outlet, useMatch, useNavigate } from 'react-router'
 import { Bot, LogOut } from 'lucide-react'
 import { useAuth } from '../auth/AuthContext'
 import { NAV, type NavItem } from '../nav'
@@ -22,6 +22,8 @@ function Brand() {
 export function Layout({ nav = NAV }: { nav?: NavItem[] }) {
   const { session, me, isOwner, signOut: endSession } = useAuth()
   const navigate = useNavigate()
+  // The Chat page's three panes use the whole width; other pages keep a readable column.
+  const wide = useMatch('/chat') !== null
   // The next person to sign in starts on the dashboard, not on the last page visited.
   const signOut = () => {
     navigate('/')
@@ -95,7 +97,7 @@ export function Layout({ nav = NAV }: { nav?: NavItem[] }) {
         </div>
       </aside>
       <main className="min-w-0 flex-1 px-4 py-8 sm:px-8 md:px-12 md:py-12">
-        <div className="mx-auto max-w-5xl">
+        <div className={wide ? 'w-full' : 'mx-auto max-w-5xl'} data-width={wide ? 'full' : 'column'}>
           <Outlet />
         </div>
       </main>
