@@ -2,6 +2,7 @@
 
 | Version | Summary | Files |
 |---|---|---|
+| [1.15.0](1/15/0/CHANGELOG.md) | AI keys / Workspace keys switch; workspace keys name their platform | `CHANGELOG.md` |
 | [1.14.0](1/14/0/CHANGELOG.md) | Workspace keys section and the 3-pane Chat page | `CHANGELOG.md` |
 | [1.13.0](1/13/0/CHANGELOG.md) | Help text names the `@lxagents` trigger | `CHANGELOG.md` |
 | [1.12.1](1/12/1/CHANGELOG.md) | API keys page and model picker split into smaller parts | `CHANGELOG.md` |
