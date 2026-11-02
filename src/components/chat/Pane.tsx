@@ -23,7 +23,7 @@ export function Pane({ id, title, icon: Icon, aside, toolbar, scrollKey, footer,
     if (el && scrollKey !== undefined) el.scrollTop = el.scrollHeight
   }, [scrollKey])
   return (
-    <section aria-labelledby={id} className="flex h-[72dvh] min-h-[28rem] min-w-0 flex-col rounded-2xl border border-line bg-canvas-subtle shadow-card">
+    <section aria-labelledby={id} className="flex h-[82dvh] min-h-[36rem] min-w-0 flex-col rounded-2xl border border-line bg-canvas-subtle shadow-card">
       <header className="space-y-3 border-b border-line p-4">
         <div className="flex items-center justify-between gap-2">
           <h2 id={id} className="flex items-center gap-2 text-base font-semibold">
