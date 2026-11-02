@@ -6,6 +6,7 @@ import { ConfirmDelete } from '../components/ConfirmDelete'
 import { DataTable, type Column } from '../components/DataTable'
 import { AddKeyModal } from '../components/AddKeyModal'
 import { WorkspaceKeys } from '../components/WorkspaceKeys'
+import { Segmented } from '../components/Field'
 import { Badge, PageHeader } from '../components/PageHeader'
 import { useToast } from '../components/Toast'
 import { formatDate } from '../format'
@@ -21,11 +22,22 @@ function OwnerIcon({ type }: { type: ApiKey['owner']['type'] }) {
   return <Icon aria-hidden className="size-4 text-fg-muted" />
 }
 
+function describe(workspace: boolean, isOwner: boolean): string {
+  if (workspace)
+    return 'GitHub personal access tokens with the codespace scope. With one, the agent can start a GitHub Codespace, run commands and push a branch for commenters with write access. It tries repository keys, then organization keys, then the commenter’s own.'
+  if (isOwner) return 'Every AI provider key on the server, each brought by a user, organization or repository. Keys are shown by their last four characters only.'
+  return 'Bring your own key for each AI provider you use: yours, and those of organizations you own and repositories you administer. For the chosen provider the agent tries repository keys, then organization keys, then the commenter’s own.'
+}
+
 export function ApiKeys() {
   const toast = useToast()
   const { isOwner, session } = useAuth()
   const { data, loading, reload } = useLoad(useCallback(() => loadKeys(isOwner), [isOwner]))
   const [adding, setAdding] = useState(false)
+  // Workspace keys are GitHub Codespaces tokens, so GitLab sessions only have AI keys.
+  const workspaces = session?.platform === 'github'
+  const [kind, setKind] = useState<'ai' | 'workspace'>('ai')
+  const showWorkspace = workspaces && kind === 'workspace'
 
   const remove = async (key: ApiKey) => {
     try {
@@ -71,20 +83,38 @@ export function ApiKeys() {
     <>
       <PageHeader
         title="API keys"
-        description={
-          isOwner
-            ? 'Every AI provider key on the server, each brought by a user, organization or repository. Keys are shown by their last four characters only.'
-            : 'Bring your own key for each AI provider you use: yours, and those of organizations you own and repositories you administer. For the chosen provider the agent tries repository keys, then organization keys, then the commenter’s own.'
-        }
+        description={describe(showWorkspace, isOwner)}
         actions={
-          <Button variant="primary" onClick={() => setAdding(true)} disabled={!data}>
-            <Plus aria-hidden className="size-4" /> Add key
-          </Button>
+          <>
+            {workspaces && (
+              <Segmented
+                label="Key type"
+                hideLabel
+                value={kind}
+                onChange={(next) => {
+                  setAdding(false)
+                  setKind(next)
+                }}
+                options={[
+                  { value: 'ai', label: 'AI keys' },
+                  { value: 'workspace', label: 'Workspace keys' },
+                ]}
+              />
+            )}
+            <Button variant="primary" onClick={() => setAdding(true)} disabled={!showWorkspace && !data}>
+              <Plus aria-hidden className="size-4" /> Add key
+            </Button>
+          </>
         }
       />
-      <DataTable label="API keys" columns={columns} rows={data?.keys ?? null} rowKey={(k) => k.id} loading={loading} empty="No API keys yet." />
-      {adding && data && <AddKeyModal data={data} onClose={() => setAdding(false)} onAdded={reload} />}
-      {session?.platform === 'github' && <WorkspaceKeys />}
+      {showWorkspace ? (
+        <WorkspaceKeys adding={adding} onAddingDone={() => setAdding(false)} />
+      ) : (
+        <>
+          <DataTable label="API keys" columns={columns} rows={data?.keys ?? null} rowKey={(k) => k.id} loading={loading} empty="No API keys yet." />
+          {adding && data && <AddKeyModal data={data} onClose={() => setAdding(false)} onAdded={reload} />}
+        </>
+      )}
     </>
   )
 }

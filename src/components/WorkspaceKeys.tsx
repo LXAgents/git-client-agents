@@ -1,12 +1,10 @@
-import { useCallback, useState } from 'react'
-import { Plus } from 'lucide-react'
+import { useCallback } from 'react'
 import { errorMessage } from '../services/api'
 import { deleteWorkspaceKeyOf, loadWorkspaceKeys } from '../services/workspaceKeys'
 import { formatDate } from '../format'
 import { useLoad } from '../hooks/useLoad'
 import type { ApiKey } from '../types'
 import { AddWorkspaceKeyModal } from './AddWorkspaceKeyModal'
-import { Button } from './Button'
 import { ConfirmDelete } from './ConfirmDelete'
 import { DataTable, type Column } from './DataTable'
 import { Badge } from './PageHeader'
@@ -14,11 +12,11 @@ import { useToast } from './Toast'
 
 const OWNER_LABEL: Record<ApiKey['owner']['type'], string> = { user: 'You', org: 'Organization', repo: 'Repository' }
 
-// GitHub Codespaces tokens, for the agent's workspace tools (GitHub sessions only).
-export function WorkspaceKeys() {
+// Workspace keys (GitHub Codespaces tokens) for the agent's workspace tools, GitHub sessions only.
+// The API keys page owns the Add key button, so it says when the add dialog is open.
+export function WorkspaceKeys({ adding, onAddingDone }: { adding: boolean; onAddingDone: () => void }) {
   const toast = useToast()
   const { data, loading, reload } = useLoad(useCallback(() => loadWorkspaceKeys(), []))
-  const [adding, setAdding] = useState(false)
 
   const remove = async (key: ApiKey) => {
     try {
@@ -60,22 +58,9 @@ export function WorkspaceKeys() {
   ]
 
   return (
-    <section aria-labelledby="workspace-keys" className="mt-12">
-      <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h2 id="workspace-keys" className="text-xl font-semibold tracking-tight">
-            Workspace keys
-          </h2>
-          <p className="mt-2 max-w-2xl text-sm text-fg-muted">
-            GitHub personal access tokens with the codespace scope. With one, the agent can start a GitHub Codespace, run commands and push a branch for commenters with write access. It tries repository keys, then organization keys, then the commenter’s own.
-          </p>
-        </div>
-        <Button onClick={() => setAdding(true)} disabled={!data}>
-          <Plus aria-hidden className="size-4" /> Add workspace key
-        </Button>
-      </div>
+    <>
       <DataTable label="Workspace keys" columns={columns} rows={data?.keys ?? null} rowKey={(k) => k.id} loading={loading} empty="No workspace keys yet." />
-      {adding && data && <AddWorkspaceKeyModal data={data} onClose={() => setAdding(false)} onAdded={reload} />}
-    </section>
+      {adding && data && <AddWorkspaceKeyModal data={data} onClose={onAddingDone} onAdded={reload} />}
+    </>
   )
 }

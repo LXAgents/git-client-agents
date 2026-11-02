@@ -51,6 +51,8 @@ log in again as Free.
 
 ### Workspace keys (GitHub sessions)
 
+- On GitHub sessions, the switch next to **Add key** picks **AI keys** or **Workspace keys**: the
+  page shows that table, and Add key opens that kind's dialog. GitLab sessions have AI keys only.
 - GitHub personal access tokens with the `codespace` scope (and `repo` to push), for yourself,
   an organization you own or a repository you administer.
 - Each key names its platform. For now the only one is **GitHub Codespaces**.

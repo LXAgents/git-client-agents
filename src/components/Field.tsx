@@ -46,18 +46,21 @@ const CHEVRON = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/sv
 // A two-option toggle with a raised "thumb" on the selected option.
 export function Segmented<T extends string>({
   label,
+  hideLabel = false,
   value,
   options,
   onChange,
 }: {
   label: string
+  /** Keep the label for screen readers only, e.g. when the options say it all. */
+  hideLabel?: boolean
   value: T
   options: { value: T; label: string }[]
   onChange: (value: T) => void
 }) {
   return (
     <fieldset>
-      <legend className="mb-1.5 block text-sm font-medium">{label}</legend>
+      <legend className={hideLabel ? 'sr-only' : 'mb-1.5 block text-sm font-medium'}>{label}</legend>
       <div className="grid auto-cols-fr grid-flow-col rounded-xl bg-overlay p-1">
         {options.map((o) => (
           <button
