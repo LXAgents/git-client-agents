@@ -20,6 +20,7 @@ description: Index of .agents/memory/tasks — one row per task record.
 | [`tasks/chat-single-room.md`](../memory/tasks/chat-single-room.md) | Task record for the single-room, three-pane Chat page (client 1.16.0). |
 | [`tasks/chat-input-size.md`](../memory/tasks/chat-input-size.md) | Task record for the bigger, self-growing chat message boxes (client 1.16.1). |
 | [`tasks/chat-full-width.md`](../memory/tasks/chat-full-width.md) | Task record for the full-width Chat page with a 20/40/40 pane split (client 1.16.2). |
+| [`tasks/chat-pane-split.md`](../memory/tasks/chat-pane-split.md) | Task record for the 10/45/45 Chat pane split (client 1.16.3). |
 | [`tasks/docker.md`](../memory/tasks/docker.md) | Task record for the git-client-agents Docker image (1.1.0). |
 | [`tasks/free-role-open-login.md`](../memory/tasks/free-role-open-login.md) | Task record for the light green Free role badge and open login wording (dashboard 1.10.0). |
 | [`tasks/install-warnings.md`](../memory/tasks/install-warnings.md) | Task record for the EBADENGINE warnings on npm install in git-client-agents (1.0.2). |
