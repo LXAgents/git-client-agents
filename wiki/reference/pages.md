@@ -51,8 +51,11 @@ log in again as Free.
 
 ### Workspace keys (GitHub sessions)
 
-- Below the AI keys: GitHub personal access tokens with the `codespace` scope (and `repo` to
-  push), for yourself, an organization you own or a repository you administer.
+- On GitHub sessions, the switch next to **Add key** picks **AI keys** or **Workspace keys**: the
+  page shows that table, and Add key opens that kind's dialog. GitLab sessions have AI keys only.
+- GitHub personal access tokens with the `codespace` scope (and `repo` to push), for yourself,
+  an organization you own or a repository you administer.
+- Each key names its platform. For now the only one is **GitHub Codespaces**.
 - With one, the agent can start a GitHub Codespace, run commands and push a branch for
   commenters with write access. Keys are listed in the order the agent tries them: repository,
   organization, yours, each highest priority first.
